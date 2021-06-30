@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Hexo + GitHub Pages + Typora 构建博客 (1) Hexo 的安装最近在学一些网络知识，但是使用市面上支持 Markdown 的 笔记工具（如简书，有道云笔记，印象笔记）的产品，时常遇到两类问题：  功能过于复杂（有道，印象），很多功能我用不上，且打开有些卡顿  没有在线存储文件或者图片的能力（Typora）  在线打开操作不够方便，体验不够好（简书，掘金）  需要付费">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重新利用hexo和github page 建立了一个blog">
+<meta property="og:url" content="http://example.com/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="Hexo + GitHub Pages + Typora 构建博客 (1) Hexo 的安装最近在学一些网络知识，但是使用市面上支持 Markdown 的 笔记工具（如简书，有道云笔记，印象笔记）的产品，时常遇到两类问题：  功能过于复杂（有道，印象），很多功能我用不上，且打开有些卡顿  没有在线存储文件或者图片的能力（Typora）  在线打开操作不够方便，体验不够好（简书，掘金）  需要付费">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/image-20210429134302029.png">
+<meta property="article:published_time" content="2021-04-30T00:35:31.308Z">
+<meta property="article:modified_time" content="2021-04-30T00:35:31.308Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="hexo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/image-20210429134302029.png">
+
+<link rel="canonical" href="http://example.com/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>重新利用hexo和github page 建立了一个blog | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          重新利用hexo和github page 建立了一个blog
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-30 08:35:31" itemprop="dateCreated datePublished" datetime="2021-04-30T08:35:31+08:00">2021-04-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hexo/" itemprop="url" rel="index"><span itemprop="name">hexo</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Hexo-GitHub-Pages-Typora-构建博客-1-Hexo-的安装"><a href="#Hexo-GitHub-Pages-Typora-构建博客-1-Hexo-的安装" class="headerlink" title="Hexo + GitHub Pages + Typora 构建博客 (1) Hexo 的安装"></a>Hexo + GitHub Pages + Typora 构建博客 (1) Hexo 的安装</h2><p>最近在学一些网络知识，但是使用市面上支持 <a target="_blank" rel="noopener" href="https://www.runoob.com/markdown/md-tutorial.html">Markdown </a>的 笔记工具（如简书，有道云笔记，印象笔记）的产品，时常遇到两类问题：</p>
+<ol>
+<li><p>功能过于复杂（有道，印象），很多功能我用不上，且打开有些卡顿</p>
+</li>
+<li><p>没有在线存储文件或者图片的能力（Typora）</p>
+</li>
+<li><p>在线打开操作不够方便，体验不够好（简书，掘金）</p>
+</li>
+<li><p>需要付费</p>
+</li>
+</ol>
+<p>因此我准备构建一套的博客工具，方案采用</p>
+<p> Hexo+Git Page +Typora，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">A[简易博客系统] --&gt; B(Hexo 生成静态网页)</span><br><span class="line">A --&gt; C(Github Page Mini服务器)</span><br><span class="line">A --&gt; D(Typora Mini客户端 编辑文本)</span><br><span class="line">E[简易博客系统]</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+
+
+<h3 id="Hexo-构建博客静态页面"><a href="#Hexo-构建博客静态页面" class="headerlink" title="Hexo 构建博客静态页面"></a>Hexo 构建博客静态页面</h3><p>Hexo 是一个基于<a target="_blank" rel="noopener" href="http://www.oschina.net/p/nodejs">nodejs</a> 的静态博客网站生成器，作者是来自台湾的 <a target="_blank" rel="noopener" href="http://mailto:tommy351@gmail.com/">Tommy Chen</a></p>
+<h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><p>建议直接阅读官网的文档 参考安装</p>
+<p><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/">https://hexo.io/zh-cn/</a>   </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-cli -g</span><br><span class="line">hexo init blog</span><br><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line">npm install</span><br><span class="line">hexo server</span><br></pre></td></tr></table></figure>
+<p>（本文选择版本 hexo-cli: 4.2.0）</p>
+<h4 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h4><h5 id="清理缓存"><a href="#清理缓存" class="headerlink" title="清理缓存"></a>清理缓存</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br></pre></td></tr></table></figure>
+<h5 id="创建文章"><a href="#创建文章" class="headerlink" title="创建文章"></a>创建文章</h5>  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo new <span class="string">&quot;My New Post&quot;</span></span><br><span class="line">缩写版本</span><br><span class="line">hexo n <span class="string">&quot;新文章title&quot;</span> </span><br></pre></td></tr></table></figure>
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h5 id="本地调试"><a href="#本地调试" class="headerlink" title="本地调试"></a>本地调试</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo server</span><br><span class="line">缩写版本</span><br><span class="line">hexo s</span><br></pre></td></tr></table></figure>
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
+<h5 id="构建静态文件"><a href="#构建静态文件" class="headerlink" title="构建静态文件"></a>构建静态文件</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo generate</span><br><span class="line">缩写版本</span><br><span class="line">hexo g</span><br></pre></td></tr></table></figure>
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
+<h5 id="发布文章"><a href="#发布文章" class="headerlink" title="发布文章"></a>发布文章</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo deploy</span><br><span class="line">缩写版本</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure>
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<p>注意：发布之后的文章会覆盖之前发布的（全量发布），所以多终端发布之前先 同步好博客资源。</p>
+<p>生成资源+发布的操作可以简化为</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo g -d</span><br></pre></td></tr></table></figure>
+<h5 id="文章标签和分类"><a href="#文章标签和分类" class="headerlink" title="文章标签和分类"></a>文章标签和分类</h5><p>参考官方文档：<a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/front-matter">https://hexo.io/zh-cn/docs/front-matter</a></p>
+<p>只有文章支持分类和标签，您可以在 Front-matter 中设置。在其他系统中，分类和标签听起来很接近，但是在 Hexo 中两者有着明显的差别：分类具有顺序性和层次性，也就是说 <code>Foo, Bar</code> 不等于 <code>Bar, Foo</code>；而标签没有顺序和层次。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">categories:</span><br><span class="line">- Diary</span><br><span class="line">tags:</span><br><span class="line">- PS3</span><br><span class="line">- Games</span><br></pre></td></tr></table></figure>
+<h4 id="使用个性化主题NexT"><a href="#使用个性化主题NexT" class="headerlink" title="使用个性化主题NexT"></a>使用个性化主题NexT</h4><p>是用了NexT主题</p>
+<h5 id="NexT主题安装"><a href="#NexT主题安装" class="headerlink" title="NexT主题安装"></a>NexT主题安装</h5><p>安装建议参考官方文档：<a target="_blank" rel="noopener" href="http://theme-next.iissnan.com/">http://theme-next.iissnan.com/</a></p>
+<p>但是官方镜像（Github 仓库）下载过于慢了，最终我采用的是下载Gitee上的镜像（也可以将官方镜像导入自己的Gitee仓库）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line">git <span class="built_in">clone</span> git@gitee.com:Lee-Li/hexo-theme-next.git themes/next</span><br></pre></td></tr></table></figure>
+<h5 id="启用主题"><a href="#启用主题" class="headerlink" title="启用主题"></a>启用主题</h5><p>与所有 Hexo 主题启用的模式一样。 当 克隆/下载 完成后，打开 <code>blog/_config.yml </code>， 找到 <code>theme</code> 字段，并将其值更改为 <code>next</code>。</p>
+<p>启用 NexT 主题</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">theme: next</span><br></pre></td></tr></table></figure>
+<p>到此，NexT 主题安装完成。下一步我们将验证主题是否正确启用。在切换主题之后、验证之前， 我们最好使用 <code>hexo clean</code> 来清除 Hexo 的缓存。</p>
+<h5 id="主题设定"><a href="#主题设定" class="headerlink" title="主题设定"></a>主题设定</h5><h6 id="选择-Scheme"><a href="#选择-Scheme" class="headerlink" title="选择 Scheme"></a>选择 Scheme</h6><p>Scheme 是 NexT 提供的一种特性，借助于 Scheme，NexT 为你提供多种不同的外观。同时，几乎所有的配置都可以 在 Scheme 之间共用。目前 NexT 支持三种 Scheme，他们是：</p>
+<ul>
+<li>Muse - 默认 Scheme，这是 NexT 最初的版本，黑白主调，大量留白</li>
+<li>Mist - Muse 的紧凑版本，整洁有序的单栏外观</li>
+<li>Pisces - 双栏 Scheme，小家碧玉似的清新</li>
+</ul>
+<p>Scheme 的切换通过更改 <strong>主题配置文件</strong>，搜索 scheme 关键字。 你会看到有三行 scheme 的配置，将你需用启用的 scheme 前面注释 <code>#</code> 去除即可。</p>
+<p>选择 Pisces Scheme</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#scheme: Muse</span><br><span class="line">#scheme: Mist</span><br><span class="line">scheme: Pisces</span><br></pre></td></tr></table></figure>
+<h5 id="设置-语言"><a href="#设置-语言" class="headerlink" title="设置 语言"></a>设置 语言</h5><p>编辑 <strong>站点配置文件</strong>， 将 <code>language</code> 设置成你所需要的语言。建议明确设置你所需要的语言，例如选用简体中文，配置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">language: zh-Hans</span><br></pre></td></tr></table></figure>
+<p>目前 NexT 支持的语言如以下表格所示：</p>
+<table>
+<thead>
+<tr>
+<th align="left">语言</th>
+<th align="left">代码</th>
+<th align="left">设定示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">English</td>
+<td align="left"><code>en</code></td>
+<td align="left"><code>language: en</code></td>
+</tr>
+<tr>
+<td align="left">简体中文</td>
+<td align="left"><code>zh-Hans</code></td>
+<td align="left"><code>language: zh-Hans</code></td>
+</tr>
+<tr>
+<td align="left">Français</td>
+<td align="left"><code>fr-FR</code></td>
+<td align="left"><code>language: fr-FR</code></td>
+</tr>
+<tr>
+<td align="left">Português</td>
+<td align="left"><code>pt</code></td>
+<td align="left"><code>language: pt</code> or <code>language: pt-BR</code></td>
+</tr>
+<tr>
+<td align="left">繁體中文</td>
+<td align="left"><code>zh-hk</code> 或者 <code>zh-tw</code></td>
+<td align="left"><code>language: zh-hk</code></td>
+</tr>
+<tr>
+<td align="left">Русский язык</td>
+<td align="left"><code>ru</code></td>
+<td align="left"><code>language: ru</code></td>
+</tr>
+<tr>
+<td align="left">Deutsch</td>
+<td align="left"><code>de</code></td>
+<td align="left"><code>language: de</code></td>
+</tr>
+<tr>
+<td align="left">日本語</td>
+<td align="left"><code>ja</code></td>
+<td align="left"><code>language: ja</code></td>
+</tr>
+<tr>
+<td align="left">Indonesian</td>
+<td align="left"><code>id</code></td>
+<td align="left"><code>language: id</code></td>
+</tr>
+<tr>
+<td align="left">Korean</td>
+<td align="left"><code>ko</code></td>
+<td align="left"><code>language: ko</code></td>
+</tr>
+</tbody></table>
+<h5 id="设置-菜单"><a href="#设置-菜单" class="headerlink" title="设置 菜单"></a>设置 菜单</h5><p>菜单配置包括三个部分，第一是菜单项（名称和链接），第二是菜单项的显示文本，第三是菜单项对应的图标。 NexT 使用的是 <a target="_blank" rel="noopener" href="http://fontawesome.io/">Font Awesome</a> 提供的图标， Font Awesome 提供了 600+ 的图标，可以满足绝大的多数的场景，同时无须担心在 Retina 屏幕下 图标模糊的问题。</p>
+<p>编辑 <strong>主题配置文件</strong>，修改以下内容：</p>
+<ol>
+<li><p>设定菜单内容，对应的字段是 <code>menu</code>。 菜单内容的设置格式是：<code>item name: link</code>。其中 <code>item name </code>是一个名称，这个名称并不直接显示在页面上，她将用于匹配图标以及翻译。</p>
+<p>菜单示例配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: &#x2F;</span><br><span class="line">  archives: &#x2F;archives</span><br><span class="line">  #about: &#x2F;about</span><br><span class="line">  #categories: &#x2F;categories</span><br><span class="line">  tags: &#x2F;tags</span><br><span class="line">  #commonweal: &#x2F;404.html</span><br></pre></td></tr></table></figure>
+<h5 id="配置标签、分类、公益404页面"><a href="#配置标签、分类、公益404页面" class="headerlink" title="配置标签、分类、公益404页面"></a>配置标签、分类、公益404页面</h5></li>
+</ol>
+<p>请参考 官方文档 ：<a target="_blank" rel="noopener" href="http://theme-next.iissnan.com/theme-settings.html">http://theme-next.iissnan.com/theme-settings.html</a></p>
+<h5 id="添加「标签」页面"><a href="#添加「标签」页面" class="headerlink" title="添加「标签」页面"></a>添加「标签」页面</h5><ol>
+<li><p>新建页面：在终端窗口下，定位到 Hexo 站点目录下。使用 <code>hexo new page</code> 新建一个页面，命名为 <code>categories</code> ：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ cd your-hexo-site</span><br><span class="line">$ hexo new page categories</span><br></pre></td></tr></table></figure></li>
+<li><p>设置页面类型：编辑刚新建的页面，将页面的 <code>type</code> 设置为 <code>categories</code> ，主题将自动为这个页面显示分类。页面内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">title: 分类</span><br><span class="line">date: 2014-12-22 12:39:04</span><br><span class="line">type: &quot;categories&quot;</span><br><span class="line">---</span><br></pre></td></tr></table></figure></li>
+<li><p>修改菜单</p>
+<p>在菜单中添加链接。编辑 <strong>主题配置文件</strong> ， 添加 <code>categories</code> 到 <code>menu</code> 中，如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: &#x2F;</span><br><span class="line">  archives: &#x2F;archives</span><br><span class="line">  categories: &#x2F;categories</span><br></pre></td></tr></table></figure>
+
+
+</li>
+</ol>
+<p><strong>注意：</strong>如果有集成评论服务，页面也会带有评论。 若需要关闭的话，请添加字段 <code>comments</code> 并将值设置为 <code>false</code>，如：<br>禁用评论示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">title: 标签</span><br><span class="line">date: 2014-12-22 12:39:04</span><br><span class="line">type: &quot;tags&quot;</span><br><span class="line">comments: false</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<h5 id="添加「分类」页面"><a href="#添加「分类」页面" class="headerlink" title="添加「分类」页面"></a>添加「分类」页面</h5><p>新建「分类」页面，并在菜单中显示「分类」链接。「分类」页面将展示站点的所有分类，若你的所有文章都未包含分类，此页面将是空的。 底下代码是一篇包含分类的文章的例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">title: 分类测试文章</span><br><span class="line">categories: Testing</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<p>请参阅 <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/front-matter.html#%E5%88%86%E7%B1%BB%E5%92%8C%E6%A0%87%E7%AD%BE">Hexo 的分类与标签文档</a>，了解如何为文章添加标签或者分类。</p>
+<ol>
+<li><p>新建页面：在终端窗口下，定位到 Hexo 站点目录下。使用 <code>hexo new page</code> 新建一个页面，命名为 <code>categories</code> ：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd your-hexo-site</span><br><span class="line">hexo new page categories</span><br></pre></td></tr></table></figure></li>
+<li><p>设置页面类型：编辑刚新建的页面，将页面的 <code>type</code> 设置为 <code>categories</code> ，主题将自动为这个页面显示分类。页面内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">title: 分类</span><br><span class="line">date: 2014-12-22 12:39:04</span><br><span class="line">type: &quot;categories&quot;</span><br><span class="line">---</span><br></pre></td></tr></table></figure></li>
+<li><p>修改菜单在菜单中添加链接。编辑 <strong>主题配置文件</strong> ， 添加 <code>categories</code> 到 <code>menu</code> 中，如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: &#x2F;</span><br><span class="line">  archives: &#x2F;archives</span><br><span class="line">  categories: &#x2F;categories</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>注意：</strong>如果有集成评论服务，页面也会带有评论。 若需要关闭的话，请添加字段 <code>comments</code> 并将值设置为 <code>false</code>，如：</p>
+<p>   禁用评论示例</p>
+   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">title: 分类</span><br><span class="line">date: 2014-12-22 12:39:04</span><br><span class="line">type: &quot;categories&quot;</span><br><span class="line">comments: false</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<h5 id="主题配置文件是什么"><a href="#主题配置文件是什么" class="headerlink" title="主题配置文件是什么"></a>主题配置文件是什么</h5><blockquote>
+<h5 id="主题配置文件指的是theme-next下面的-config-yml文件"><a href="#主题配置文件指的是theme-next下面的-config-yml文件" class="headerlink" title="主题配置文件指的是theme/next下面的_config.yml文件"></a><strong>主题配置文件</strong>指的是theme/next下面的_config.yml文件</h5></blockquote>
+<h4 id="使用Typora-编辑Hexo博客时需要的配置："><a href="#使用Typora-编辑Hexo博客时需要的配置：" class="headerlink" title="使用Typora 编辑Hexo博客时需要的配置："></a>使用Typora 编辑Hexo博客时需要的配置：</h4><p><a target="_blank" rel="noopener" href="https://www.typora.io/">Typora</a> 是一个好用的Markdown 记事本，记得进行如下配置，即可方便的编写</p>
+<img src="/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/image-20210429134302029.png" alt="image-20210429134302029" style="zoom:50%;">
+
+<h3 id="问题汇总"><a href="#问题汇总" class="headerlink" title="问题汇总"></a>问题汇总</h3><h4 id="hexo-本地图片无法加载"><a href="#hexo-本地图片无法加载" class="headerlink" title="hexo 本地图片无法加载"></a>hexo 本地图片无法加载</h4><p>放在 和文章同名的文件夹下，执行<code>hexo g</code> 生成静态Html文件的时候，img标签的路径总是指向错误的方式</p>
+<p><strong>解决方案：</strong></p>
+<p>asset-image 插件</p>
+<p>在 hexo 2.x 时出现的插件，后来被吸纳进 hexo 3 core。比较尴尬的是，这种方法直接放弃了 markdown 原来的语法，使用类似 的语法，。markdown 本来有插入图片的语法不好好支持，专门用一个新的语法来插入本地图片。</p>
+<p>解决方案： <a target="_blank" rel="noopener" href="https://github.com/CodeFalling/hexo-asset-image">hexo-asset-image插件</a></p>
+<p>首先修改_config.yml文件里面的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">post_asset_folder: true</span><br></pre></td></tr></table></figure>
+<p>然后再hexo目录执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install https:&#x2F;&#x2F;github.com&#x2F;CodeFalling&#x2F;hexo-asset-image --save</span><br></pre></td></tr></table></figure>
+<h4 id="Hexo-Next-Theme-不支持mermaid流程图"><a href="#Hexo-Next-Theme-不支持mermaid流程图" class="headerlink" title="Hexo Next Theme 不支持mermaid流程图"></a>Hexo Next Theme 不支持mermaid流程图</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-filter-mermaid-diagrams --save </span><br></pre></td></tr></table></figure>
+<p>打开theme/next/_config.xml</p>
+<p>然后搜索关键字mermaid，如果是false，就把它改成true，如果是true，就可以不用修改了</p>
+<blockquote>
+<p>参考文章:</p>
+<p><a target="_blank" rel="noopener" href="https://www.dazhuanlan.com/2020/01/06/5e1292fd8e5b9/">hexo如何加入本地图片：hexo</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_36759224/article/details/82121420">使用 Github Pages 和 Hexo 搭建自己的独立博客【超级详细的小白教程】</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/053374fe219f">用Typora写Hexo博客</a></p>
+<p><a target="_blank" rel="noopener" href="https://jingyan.baidu.com/article/e75aca85a3b528552fdac670.html">hexo next渲染markdown mermaid流程图</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/hexo/" rel="tag"># hexo</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/29/%E8%87%AA%E5%AE%9A%E4%B9%89View%E3%80%901%E3%80%91%E5%9B%BE%E5%BD%A2%E7%9A%84%E4%BD%8D%E7%BD%AE%E5%92%8C%E5%B0%BA%E5%AF%B8%E6%B5%8B%E9%87%8F/" rel="prev" title="自定义View【1】图形的位置和尺寸测量">
+      <i class="fa fa-chevron-left"></i> 自定义View【1】图形的位置和尺寸测量
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/06/29/Http%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/" rel="next" title="Http的原理和工作机制">
+      Http的原理和工作机制 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo-GitHub-Pages-Typora-%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2-1-Hexo-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">Hexo + GitHub Pages + Typora 构建博客 (1) Hexo 的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hexo-%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%E9%9D%99%E6%80%81%E9%A1%B5%E9%9D%A2"><span class="nav-number">1.1.</span> <span class="nav-text">Hexo 构建博客静态页面</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">1.1.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">1.1.2.</span> <span class="nav-text">常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B8%85%E7%90%86%E7%BC%93%E5%AD%98"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">清理缓存</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%96%87%E7%AB%A0"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">创建文章</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E8%B0%83%E8%AF%95"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">本地调试</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E9%9D%99%E6%80%81%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.2.4.</span> <span class="nav-text">构建静态文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%91%E5%B8%83%E6%96%87%E7%AB%A0"><span class="nav-number">1.1.2.5.</span> <span class="nav-text">发布文章</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%87%E7%AB%A0%E6%A0%87%E7%AD%BE%E5%92%8C%E5%88%86%E7%B1%BB"><span class="nav-number">1.1.2.6.</span> <span class="nav-text">文章标签和分类</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E4%B8%AA%E6%80%A7%E5%8C%96%E4%B8%BB%E9%A2%98NexT"><span class="nav-number">1.1.3.</span> <span class="nav-text">使用个性化主题NexT</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#NexT%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">NexT主题安装</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%AF%E7%94%A8%E4%B8%BB%E9%A2%98"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">启用主题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98%E8%AE%BE%E5%AE%9A"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">主题设定</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%80%89%E6%8B%A9-Scheme"><span class="nav-number">1.1.3.3.1.</span> <span class="nav-text">选择 Scheme</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE-%E8%AF%AD%E8%A8%80"><span class="nav-number">1.1.3.4.</span> <span class="nav-text">设置 语言</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE-%E8%8F%9C%E5%8D%95"><span class="nav-number">1.1.3.5.</span> <span class="nav-text">设置 菜单</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%A0%87%E7%AD%BE%E3%80%81%E5%88%86%E7%B1%BB%E3%80%81%E5%85%AC%E7%9B%8A404%E9%A1%B5%E9%9D%A2"><span class="nav-number">1.1.3.6.</span> <span class="nav-text">配置标签、分类、公益404页面</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E3%80%8C%E6%A0%87%E7%AD%BE%E3%80%8D%E9%A1%B5%E9%9D%A2"><span class="nav-number">1.1.3.7.</span> <span class="nav-text">添加「标签」页面</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E3%80%8C%E5%88%86%E7%B1%BB%E3%80%8D%E9%A1%B5%E9%9D%A2"><span class="nav-number">1.1.3.8.</span> <span class="nav-text">添加「分类」页面</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.1.3.9.</span> <span class="nav-text">主题配置文件是什么</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%8C%87%E7%9A%84%E6%98%AFtheme-next%E4%B8%8B%E9%9D%A2%E7%9A%84-config-yml%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.3.10.</span> <span class="nav-text">主题配置文件指的是theme&#x2F;next下面的_config.yml文件</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Typora-%E7%BC%96%E8%BE%91Hexo%E5%8D%9A%E5%AE%A2%E6%97%B6%E9%9C%80%E8%A6%81%E7%9A%84%E9%85%8D%E7%BD%AE%EF%BC%9A"><span class="nav-number">1.1.4.</span> <span class="nav-text">使用Typora 编辑Hexo博客时需要的配置：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%B1%87%E6%80%BB"><span class="nav-number">1.2.</span> <span class="nav-text">问题汇总</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hexo-%E6%9C%AC%E5%9C%B0%E5%9B%BE%E7%89%87%E6%97%A0%E6%B3%95%E5%8A%A0%E8%BD%BD"><span class="nav-number">1.2.1.</span> <span class="nav-text">hexo 本地图片无法加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hexo-Next-Theme-%E4%B8%8D%E6%94%AF%E6%8C%81mermaid%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="nav-number">1.2.2.</span> <span class="nav-text">Hexo Next Theme 不支持mermaid流程图</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

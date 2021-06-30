@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Kotlin方法与Lambda表达式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kotlin方法与Lambda表达式">
+<meta property="og:url" content="http://example.com/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="Kotlin方法与Lambda表达式">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/image-20210425184401937.png">
+<meta property="article:published_time" content="2021-04-25T10:41:00.000Z">
+<meta property="article:modified_time" content="2021-06-25T09:27:32.128Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="Kotlin- 方法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/image-20210425184401937.png">
+
+<link rel="canonical" href="http://example.com/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kotlin方法与Lambda表达式 | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kotlin方法与Lambda表达式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-25 18:41:00" itemprop="dateCreated datePublished" datetime="2021-04-25T18:41:00+08:00">2021-04-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-25 17:27:32" itemprop="dateModified" datetime="2021-06-25T17:27:32+08:00">2021-06-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kotlin/" itemprop="url" rel="index"><span itemprop="name">Kotlin</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Kotlin方法与Lambda表达式"><a href="#Kotlin方法与Lambda表达式" class="headerlink" title="Kotlin方法与Lambda表达式"></a>Kotlin方法与Lambda表达式</h1><a id="more"></a>
+
+<p>Java中对象是一等公民，而在Kotlin中方法是一等公民。</p>
+<p>Java中方法分为成员方法和类方法，Kotlin直接在文件中即可定义方法。</p>
+<h2 id="Kotlin的方法"><a href="#Kotlin的方法" class="headerlink" title="Kotlin的方法"></a>Kotlin的方法</h2><h3 id="方法声明"><a href="#方法声明" class="headerlink" title="方法声明"></a>方法声明</h3><img src="/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/image-20210425184401937.png" alt="image-20210425184401937" style="zoom: 50%;">
+
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">functionLearn</span><span class="params">(days: <span class="type">Int</span>)</span></span>:<span class="built_in">Boolean</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> days &gt; <span class="number">100</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="类方法"><a href="#类方法" class="headerlink" title="类方法"></a>类方法</h4><ul>
+<li><p>companion object 实现的类方法</p>
+</li>
+<li><p>静态类</p>
+</li>
+<li><p>全局静态</p>
+<p>kotlin中没有静态方法，我们可以借助companion object来实现方法的目的</p>
+</li>
+</ul>
+<h5 id="companion-object-实现的类方法"><a href="#companion-object-实现的类方法" class="headerlink" title="companion object 实现的类方法"></a>companion object 实现的类方法</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">test2</span><span class="params">()</span></span> &#123;</span><br><span class="line">            println(<span class="string">&quot;companion object 实现的类方法&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">Person.test2()</span><br></pre></td></tr></table></figure>
+<h5 id="静态类"><a href="#静态类" class="headerlink" title="静态类"></a>静态类</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 整个静态类，里面所有的方法都是静态方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">object</span> NumUtil &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">double</span><span class="params">(num: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> num * <span class="number">2</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="全局静态"><a href="#全局静态" class="headerlink" title="全局静态"></a>全局静态</h5><p>我们可以直接新建一个Kotlin file 然后定义一些常方法。</p>
+<h4 id="单表达式方法"><a href="#单表达式方法" class="headerlink" title="单表达式方法"></a>单表达式方法</h4><p>当方法返回单个表达式时，可以省略花括号并且在 = 符号之后指定代码即可：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">double</span><span class="params">(x: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> = x * <span class="number">2</span></span><br></pre></td></tr></table></figure>
+<p>当返回值类型可由编译器推断时，显示声明返回类型是可选的：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">double</span><span class="params">(x: <span class="type">Int</span>)</span></span> = x * <span class="number">2</span></span><br></pre></td></tr></table></figure>
+<h4 id="匿名方法"><a href="#匿名方法" class="headerlink" title="匿名方法"></a>匿名方法</h4><p>高级用法 ⬇️</p>
+<h4 id="局部方法"><a href="#局部方法" class="headerlink" title="局部方法"></a>局部方法</h4><p>方法作用域⬇️</p>
+<h4 id="泛型方法"><a href="#泛型方法" class="headerlink" title="泛型方法"></a>泛型方法</h4><p>深入理解Kotlin 泛型</p>
+<h4 id="扩展方法"><a href="#扩展方法" class="headerlink" title="扩展方法"></a>扩展方法</h4><p>Extensions 技术探秘与应用</p>
+<h3 id="方法参数"><a href="#方法参数" class="headerlink" title="方法参数"></a>方法参数</h3><ul>
+<li>默认参数</li>
+<li>具名参数</li>
+<li>可变数量参数</li>
+</ul>
+<h4 id="默认参数"><a href="#默认参数" class="headerlink" title="默认参数"></a>默认参数</h4><p>方法参数可以有默认值，当省略相应的参数时使用默认值，与其Java相比，这可以减少重载数量：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">read</span><span class="params">(b: <span class="type">Array</span>&lt;<span class="type">Byte</span>&gt;, off: <span class="type">Int</span> = <span class="number">0</span>, len: <span class="type">Int</span> = b.size)</span></span> &#123; <span class="comment">/*……*/</span> &#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以通过类型后面的 = 来设置默认值。</p>
+<p>如果一个默认参数在一个无默认值的参数之前，那么该默认值只能通过使用具名参数调用该方法来使用：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">foo</span><span class="params">(bar: <span class="type">Int</span> = <span class="number">0</span>, baz: <span class="type">Int</span>)</span></span> &#123; <span class="comment">/*……*/</span> &#125;</span><br><span class="line"></span><br><span class="line">foo(baz = <span class="number">1</span>) <span class="comment">// 使用默认值 bar = 0</span></span><br></pre></td></tr></table></figure>
+<p>如果在默认参数之后的最后一个参数是Lambda表达式</p>
+<h4 id="可变数量参数-Varargs"><a href="#可变数量参数-Varargs" class="headerlink" title="可变数量参数(Varargs)"></a>可变数量参数(Varargs)</h4><p>方法的参数（通常是最后一个）可以用vararg 修饰符标记</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">append</span><span class="params">(<span class="keyword">vararg</span> str: <span class="type">Char</span>)</span></span>: String &#123;</span><br><span class="line">    <span class="keyword">val</span> result = StringBuffer()</span><br><span class="line">    <span class="keyword">for</span> (char <span class="keyword">in</span> str) &#123;</span><br><span class="line">        result.append(char)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result.toString()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>允许将可变数量的参数传递给方法。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">append(<span class="string">&#x27;h&#x27;</span>, <span class="string">&#x27;e&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;o&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>可变参数的要求:</p>
+<ul>
+<li>只有一个参数可以标注为vararg</li>
+<li>如果vararg参数不是列表中的最后一个参数，可以使用具名参数语法传递其后的参数的值，或者，如果参数具有方法类型，则通过在括号外部传一个Lambda</li>
+</ul>
+<p>当我们调用vararg方法时，我们可以一个接一个地传参，例如append（’h’,’e’,’l’,’l’,’o’），或者，如果我们已经有一个数组并希望将其内容传给该方法，我们使用伸展*<em>（spread）操作符（在数组前面加</em>）**：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> world = charArrayOf(<span class="string">&#x27;w&#x27;</span>, <span class="string">&#x27;o&#x27;</span>, <span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;d&#x27;</span>)</span><br><span class="line"><span class="keyword">val</span> result = append(<span class="string">&#x27;h&#x27;</span>, <span class="string">&#x27;e&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;o&#x27;</span>,<span class="string">&#x27; &#x27;</span>, *world)</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="方法作用域"><a href="#方法作用域" class="headerlink" title="方法作用域"></a>方法作用域</h3><p>在Kotlin中方法可以在文件顶层声明，这意味着你不需要像一些语言如Java、C# 那样需要创建一个类来保存一个方法。</p>
+<p>此外除了顶层方法，Kotlin中方法也可以声明在局部作用域、作为成员方法以及扩展方法。</p>
+<h4 id="局部方法-1"><a href="#局部方法-1" class="headerlink" title="局部方法"></a>局部方法</h4><p>Kotlin支持局部方法，即一个方法在另一个方法内部：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">magic</span><span class="params">()</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">foo</span><span class="params">(v: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> v * v</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> v1 = (<span class="number">0.</span><span class="number">.100</span>).random()</span><br><span class="line">    <span class="keyword">return</span> foo(v1) <span class="comment">//在方法内部调用了局部方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>局部方法可以访问外部方法（即闭包）的局部变量</p>
+<h2 id="Lambda-表达式"><a href="#Lambda-表达式" class="headerlink" title="Lambda 表达式"></a>Lambda 表达式</h2><p>在Java 8的时候开始支持Lambda表达式，目前Lambda语法在Java中已经被广泛运用，Lambda表达式可以理解为是一种语法糖，值得庆幸的是，Kotlin一经开源成熟就已经支持这种语法。</p>
+<blockquote>
+<p>Lambda表达式的本质其实是匿名方法，因为在其底层实现中还是通过匿名方法来实现的。但是我们在用的时候不必关心起底层实现。不过Lambda的出现确实是减少了代码量的编写，同时也是代码更佳简洁明了。</p>
+</blockquote>
+<p>Lambda作为表达式编程的基础，其语法也是相当简单的。这里先通过一段简单的代码演示没让大家了解Lambda表达式的简洁之处。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">view.setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</span><br><span class="line">        Toast.makeText(v.getContext(), <span class="string">&quot;Lambda简洁之道&quot;</span>, Toast.LENGTH_LONG).show();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>Lambda</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">view.setOnClickListener &#123; v -&gt; Toast.makeText(v.context, <span class="string">&quot;Lambda简洁之道&quot;</span>, Toast.LENGTH_LONG).show() &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Lambda表达式的特点"><a href="#Lambda表达式的特点" class="headerlink" title="Lambda表达式的特点"></a>Lambda表达式的特点</h4><ul>
+<li>是匿名方法</li>
+<li>可以传递</li>
+</ul>
+<h4 id="Lambda语法"><a href="#Lambda语法" class="headerlink" title="Lambda语法"></a>Lambda语法</h4><p>语法如下：</p>
+<h5 id="无参数的情况："><a href="#无参数的情况：" class="headerlink" title="无参数的情况："></a>无参数的情况：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span>/<span class="keyword">var</span> 变量名 = &#123; 操作的代码 &#125;</span><br></pre></td></tr></table></figure>
+<p>Eg:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> test1 = &#123; println(<span class="string">&quot;无参数&quot;</span>) &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="有参数的情况"><a href="#有参数的情况" class="headerlink" title="有参数的情况"></a>有参数的情况</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span>/<span class="keyword">var</span> 变量名 : (参数的类型，参数类型，...) -&gt; 返回值类型 = &#123;参数<span class="number">1</span>，参数<span class="number">2</span>，... -&gt; 操作参数的代码 &#125;</span><br></pre></td></tr></table></figure>
+<p>Eg: </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> test3:(<span class="built_in">Int</span>, <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = &#123; a, b -&gt; a + b &#125;</span><br></pre></td></tr></table></figure>
+<p>等价于</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 此种写法：即表达式的返回值类型会根据操作的代码自推导出来。</span></span><br><span class="line"><span class="keyword">val</span>/<span class="keyword">var</span> 变量名 = &#123; 参数<span class="number">1</span> ： 类型，参数<span class="number">2</span> : 类型, ... -&gt; 操作参数的代码 &#125;</span><br></pre></td></tr></table></figure>
+<p>Eg:</p>
+<p>Lambda表达式作为方法中的参数的时候，这里举一个例子：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">test</span><span class="params">(a : <span class="type">Int</span>, 参数名 : (参数1 ： 类型，参数2 : 类型, ... ) -&gt; 表达式返回类型)</span></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Lambda-实践"><a href="#Lambda-实践" class="headerlink" title="Lambda 实践"></a>Lambda 实践</h4><h5 id="如何使用it"><a href="#如何使用it" class="headerlink" title="如何使用it"></a>如何使用it</h5><p>认识it</p>
+<ul>
+<li>it 并不是Kotlin中的一个关键字（保留字）</li>
+<li>it 是在当一个高阶方法中Lambda表达式的参数只有一个的时候可以使用it来使用此参数</li>
+<li>it可表示为单个参数的隐式名称，是Kotlin语言约定的。</li>
+</ul>
+<p>实例A：单个参数的隐式名称，是Kotlin语言约定的</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里举例一个语言自带的一个高阶方法filter,此方法的作用是过滤掉不满足条件的值。</span></span><br><span class="line"><span class="keyword">val</span> arr = arrayOf(<span class="number">1</span>,<span class="number">3</span>,<span class="number">5</span>,<span class="number">7</span>,<span class="number">9</span>)</span><br><span class="line"><span class="comment">// 过滤掉数组中元素小于2的元素，取其第一个打印。这里的it就表示每一个元素。</span></span><br><span class="line">println(arr.filter &#123; it &lt; <span class="number">5</span> &#125;.component1())</span><br><span class="line"></span><br><span class="line"><span class="comment">//结合上文的</span></span><br><span class="line">testClosure(<span class="number">1</span>)(<span class="number">2</span>) &#123;</span><br><span class="line">    println(it)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="如何使用下划线"><a href="#如何使用下划线" class="headerlink" title="如何使用下划线_"></a>如何使用下划线_</h5><p>在使用Lambda表达式的时候，可以用下划线（_）表示未使用的参数，表示不处理这个参数</p>
+<p>在遍历一个Map集合的时候，这非常有用</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> map = mapOf(<span class="string">&quot;key1&quot;</span> to <span class="string">&quot;value1&quot;</span>, <span class="string">&quot;key2&quot;</span> to <span class="string">&quot;value2&quot;</span>, <span class="string">&quot;key3&quot;</span> to <span class="string">&quot;value3&quot;</span>)</span><br><span class="line">map.forEach &#123; (key, value) -&gt;</span><br><span class="line">    println(<span class="string">&quot;<span class="variable">$key</span> \t <span class="variable">$value</span>&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 不需要key的时候</span></span><br><span class="line">map.forEach &#123; (_, value) -&gt;</span><br><span class="line">    println(value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Kotlin-%E6%96%B9%E6%B3%95/" rel="tag"># Kotlin- 方法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/12/adb%E7%9B%B8%E5%85%B3/" rel="prev" title="adb相关">
+      <i class="fa fa-chevron-left"></i> adb相关
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/29/%E8%87%AA%E5%AE%9A%E4%B9%89View%E3%80%901%E3%80%91%E5%9B%BE%E5%BD%A2%E7%9A%84%E4%BD%8D%E7%BD%AE%E5%92%8C%E5%B0%BA%E5%AF%B8%E6%B5%8B%E9%87%8F/" rel="next" title="自定义View【1】图形的位置和尺寸测量">
+      自定义View【1】图形的位置和尺寸测量 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">Kotlin方法与Lambda表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kotlin%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.</span> <span class="nav-text">Kotlin的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%A3%B0%E6%98%8E"><span class="nav-number">1.1.1.</span> <span class="nav-text">方法声明</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B1%BB%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">类方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#companion-object-%E5%AE%9E%E7%8E%B0%E7%9A%84%E7%B1%BB%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.1.1.</span> <span class="nav-text">companion object 实现的类方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E7%B1%BB"><span class="nav-number">1.1.1.1.2.</span> <span class="nav-text">静态类</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E9%9D%99%E6%80%81"><span class="nav-number">1.1.1.1.3.</span> <span class="nav-text">全局静态</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">单表达式方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8C%BF%E5%90%8D%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">匿名方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">局部方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.5.</span> <span class="nav-text">泛型方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.6.</span> <span class="nav-text">扩展方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.2.</span> <span class="nav-text">方法参数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">默认参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E5%8F%98%E6%95%B0%E9%87%8F%E5%8F%82%E6%95%B0-Varargs"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">可变数量参数(Varargs)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">1.1.3.</span> <span class="nav-text">方法作用域</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E6%96%B9%E6%B3%95-1"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">局部方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lambda-%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">Lambda 表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">1.2.0.1.</span> <span class="nav-text">Lambda表达式的特点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Lambda%E8%AF%AD%E6%B3%95"><span class="nav-number">1.2.0.2.</span> <span class="nav-text">Lambda语法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%97%A0%E5%8F%82%E6%95%B0%E7%9A%84%E6%83%85%E5%86%B5%EF%BC%9A"><span class="nav-number">1.2.0.2.1.</span> <span class="nav-text">无参数的情况：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%84%E6%83%85%E5%86%B5"><span class="nav-number">1.2.0.2.2.</span> <span class="nav-text">有参数的情况</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Lambda-%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.2.0.3.</span> <span class="nav-text">Lambda 实践</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8it"><span class="nav-number">1.2.0.3.1.</span> <span class="nav-text">如何使用it</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E4%B8%8B%E5%88%92%E7%BA%BF"><span class="nav-number">1.2.0.3.2.</span> <span class="nav-text">如何使用下划线_</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

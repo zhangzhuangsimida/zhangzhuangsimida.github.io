@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Git 深入之核心概念:一切皆引用Git基本概念Git和传统中央仓库版本管理工具的区别  分布式，即所有人都能得到所有文件的提交记录，而不是放在中央仓库，其他人只能拿到最新代码  可以脱离中央仓库离线提交，虽然早晚得联网传，但是如果你写了1w行，一次性在提交，同事更新后就疯了，以后自己看也麻烦，Git能拆成小提交离线提交在本地，中央仓库这时不联网就不行。  仓库会比较大，但是因为代码都是文本，而且">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Git-01】Git深入之核心理念：一切皆引用">
+<meta property="og:url" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="Git 深入之核心概念:一切皆引用Git基本概念Git和传统中央仓库版本管理工具的区别  分布式，即所有人都能得到所有文件的提交记录，而不是放在中央仓库，其他人只能拿到最新代码  可以脱离中央仓库离线提交，虽然早晚得联网传，但是如果你写了1w行，一次性在提交，同事更新后就疯了，以后自己看也麻烦，Git能拆成小提交离线提交在本地，中央仓库这时不联网就不行。  仓库会比较大，但是因为代码都是文本，而且">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210208170300604.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210208171845882.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210208171954849.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218145903344.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218152209475.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218152855887.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153048326.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153109274.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153750630.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153804769.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153820241.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153837647.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218155741370.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218155854531.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218155911405.png">
+<meta property="og:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218155929060.png">
+<meta property="article:published_time" content="2021-02-05T09:20:43.000Z">
+<meta property="article:modified_time" content="2021-03-07T14:55:42.801Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="Git">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210208170300604.png">
+
+<link rel="canonical" href="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【Git-01】Git深入之核心理念：一切皆引用 | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【Git-01】Git深入之核心理念：一切皆引用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-02-05 17:20:43" itemprop="dateCreated datePublished" datetime="2021-02-05T17:20:43+08:00">2021-02-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-03-07 22:55:42" itemprop="dateModified" datetime="2021-03-07T22:55:42+08:00">2021-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Git/" itemprop="url" rel="index"><span itemprop="name">Git</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Git-深入之核心概念-一切皆引用"><a href="#Git-深入之核心概念-一切皆引用" class="headerlink" title="Git 深入之核心概念:一切皆引用"></a>Git 深入之核心概念:一切皆引用</h1><h2 id="Git基本概念"><a href="#Git基本概念" class="headerlink" title="Git基本概念"></a>Git基本概念</h2><p>Git和传统中央仓库版本管理工具的区别</p>
+<ol>
+<li><p>分布式，即所有人都能得到所有文件的提交记录，而不是放在中央仓库，其他人只能拿到最新代码</p>
+</li>
+<li><p>可以脱离中央仓库离线提交，虽然早晚得联网传，但是如果你写了1w行，一次性在提交，同事更新后就疯了，以后自己看也麻烦，Git能拆成小提交离线提交在本地，中央仓库这时不联网就不行。</p>
+</li>
+<li><p>仓库会比较大，但是因为代码都是文本，而且依赖一般不用提交，仓库大小也不会太大，但是游戏开发一般使用中央仓库，因为游戏中使用了大量媒体文件，体积庞大</p>
+</li>
+</ol>
+<a id="more"></a>
+
+
+
+<h2 id="Git-仓库数据结构和常用概念"><a href="#Git-仓库数据结构和常用概念" class="headerlink" title="Git 仓库数据结构和常用概念"></a>Git 仓库数据结构和常用概念</h2><h3 id="Git-仓库数据结构"><a href="#Git-仓库数据结构" class="headerlink" title="Git 仓库数据结构"></a>Git 仓库数据结构</h3><ul>
+<li><p>Git 仓库由一个个的 commit（记录） 组成</p>
+</li>
+<li><p>某些 commit 上会有一些 branch 指向它们，这些 branch 的本质是引用</p>
+</li>
+<li><p>有一个特殊的引用叫做 HEAD，它始终指向当前的位置，这个位置可以是 commit，也可以是 branch</p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210208170300604.png" alt="image-20210208170300604"></p>
+</li>
+</ul>
+<h3 id="常用概念：commit-本质是改动"><a href="#常用概念：commit-本质是改动" class="headerlink" title="常用概念：commit(本质是改动)"></a>常用概念：commit(本质是改动)</h3><p>commit 表示对于一次改动的提交，它可以代表当前时刻下 Git 仓库的完整快照，但 <strong>本质上，commit 只是记录了距离上一次 commit 之间的改动。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">commit df68708ea927ab8af62a57dc1ae6e3880da23b6e (HEAD -&gt; master, origin&#x2F;master, origin&#x2F;HEAD)</span><br><span class="line"></span><br><span class="line">Author: wuyuanaaa &lt;dao332508553@163.com&gt;</span><br><span class="line"></span><br><span class="line">Date: Sun May 5 21:48:49 2019 +0800</span><br><span class="line"></span><br><span class="line">修复</span><br><span class="line"></span><br><span class="line">commit f74ce755cbd97ce17731348a503bf70d691c53ab</span><br><span class="line"></span><br><span class="line">Author: wuyuanaaa &lt;dao332508553@163.com&gt;</span><br><span class="line"></span><br><span class="line">Date: Sat May 4 00:11:54 2019 +0800</span><br><span class="line"></span><br><span class="line">admin</span><br></pre></td></tr></table></figure>
+<p>乱码是这次提交的hash值，代表这次提交，过去用sha1算出，以后用sha256，一般用前4，5位就行，如果重复了再加长</p>
+<h3 id="常用概念：staging-area-暂存区和-add"><a href="#常用概念：staging-area-暂存区和-add" class="headerlink" title="常用概念：staging area 暂存区和 add"></a>常用概念：staging area 暂存区和 add</h3><ul>
+<li><p>staging 原意:舞台表演前的筹划准备(例如汇集道具和演员)。Git 中的意 思:把改动内容汇集起来以待提交。</p>
+</li>
+<li><p>staging area:待提交的修改内容暂时存放的地方。主要用于和已经改动但不打 算提交的内容区分开来。</p>
+</li>
+<li><p>add 指令:把指定的内容放进暂存区。 git add README.md</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git add README.md</span><br></pre></td></tr></table></figure>
+
+
+</li>
+</ul>
+<h3 id="常用概念：仓库，就是-git-目录"><a href="#常用概念：仓库，就是-git-目录" class="headerlink" title="常用概念：仓库，就是.git 目录"></a>常用概念：仓库，就是.git 目录</h3><p><code>.git</code> 隐藏目录就是仓库，记录所有改动，当前状态，靠它保存历史的</p>
+<h3 id="常用概念：引用"><a href="#常用概念：引用" class="headerlink" title="常用概念：引用"></a>常用概念：引用</h3><p>指向某个commit的指针，或者指向某个引用的引用（指针的指针，其实还是指向commit，只有一个例子就是HEAD 只有Head能指向别的引用）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">commit df68708ea927ab8af62a57dc1ae6e3880da23b6e (HEAD -&gt; master, origin&#x2F;master, origin&#x2F;HEAD)</span><br><span class="line"></span><br><span class="line">Author: wuyuanaaa &lt;dao332508553@163.com&gt;</span><br><span class="line"></span><br><span class="line">Date: Sun May 5 21:48:49 2019 +0800</span><br><span class="line">(HEAD -&gt; master, origin&#x2F;master, origin&#x2F;HEAD)</span><br></pre></td></tr></table></figure>
+<p>这串就是引用</p>
+<h3 id="常用概念：branch-和-master"><a href="#常用概念：branch-和-master" class="headerlink" title="常用概念：branch 和 master"></a>常用概念：branch 和 master</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch feature1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>branch 的含义是分支，指的是仓库结构出现分叉时的不同的「叉」本质上，git 的 branch 是引用(reference)，即指向某个 commit 的指针 直观感觉的 branch:</li>
+</ul>
+<p>直观感觉的 branch:</p>
+<blockquote>
+<p>commit 前</p>
+</blockquote>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210208171845882.png" alt="image-20210208171845882"></p>
+<blockquote>
+<p>commit 后</p>
+</blockquote>
+<p>而实质上的brach：</p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210208171954849.png" alt="image-20210208171954849"></p>
+<ul>
+<li>master 是一个特殊的 branch，因为它是 Git 的默认 branch(默认 branch可以修改)。默认 branch 的特点:<ul>
+<li>执行 clone 方法把仓库取到本地的时候，默认 checkout 出来的是默认 branch，即 master;</li>
+<li>在执行 push 命令把本地内容推送到远端仓库的时候，远端仓库的 HEAD 永 远跟随默认 branch，而不是和本地 HEAD 同步。换句话说，只有 push master 分支到远端的时候，远端的 HEAD 才会移动。</li>
+</ul>
+</li>
+</ul>
+<h3 id="常用概念：HEAD"><a href="#常用概念：HEAD" class="headerlink" title="常用概念：HEAD"></a>常用概念：HEAD</h3><ul>
+<li><p>HEAD 也是引用，但它不是 branch，它代表了当前所处的位置。HEAD 不仅可</p>
+</li>
+<li><p>以指向某个 commit，也可以指向某个 branch(例如 master、feature1) 当每次 commit 的时候，HEAD 不仅随着新的 commit 一起移动，而且如果它指向了某个 branch，那么它也会带着 branch 一起移动</p>
+</li>
+</ul>
+<blockquote>
+<p>commit 后</p>
+</blockquote>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218145903344.png" alt="image-20210218145903344"></p>
+<h3 id="常用概念：clone"><a href="#常用概念：clone" class="headerlink" title="常用概念：clone"></a>常用概念：clone</h3><p>clone 是从远端仓库初次把数据取下来:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span>  https://github.com/zz/git-demo.git</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>把整个仓库中的所有branch取下来，并把从初始commit到达这些branch的路径上的所有 commit 都取下来</p>
+<p>（把仓库<code>.git</code> 目录的提交记录down下来,然后下载代码）</p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218152209475.png" alt="image-20210218152209475"></p>
+</li>
+<li><p>从初始commit开始，向master指向的commit，一个个地把每个commit应 用，最终得到一个「当前」状态的仓库内容，写进 Git 所在的目录(这个目录叫 做 working tree)</p>
+</li>
+</ol>
+<h3 id="常用概念：log"><a href="#常用概念：log" class="headerlink" title="常用概念：log"></a>常用概念：log</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">log</span></span><br></pre></td></tr></table></figure>
+
+
+<p>从 HEAD 指向的 commit 开始，倒序显示每一个 commit 的摘要信息</p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218152855887.png" alt="image-20210218152855887"></p>
+<h3 id="常用概念：merge"><a href="#常用概念：merge" class="headerlink" title="常用概念：merge"></a>常用概念：merge</h3><p>merge 就是合并，它会把当前 commit 和指定 commit(所谓 commit，可以直接用 它的 hash 值来指定，例如 <code>4a0a1b</code> ，也可以用一个直接或间接指向它的引用来指 定，例如<code>master</code>或者 <code>HEAD </code>)进行合并，并把这个合并行为创建成一个新的 commit。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git merge feature1</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153048326.png" alt="image-20210218153048326"></p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153109274.png" alt="image-20210218153109274"></p>
+<p>merge 行为所产生的 commit，是一种特殊的 commit:</p>
+<ol>
+<li><p>它不需要有改动，只要指定两个(或更多个)父commit就好</p>
+</li>
+<li><p>正如上面这句说的，它有两个或更多个父commit，这是一般的commit不具有</p>
+<p>的性质</p>
+</li>
+</ol>
+<h4 id="merge-冲突"><a href="#merge-冲突" class="headerlink" title="merge 冲突"></a><strong>merge</strong> 冲突</h4><p> 当 Git 不知道怎么合并某两处冲突的修改时，会中断自动合并，并对冲突文件进行标</p>
+<p>记。解决方法:</p>
+<ol>
+<li><p>把文件手动修改好</p>
+</li>
+<li><p>把修改的内容使用add来添加进暂存区</p>
+</li>
+<li><p>用 git merge –continue 来继续自动合并流</p>
+</li>
+<li></li>
+</ol>
+<h3 id="关于-origin-打头的-branch"><a href="#关于-origin-打头的-branch" class="headerlink" title="关于 origin/ 打头的 branch"></a>关于 <strong>origin/</strong> 打头的 branch</h3><p>本地仓库中，有一些以 <code>origin/</code> 打头的 branch，它们是远端仓库(别名为 origin)的本地镜像。它们的作用是方便在本地查看远端仓库的 branch 状态。</p>
+<blockquote>
+<p>远端仓库默认名称是 origin，但也可以给它们起别的名称</p>
+</blockquote>
+<p><code>origin/</code> 分支并不在本地直接操作，它们一般只在两种情况下会进行自动更新:</p>
+<ol>
+<li>在执行push的时候，push成功后，push成功的branch会把它对应的 <code>origin/</code> branch 更新到当前 commit(因为远端的 branch 已经随着 push 的  成功而更新，所以本地镜像也一起更新)</li>
+<li>在执行pull或者fetch的时候，由于从远端拿到了所有最新的branch状态，所以也会一同更新所有的 <code>origin/ </code>branch</li>
+</ol>
+<blockquote>
+<p>关于 origin/HEAD:这是一个永远跟随 origin/master 的引用，它最大的作用是用来标记默认 branch</p>
+</blockquote>
+<h3 id="常用概念：push"><a href="#常用概念：push" class="headerlink" title="常用概念：push"></a>常用概念：push</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push origin feature1</span><br></pre></td></tr></table></figure>
+<p>把当前 branch 推送到远端仓库的指定分支。</p>
+<p>具体做三件事:</p>
+<ol>
+<li>把HEAD所指向的branch(只是一个引用哦)推送到远端仓库</li>
+<li>从这个branch向前回溯，远端仓库缺少的每一个commit也推送到远端仓库。</li>
+<li>将 push 的 branch 的本地镜像 origin/xxx 更新</li>
+</ol>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153750630.png" alt="image-20210218153750630"></p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153804769.png" alt="image-20210218153804769"></p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153820241.png" alt="image-20210218153820241"></p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218153837647.png" alt="image-20210218153837647"></p>
+<blockquote>
+<p> 注意:origin/HEAD 并没有在图上画出来，但如果 push 是 master(即默认 branch)，那么本地的 <code>origin/HEAD</code> 也会更新到 master 的最新位置;当 push 的是其他 branch 的时候， <code>origin/HEAD</code> 并不会更新。</p>
+<p>也就是说， <code>origin/HEAD</code> 只和默认分支相关，和 <code>HEAD</code> 是无关的</p>
+</blockquote>
+<h3 id="常用概念：pull"><a href="#常用概念：pull" class="headerlink" title="常用概念：pull"></a>常用概念：pull</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git pull origin feature1</span><br></pre></td></tr></table></figure>
+<p>把远端 branch 取到本地。 具体做的事有三件:</p>
+<ol>
+<li>把远端所有 branch 的最新位置更新到本地的 <code>origin/xxx</code> 镜像</li>
+<li>要到达这些branch，本地所缺少的所有commit，也取到本地</li>
+<li>把<code> origin/当前branch</code> 的内容合并到当前 branch</li>
+</ol>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218155741370.png" alt="image-20210218155741370"></p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218155854531.png" alt="image-20210218155854531"></p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218155911405.png" alt="image-20210218155911405"></p>
+<p><img src="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/image-20210218155929060.png" alt="image-20210218155929060"></p>
+<p>事实上，<code>git pull origin feature1</code> 会分成两部执行，它等价于下面两行:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git fetch</span><br><span class="line">git merge origin/feature1</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Git/" rel="tag"># Git</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/02/02/Sophix/" rel="prev" title="Sophix">
+      <i class="fa fa-chevron-left"></i> Sophix
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/18/%E3%80%90Git-02%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8BFeatureBranching/" rel="next" title="【Git-02】Git深入之FeatureBranching">
+      【Git-02】Git深入之FeatureBranching <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Git-%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5-%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">Git 深入之核心概念:一切皆引用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Git%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">Git基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Git-%E4%BB%93%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5"><span class="nav-number">1.2.</span> <span class="nav-text">Git 仓库数据结构和常用概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Git-%E4%BB%93%E5%BA%93%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.1.</span> <span class="nav-text">Git 仓库数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9Acommit-%E6%9C%AC%E8%B4%A8%E6%98%AF%E6%94%B9%E5%8A%A8"><span class="nav-number">1.2.2.</span> <span class="nav-text">常用概念：commit(本质是改动)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9Astaging-area-%E6%9A%82%E5%AD%98%E5%8C%BA%E5%92%8C-add"><span class="nav-number">1.2.3.</span> <span class="nav-text">常用概念：staging area 暂存区和 add</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9A%E4%BB%93%E5%BA%93%EF%BC%8C%E5%B0%B1%E6%98%AF-git-%E7%9B%AE%E5%BD%95"><span class="nav-number">1.2.4.</span> <span class="nav-text">常用概念：仓库，就是.git 目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9A%E5%BC%95%E7%94%A8"><span class="nav-number">1.2.5.</span> <span class="nav-text">常用概念：引用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9Abranch-%E5%92%8C-master"><span class="nav-number">1.2.6.</span> <span class="nav-text">常用概念：branch 和 master</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9AHEAD"><span class="nav-number">1.2.7.</span> <span class="nav-text">常用概念：HEAD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9Aclone"><span class="nav-number">1.2.8.</span> <span class="nav-text">常用概念：clone</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9Alog"><span class="nav-number">1.2.9.</span> <span class="nav-text">常用概念：log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9Amerge"><span class="nav-number">1.2.10.</span> <span class="nav-text">常用概念：merge</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#merge-%E5%86%B2%E7%AA%81"><span class="nav-number">1.2.10.1.</span> <span class="nav-text">merge 冲突</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-origin-%E6%89%93%E5%A4%B4%E7%9A%84-branch"><span class="nav-number">1.2.11.</span> <span class="nav-text">关于 origin&#x2F; 打头的 branch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9Apush"><span class="nav-number">1.2.12.</span> <span class="nav-text">常用概念：push</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A6%82%E5%BF%B5%EF%BC%9Apull"><span class="nav-number">1.2.13.</span> <span class="nav-text">常用概念：pull</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

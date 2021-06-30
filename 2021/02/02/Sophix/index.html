@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Sophix移动热修复（Mobile Hotfix）是面向Android、iOS平台应用提供的在线热修复服务方案，产品基于阿里巴巴首创的Hotpatch技术，提供细粒度热修复能力，无需等待发版即可实时修复应用线上问题，用户全程无感知。 接入热修复SDK官方文档">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sophix">
+<meta property="og:url" content="http://example.com/2021/02/02/Sophix/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="Sophix移动热修复（Mobile Hotfix）是面向Android、iOS平台应用提供的在线热修复服务方案，产品基于阿里巴巴首创的Hotpatch技术，提供细粒度热修复能力，无需等待发版即可实时修复应用线上问题，用户全程无感知。 接入热修复SDK官方文档">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/02/02/Sophix/image-20210202164147743.png">
+<meta property="og:image" content="http://example.com/2021/02/02/Sophix/image-20210202161355883.png">
+<meta property="og:image" content="http://example.com/2021/02/02/Sophix/image-20210202165053570.png">
+<meta property="og:image" content="http://example.com/2021/02/02/Sophix/image-20210202165238458.png">
+<meta property="og:image" content="http://example.com/2021/02/02/Sophix/image-20210202165306861.png">
+<meta property="og:image" content="http://example.com/2021/02/02/Sophix/image-20210203155115536.png">
+<meta property="og:image" content="http://example.com/2021/02/02/Sophix/image-20210203164717343.png">
+<meta property="og:image" content="http://example.com/2021/02/02/Sophix/image-20210203164906491.png">
+<meta property="og:image" content="http://example.com/2021/02/02/Sophix/image-20210302141239739.png">
+<meta property="article:published_time" content="2021-02-02T07:58:54.000Z">
+<meta property="article:modified_time" content="2021-06-25T09:27:32.130Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="热修复">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/02/02/Sophix/image-20210202164147743.png">
+
+<link rel="canonical" href="http://example.com/2021/02/02/Sophix/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Sophix | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/02/Sophix/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Sophix
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-02-02 15:58:54" itemprop="dateCreated datePublished" datetime="2021-02-02T15:58:54+08:00">2021-02-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-25 17:27:32" itemprop="dateModified" datetime="2021-06-25T17:27:32+08:00">2021-06-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/Android%E6%A0%B8%E5%BF%83/" itemprop="url" rel="index"><span itemprop="name">Android核心</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/Android%E6%A0%B8%E5%BF%83/%E7%83%AD%E4%BF%AE%E5%A4%8D/" itemprop="url" rel="index"><span itemprop="name">热修复</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Sophix"><a href="#Sophix" class="headerlink" title="Sophix"></a>Sophix</h1><p>移动热修复（Mobile Hotfix）是面向Android、iOS平台应用提供的在线热修复服务方案，产品基于阿里巴巴首创的Hotpatch技术，提供细粒度热修复能力，无需等待发版即可实时修复应用线上问题，用户全程无感知。</p>
+<h1 id="接入热修复SDK"><a href="#接入热修复SDK" class="headerlink" title="接入热修复SDK"></a>接入热修复SDK</h1><p><a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/181015.html?spm=a2c4g.11174283.2.16.3fd09c664MAItx">官方文档</a></p>
+<p> <img src="/2021/02/02/Sophix/image-20210202164147743.png" alt="image-20210202164147743"></p>
+<a id="more"></a>
+
+<h2 id="创建应用"><a href="#创建应用" class="headerlink" title="创建应用"></a>创建应用</h2><p>EMAS平台中的应用即您实际端应用的映射，您需要在EMAS控制台创建应用，与您要加载SDK的端应用进行关联。创建应用请参考<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/169962.html">EMAS 快速入门&gt;创建产品及应用</a>。</p>
+<h3 id="注册登陆"><a href="#注册登陆" class="headerlink" title="注册登陆"></a>注册登陆</h3><p><a target="_blank" rel="noopener" href="https://www.aliyun.com/">阿里云官网</a>-&gt;登陆账号-&gt;产品-&gt;开发与运维-&gt;移动研发平台 EMAS-&gt;运维 -&gt; <a target="_blank" rel="noopener" href="https://www.aliyun.com/product/hotfix?spm=5176.185759.J_8058803260.420.5aa565f7pRwzCe">移动热修复</a> ，切换到当前页面先去注册登录，登录之后，如果是之前没用过，会显示立即开通，之前已经开通的话会直接显示管理控制台</p>
+<p><img src="/2021/02/02/Sophix/image-20210202161355883.png" alt="image-20210202161355883"></p>
+<h4 id="创建工作空间和应用"><a href="#创建工作空间和应用" class="headerlink" title="创建工作空间和应用"></a>创建工作空间和应用</h4><ol>
+<li><p>产品开通后即可进入移动研发平台的<a target="_blank" rel="noopener" href="https://emas.console.aliyun.com/?spm=a2c4g.11186623.2.13.11293207iFXcAB#/productList">管理控制台</a>，默认打开<strong>我的工作空间</strong>页面。</p>
+</li>
+<li><p>在<strong>我的工作空间</strong>页面，单击<strong>创建工作空间</strong>标签，打开<strong>创作工作空间</strong>右侧栏。</p>
+<p><img src="/2021/02/02/Sophix/image-20210202165053570.png" alt="image-20210202165053570"></p>
+</li>
+<li><p>在<strong>创作工作空间</strong>右侧栏，填写<strong>工作空间名称</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>工作空间名称</strong></td>
+<td>用于设置工作空间的名称。【取值范围】1～30字符【字符类型】中文/英文大小写/数字/下划线</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>单击<strong>创建并进入</strong>按钮，保存工作空间，并打开<strong>工作空间概览</strong>页面。</p>
+</li>
+<li><p>在<strong>工作空间概览</strong>页面，单击<strong>添加应用</strong>按钮，打开<strong>应用配置</strong>右侧栏。</p>
+<p><img src="/2021/02/02/Sophix/image-20210202165238458.png" alt="image-20210202165238458"></p>
+</li>
+<li><p>在<strong>应用配置</strong>右侧栏 &gt; <strong>填写应用信息</strong>步骤，输入应用信息。</p>
+<p><img src="/2021/02/02/Sophix/image-20210202165306861.png" alt="image-20210202165306861"></p>
+</li>
+</ol>
+<p>经典模式是用代码开发</p>
+<p>低代码模式是用可视化工具开发，支持平台为小程序和H5</p>
+<h2 id="SDK集成"><a href="#SDK集成" class="headerlink" title="SDK集成"></a>SDK集成</h2><blockquote>
+<p>说明：SDK下载请参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/169962.html">EMAS 快速入门&gt;下载SDK</a>。</p>
+</blockquote>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/61082.html">Android SDK稳健接入（推荐使用）</a></li>
+<li><a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/53240.html">Android SDK快速接入（不推荐使用）</a>只支持9.0一下设备，9.0以上有崩溃风险没有使用Application代理，直接初始化了Sophix</li>
+<li>iOS SDK接入方式：请接入技术支持钉钉群获取，参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/173248.html">技术支持</a></li>
+</ul>
+<p><strong><em>我们采用的是稳健接入（兼容Android 9.0）</em></strong></p>
+<p><strong><em>以下内容是基于Android Studio的稳健接入方案</em></strong></p>
+<h3 id="前提条件"><a href="#前提条件" class="headerlink" title="前提条件"></a>前提条件</h3><ul>
+<li>SDK下载，请参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/169962.html">EMAS快速入门&gt;下载SDK</a></li>
+<li>Demo程序：<a target="_blank" rel="noopener" href="https://github.com/aliyun/alicloud-android-demo/tree/master/hotfix_android_demo">Github地址</a></li>
+</ul>
+<h3 id="使用限制"><a href="#使用限制" class="headerlink" title="使用限制"></a>使用限制</h3><p>支持Android 4.0.3及以上系统，如自研设备和系统，请关闭系统级jit后进行接入。</p>
+<h3 id="集成步骤"><a href="#集成步骤" class="headerlink" title="集成步骤"></a>集成步骤</h3><h4 id="添加工程依赖"><a href="#添加工程依赖" class="headerlink" title="添加工程依赖"></a>添加工程依赖</h4><p>app的build.gradle文件，添加如下配置：</p>
+<p>添加maven仓库地址：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">repositories &#123;</span><br><span class="line">   maven &#123;</span><br><span class="line">       url <span class="string">&quot;http://maven.aliyun.com/nexus/content/repositories/releases&quot;</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Module/build.gradle 添加依赖</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    ......</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">&quot;com.xxx.xxx&quot;</span> <span class="comment">//包名</span></span><br><span class="line">        ......</span><br><span class="line">        ndk &#123;</span><br><span class="line">            <span class="comment">//选择要添加的对应cpu类型的.so库。</span></span><br><span class="line">            <span class="comment">//热修复支持五种</span></span><br><span class="line">            abiFilters <span class="string">&#x27;arm64-v8a&#x27;</span>, <span class="string">&#x27;armeabi&#x27;</span>, <span class="string">&#x27;armeabi-v7a&#x27;</span>, <span class="string">&#x27;x86&#x27;</span>, <span class="string">&#x27;x86_64&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">        ......</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br><span class="line">dependencies &#123;</span><br><span class="line">    ......</span><br><span class="line">        compile <span class="string">&#x27;com.aliyun.ams:alicloud-android-hotfix:3.2.17&#x27;</span></span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如若仓库访问失败, 那么用本地依赖的方式进行依赖。</p>
+<blockquote>
+<p><strong>注意</strong> :</p>
+<ul>
+<li>使用android studio打包生成apk时，要关闭instant run。</li>
+<li>若SDK集成过程中出现UTDID冲突，请参考<a target="_blank" rel="noopener" href="https://help.aliyun.com/knowledge_detail/59152.html">阿里云-移动云产品SDK UTDID冲突解决方案</a>。</li>
+</ul>
+</blockquote>
+<h4 id="添加应用权限"><a href="#添加应用权限" class="headerlink" title="添加应用权限"></a>添加应用权限</h4><p>Sophix SDK使用到以下权限，使用maven依赖或者aar依赖可以不用配置。具体配置在<code>AndroidManifest.xml</code>中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;uses-permission android:name&#x3D;&quot;android.permission.INTERNET&quot; &#x2F;&gt;</span><br><span class="line">&lt;uses-permission android:name&#x3D;&quot;android.permission.ACCESS_NETWORK_STATE&quot; &#x2F;&gt;</span><br><span class="line">&lt;uses-permission android:name&#x3D;&quot;android.permission.ACCESS_WIFI_STATE&quot; &#x2F;&gt;</span><br><span class="line">&lt;uses-permission android:name&#x3D;&quot;android.permission.READ_EXTERNAL_STORAGE&quot;&#x2F;&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>说明</strong>: </p>
+<p><code>READ_EXTERNAL_STORAGE</code>权限属于Dangerous Permissions，仅调试工具获取外部补丁需要，不影响线上发布的补丁加载，调试时请自行做好Android 6.0以上的运行时权限获取。</p>
+</blockquote>
+<h4 id="配置AndroidManifest文件（最好在Application初始化时配置而不是Mainfest文件）"><a href="#配置AndroidManifest文件（最好在Application初始化时配置而不是Mainfest文件）" class="headerlink" title="配置AndroidManifest文件（最好在Application初始化时配置而不是Mainfest文件）"></a>配置AndroidManifest文件（最好在Application初始化时配置而不是Mainfest文件）</h4><p>在<code>AndroidManifest.xml</code>中间的<code>application</code>节点下添加如下配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;meta-data</span><br><span class="line">android:name=&quot;com.taobao.android.hotfix.IDSECRET&quot;</span><br><span class="line">android:value=&quot;App ID&quot; /&gt;</span><br><span class="line">&lt;meta-data</span><br><span class="line">android:name=&quot;com.taobao.android.hotfix.APPSECRET&quot;</span><br><span class="line">android:value=&quot;App Secret&quot; /&gt;</span><br><span class="line">&lt;meta-data</span><br><span class="line">android:name=&quot;com.taobao.android.hotfix.RSASECRET&quot;</span><br><span class="line">android:value=&quot;RSA密钥&quot; /&gt;</span><br></pre></td></tr></table></figure>
+<p>将上述value中的值分别改为通过平台HotFix服务申请得到的App Secret和RSA密钥，出于安全考虑，建议使用setSecretMetaData这个方法进行设置，详见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/180965.html">SDK API</a>的方法说明。如找不到对应参数，可参考<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/169962.html">EMAS快速入门&gt;下载配置文件</a>获取应用配置信息。</p>
+<blockquote>
+<p><strong>说明</strong> </p>
+<ul>
+<li>另外，热修复暂不支持EMAS统一插件的json文件读取。</li>
+<li><code>App ID/App Secret</code>将被用于计量计费，请妥善保管注意安全。</li>
+</ul>
+</blockquote>
+<h4 id="混淆-注意修复时打开mapping的注释，保存好mapping文件"><a href="#混淆-注意修复时打开mapping的注释，保存好mapping文件" class="headerlink" title="混淆 (注意修复时打开mapping的注释，保存好mapping文件)"></a>混淆 (注意修复时打开mapping的注释，保存好mapping文件)</h4><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#基线包使用，生成mapping.txt</span></span><br><span class="line"><span class="meta">-printmapping</span> <span class="string">mapping.txt</span></span><br><span class="line"><span class="comment">#生成的mapping.txt在app/build/outputs/mapping/release路径下，移动到/app路径下</span></span><br><span class="line"><span class="comment">#修复后的项目使用，保证混淆结果一致</span></span><br><span class="line"><span class="comment">#-applymapping mapping.txt</span></span><br><span class="line"><span class="comment">#hotfix</span></span><br><span class="line"><span class="meta">-keep</span> <span class="string">class com.taobao.sophix.**&#123;*;&#125;</span></span><br><span class="line"><span class="meta">-keep</span> <span class="string">class com.ta.utdid2.device.**&#123;*;&#125;</span></span><br><span class="line"><span class="meta">-dontwarn</span> <span class="string">com.alibaba.sdk.android.utils.**</span></span><br><span class="line"><span class="comment">#防止inline</span></span><br><span class="line"><span class="attr">-dontoptimize</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>注意</strong> ：开启混淆时，生成修复包要使用旧包的mapping文件以保证混淆结果一致。</p>
+</blockquote>
+<h4 id="应用内-初始化"><a href="#应用内-初始化" class="headerlink" title="应用内 初始化"></a>应用内 初始化</h4><p>初始化的调用应该尽可能的早，必须在<code>Application.attachBaseContext()</code>的最开始（在super.attachBaseContext之后，如果有Multidex，也需要在Multidex.install之后）进行SDK初始化操作，初始化之前不能用到其他自定义类，否则极有可能导致崩溃。而查询服务器是否有可用补丁的操作可以在后面的任意地方。不建议在<code>Application.onCreate()</code>中初始化，因为如果带有ContentProvider，就会使得Sophix初始化时机太迟从而引发问题。</p>
+<p>具体就是，用户自行加入以下这个类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.my.pkg;</span><br><span class="line"><span class="keyword">import</span> android.app.Application;</span><br><span class="line"><span class="keyword">import</span> android.content.Context;</span><br><span class="line"><span class="keyword">import</span> android.support.annotation.Keep;</span><br><span class="line"><span class="keyword">import</span> android.util.Log;</span><br><span class="line"><span class="keyword">import</span> com.taobao.sophix.PatchStatus;</span><br><span class="line"><span class="keyword">import</span> com.taobao.sophix.SophixApplication;</span><br><span class="line"><span class="keyword">import</span> com.taobao.sophix.SophixEntry;</span><br><span class="line"><span class="keyword">import</span> com.taobao.sophix.SophixManager;</span><br><span class="line"><span class="keyword">import</span> com.taobao.sophix.listener.PatchLoadStatusListener;</span><br><span class="line"><span class="keyword">import</span> com.my.pkg.MyRealApplication;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Sophix入口类，专门用于初始化Sophix，不应包含任何业务逻辑。</span></span><br><span class="line"><span class="comment"> * 此类必须继承自SophixApplication，onCreate方法不需要实现。</span></span><br><span class="line"><span class="comment"> * 此类不应与项目中的其他类有任何互相调用的逻辑，必须完全做到隔离。</span></span><br><span class="line"><span class="comment"> * AndroidManifest中设置application为此类，而SophixEntry中设为原先Application类。</span></span><br><span class="line"><span class="comment"> * 注意原先Application里不需要再重复初始化Sophix，并且需要避免混淆原先Application类。</span></span><br><span class="line"><span class="comment"> * 如有其它自定义改造，请咨询官方后妥善处理。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SophixStubApplication</span> <span class="keyword">extends</span> <span class="title">SophixApplication</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String TAG = <span class="string">&quot;SophixStubApplication&quot;</span>;</span><br><span class="line">    <span class="comment">// 此处SophixEntry应指定真正的Application，并且保证RealApplicationStub类名不被混淆。</span></span><br><span class="line">    <span class="meta">@Keep</span></span><br><span class="line">    <span class="meta">@SophixEntry(MyRealApplication.class)</span></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RealApplicationStub</span> </span>&#123;&#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">attachBaseContext</span><span class="params">(Context base)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.attachBaseContext(base);</span><br><span class="line"><span class="comment">//         如果需要使用MultiDex，需要在此处调用。</span></span><br><span class="line"><span class="comment">//         MultiDex.install(this);</span></span><br><span class="line">        initSophix();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initSophix</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        String appVersion = <span class="string">&quot;0.0.0&quot;</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            appVersion = <span class="keyword">this</span>.getPackageManager()</span><br><span class="line">                             .getPackageInfo(<span class="keyword">this</span>.getPackageName(), <span class="number">0</span>)</span><br><span class="line">                             .versionName;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">final</span> SophixManager instance = SophixManager.getInstance();</span><br><span class="line">        instance.setContext(<span class="keyword">this</span>)</span><br><span class="line">                .setAppVersion(appVersion)</span><br><span class="line">                .setSecretMetaData(<span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>)</span><br><span class="line">                .setEnableDebug(<span class="keyword">true</span>)</span><br><span class="line">                .setEnableFullLog()</span><br><span class="line">                .setPatchLoadStatusStub(<span class="keyword">new</span> PatchLoadStatusListener() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onLoad</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> mode, <span class="keyword">final</span> <span class="keyword">int</span> code, <span class="keyword">final</span> String info, <span class="keyword">final</span> <span class="keyword">int</span> handlePatchVersion)</span> </span>&#123;</span><br><span class="line">                        <span class="keyword">if</span> (code == PatchStatus.CODE_LOAD_SUCCESS) &#123;</span><br><span class="line">                            Log.i(TAG, <span class="string">&quot;sophix load patch success!&quot;</span>);</span><br><span class="line">                        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (code == PatchStatus.CODE_LOAD_RELAUNCH) &#123;</span><br><span class="line">                            <span class="comment">// 如果需要在后台重启，建议此处用SharePreference保存状态。</span></span><br><span class="line">                            Log.i(TAG, <span class="string">&quot;sophix preload patch success. restart app to make effect.&quot;</span>);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;).initialize();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; queryAndLoadNewPatch不可放在attachBaseContext 中，否则无网络权限，建议放在后面任意时刻，如onCreate中</span><br><span class="line">SophixManager.getInstance().queryAndLoadNewPatch();</span><br></pre></td></tr></table></figure>
+<p>这其中，关键一点是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Keep</span></span><br><span class="line"><span class="meta">@SophixEntry(MyRealApplication.class)</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RealApplicationStub</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>SophixEntry应指定项目中原先真正的Application（原项目里application的android::name指定的），这里用MyRealApplication指代。并且保证RealApplicationStub类名不被混淆。而SophixStubApplication的类名和包名可以自行取名。</p>
+<p>这里的Keep是android.support包中的类，目的是为了防止这个内部静态类的类名被混淆，因为sophix内部会反射获取这个类的SophixEntry。如果项目中没有依赖android.support的话，就需要在progurad里面手动指定RealApplicationStub不被混淆，详见下文。</p>
+<p>然后，在proguard文件里面需要加上下面内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-keepclassmembers <span class="class"><span class="keyword">class</span> <span class="title">com</span>.<span class="title">my</span>.<span class="title">pkg</span>.<span class="title">MyRealApplication</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> &lt;init&gt;();</span><br><span class="line">&#125;</span><br><span class="line">-keep <span class="class"><span class="keyword">class</span> <span class="title">com</span>.<span class="title">my</span>.<span class="title">pkg</span>.<span class="title">SophixStubApplication</span>$<span class="title">RealApplicationStub</span></span></span><br></pre></td></tr></table></figure>
+<p>目的是防止真正Application的构造方法被proguard混淆。</p>
+<p>最后，需要把AndroidManifest里面的application改为这个新增的SophixStubApplication类：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;application</span><br><span class="line">    android:name=&quot;com.my.pkg.SophixStubApplication&quot;</span><br><span class="line">    ... ...&gt;</span><br><span class="line">    ... ...</span><br></pre></td></tr></table></figure>
+<p>这样便完成了新方式的初始化接入改造。</p>
+<p>遇到集成问题可先查看<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/172286.html">常见问题</a>解决，通过文档不能解决，可以联系：<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/173248.html">技术支持</a>.</p>
+<h2 id="创建版本"><a href="#创建版本" class="headerlink" title="创建版本"></a>创建版本</h2><p>在控制台创建对应的应用版本，该版本与<strong>基线包初始化时setAppVersion</strong>所传的版本号对应。更多详情，参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/93805.html">创建版本</a>。</p>
+<ol>
+<li><p>登录移动热修复控制台。</p>
+</li>
+<li><p>在左侧导航栏选择<strong>补丁管理</strong>。</p>
+</li>
+<li><p>在补丁管理页面单击<strong>添加版本</strong>，输入应用版本号后单击<strong>确认</strong></p>
+<p><img src="/2021/02/02/Sophix/image-20210203155115536.png" alt="image-20210203155115536"></p>
+</li>
+</ol>
+<h2 id="生成补丁"><a href="#生成补丁" class="headerlink" title="生成补丁"></a>生成补丁</h2><p>上传补丁前您需要先在线下生成补丁包，打包工具下载及使用详情，参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/53247.html">生成补丁</a>。</p>
+<p>上传补丁前您需先生成补丁包，本文介绍如何使用我方提供的打包工具生成补丁包。</p>
+<h3 id="补丁版本说明"><a href="#补丁版本说明" class="headerlink" title="补丁版本说明"></a>补丁版本说明</h3><ol>
+<li><p>补丁是针对客户端具体某个版本的，补丁和具体版本绑定。</p>
+<p>示例：应用当前版本号是1.1.0，那么只能在后台查询到1.1.0版本对应发布的补丁，而查询不到之前1.0.0旧版本发布的补丁。</p>
+</li>
+<li><p>针对某个具体版本发布的新补丁，必须包含所有的bugfix，而不能依赖补丁递增修复的方式，因为应用仅可能加载一个补丁。</p>
+<p>示例：针对1.0.0版本在后台发布了一个补丁版本号为1的补丁修复了bug1，然后发现此时针对这个版本补丁1修复的不完全，代码还有bug2，在后台重新发布一个补丁版本号为2的补丁，那么此时补丁2就必须同时包含bug1和bug2的修复；如果只包含bug2的修复，bug1的修复就会失效。</p>
+</li>
+</ol>
+<h3 id="打包工具下载"><a href="#打包工具下载" class="headerlink" title="打包工具下载"></a>打包工具下载</h3><p>补丁包生成需要使用打补丁工具SophixPatchTool，如还未下载打补丁工具，请前往下载Android打包工具。</p>
+<p>打包工具下载地址如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://ams-hotfix-repo.oss-cn-shanghai.aliyuncs.com/SophixPatchTool_macos.zip">Mac版本打包工具下载</a></li>
+<li><a target="_blank" rel="noopener" href="http://ams-hotfix-repo.oss-cn-shanghai.aliyuncs.com/SophixPatchTool_windows.zip">Windows版本打包工具下载</a></li>
+<li><a target="_blank" rel="noopener" href="http://ams-hotfix-repo.oss-cn-shanghai.aliyuncs.com/SophixPatchTool_linux.zip">Linux版本打包工具地址</a></li>
+</ul>
+<h4 id="补丁版本说明-1"><a href="#补丁版本说明-1" class="headerlink" title="补丁版本说明"></a>补丁版本说明</h4><ol>
+<li><p>补丁是针对客户端具体某个版本的，补丁和具体版本绑定。</p>
+<p>示例：应用当前版本号是1.1.0，那么只能在后台查询到1.1.0版本对应发布的补丁，而查询不到之前1.0.0旧版本发布的补丁。</p>
+</li>
+<li><p>针对某个具体版本发布的新补丁，必须包含所有的bugfix，而不能依赖补丁递增修复的方式，因为应用仅可能加载一个补丁。</p>
+<p>示例：针对1.0.0版本在后台发布了一个补丁版本号为1的补丁修复了bug1，然后发现此时针对这个版本补丁1修复的不完全，代码还有bug2，在后台重新发布一个补丁版本号为2的补丁，那么此时补丁2就必须同时包含bug1和bug2的修复；如果只包含bug2的修复，bug1的修复就会失效。</p>
+</li>
+</ol>
+<h4 id="打包工具下载-1"><a href="#打包工具下载-1" class="headerlink" title="打包工具下载"></a>打包工具下载</h4><p>补丁包生成需要使用打补丁工具SophixPatchTool，如还未下载打补丁工具，请前往下载Android打包工具。</p>
+<p>打包工具下载地址如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://ams-hotfix-repo.oss-cn-shanghai.aliyuncs.com/SophixPatchTool_macos.zip">Mac版本打包工具下载</a></li>
+<li><a target="_blank" rel="noopener" href="http://ams-hotfix-repo.oss-cn-shanghai.aliyuncs.com/SophixPatchTool_windows.zip">Windows版本打包工具下载</a></li>
+<li><a target="_blank" rel="noopener" href="http://ams-hotfix-repo.oss-cn-shanghai.aliyuncs.com/SophixPatchTool_linux.zip">Linux版本打包工具地址</a></li>
+</ul>
+<h4 id="使用打包工具打包"><a href="#使用打包工具打包" class="headerlink" title="使用打包工具打包"></a>使用打包工具打包</h4><ol>
+<li><p>双击打开打包工具，进入打包工具主对话框。</p>
+<p><img src="/2021/02/02/Sophix/image-20210203164717343.png" alt="image-20210203164717343"></p>
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">旧包</td>
+<td align="left">&lt;必填&gt; 选择基线包路径（有问题的APK）。</td>
+</tr>
+<tr>
+<td align="left">新包</td>
+<td align="left">&lt;必填&gt; 选择新包路径（修复过该问题APK）。</td>
+</tr>
+<tr>
+<td align="left">日志</td>
+<td align="left">打开日志输出窗口。</td>
+</tr>
+<tr>
+<td align="left">设置</td>
+<td align="left">• 补丁输出路径：&lt;必填&gt;指定生成补丁之后补丁的存放位置，必须是已存在的目录。• Key Store Path：&lt;选填&gt;本地的签名文件的路径，不输入则不做签名。目前只支持jks的签名文件。• Key Store Password：&lt;选填&gt;证书文件的密码。• Key Alias：&lt;选填&gt;Key的别名。• Key Passwrod：&lt;选填&gt;Key的密码。• AES Key：&lt;选填&gt;自定义aes秘钥，必须是16位数字或字母的组合。必须与setAesKey中设置的秘钥一致。• Filter Class File：&lt;选填&gt;本地的白名单类列表文件的路径，放进去的类不会再计算patch，文件格式：一行一个类名。</td>
+</tr>
+<tr>
+<td align="left">高级</td>
+<td align="left">• 强制冷启动：勾选的话强制生成补丁包为需要冷启动才能修复的格式。默认不选的话，工具会根据代码变更情况自动选择即时热替换或者冷启动修复。• 不比较资源：打补丁时不比较资源的变化。• 不比较SO库：打补丁时不比较SO库的变化。• 检查初始化：检查初始化写法是否正确。• 快速打包：加快补丁生成速度。• 优化资源补丁：压缩补丁资源的大小。</td>
+</tr>
+<tr>
+<td align="left">GO！</td>
+<td align="left">开始生成补丁。</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>注意，这里如果勾选了检查初始化，打补丁工具会检查 SophixStubApplication 中的代码，不能包含非系统API，会报错。如果使用了 AndroidX 的 MultiDex，工具也会报错，可以先不勾选检查初始化，自行确定SophixStubApplication中无其他非系统API的使用，该工具后面会对AndroidX的库进行识别。</p>
+</blockquote>
+</li>
+<li><p>上传新旧包，进行设置后单击<strong>GO</strong>。</p>
+</li>
+</ol>
+<h2 id="上传补丁"><a href="#上传补丁" class="headerlink" title="上传补丁"></a>上传补丁</h2><p>上传补丁到移动热修复管理控制台的对应版本中，使用详情，参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/93812.html">上传补丁</a>。</p>
+<ol>
+<li><p>登录移动热修复控制台。</p>
+</li>
+<li><p>左侧导航栏选择<strong>补丁管理</strong>。</p>
+</li>
+<li><p>选择版本，单击<strong>上传补丁</strong>，选则补丁文件、填写补丁描述后单击<strong>确定</strong></p>
+</li>
+<li><p>一般我们传递VersionName为补丁版本，所以补丁版本和VersionName是一致的。</p>
+<p><img src="/2021/02/02/Sophix/image-20210203164906491.png" alt="image-20210203164906491"></p>
+</li>
+</ol>
+<h2 id="调试补丁"><a href="#调试补丁" class="headerlink" title="调试补丁"></a>调试补丁</h2><p>补丁正式发布前，请对补丁进行调试，参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/93827.html">调试补丁</a>。</p>
+<h3 id="调试方法"><a href="#调试方法" class="headerlink" title="调试方法"></a>调试方法</h3><ol>
+<li><p><strong>调试工具下载</strong></p>
+<p>单击<a target="_blank" rel="noopener" href="http://ams-hotfix-repo.oss-cn-shanghai.aliyuncs.com/hotfix_debug_tool-release.apk">Android调试工具下载地址</a>，将下载的调试工具安装到您的Android手机上。</p>
+<p><img src="/2021/02/02/Sophix/image-20210302141239739.png" alt="image-20210302141239739"></p>
+</li>
+<li><p><strong>连接测试的应用</strong></p>
+<p>打开手机调试工具，在顶部的编辑框内输入要进行测试的应用包名，确认输入无误后点击连接应用按钮。</p>
+<p><strong>说明</strong> </p>
+<p>工具与测试的应用建立连接，连接成功后输出应用的信息；aidl方式连接原应用，所以在部分机型上可能导致失败，比如MIUI最新系统上，默认禁用了跨应用aidl，MIUI上可以设置取消这个限制，其它系统类似处理。</p>
+</li>
+<li><p><strong>应用补丁</strong></p>
+<ul>
+<li><strong>扫描二维码方式</strong><ol>
+<li>登录移动热修复控制台。</li>
+<li>左侧导航栏选择<strong>补丁管理</strong>，并选择<strong>版本</strong>。</li>
+<li>单击版本下待调试补丁右侧的<strong>发布</strong>，进入补丁发布页面。</li>
+<li>单击扫码验证补丁右侧的二维码，在手机调试工具中点击<strong>扫描二维码</strong>按钮扫码，向应用发出拉去补丁的请求。</li>
+<li>补丁拉取和加载状态在调试应用界面输出，当显示下载和加载成功，打开应用进行检查。</li>
+</ol>
+</li>
+<li><strong>应用本地补丁方式</strong><ol>
+<li>将生成的补丁包存储到以安装调试供的手机本地存储任何一个目录下。</li>
+<li>打开调试工具，在应用本地补丁按钮上面的输入框中输入补丁在手机存储中的绝对路径，并点击<strong>应用本地补丁</strong>。</li>
+<li>补丁加载状态在调试应用界面输出，当显示下载和加载成功，打开应用进行检查。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p><strong>断开连接的应用</strong></p>
+<p>调试完成后，在手机调试工具中点击<strong>断开应用连接</strong>。</p>
+</li>
+</ol>
+<h2 id="过滤机型"><a href="#过滤机型" class="headerlink" title="过滤机型"></a>过滤机型</h2><p>您可以对发布的补丁设置过滤机型操作，过滤机型使用详情，参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/93816.html">机型过滤</a>。</p>
+<h2 id="发布补丁"><a href="#发布补丁" class="headerlink" title="发布补丁"></a>发布补丁</h2><p>移动热修复提供了多种发布方式，方便您根据自身业务需要选择性使用，使用详情，参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/130163.html">补丁发布推荐流程</a>。</p>
+<p>热修复补丁发布的标准流程需要经过3个步骤，准守标准作业流程，可以规避更多风险。</p>
+<p><strong>说明</strong> </p>
+<p>标准作业流程为：线下测试&gt;灰度发布&gt;全量发布</p>
+<h3 id="线下测试"><a href="#线下测试" class="headerlink" title="线下测试"></a>线下测试</h3><ol>
+<li>使用调试工具，进行补丁调试，请参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/93827.html">调试补丁</a>。</li>
+<li>线下使用市场主流手机进行补丁验证，尽可能完整覆盖主流的时长机型和ROM。说明：如果您没有足够的线下机型，可使用<a target="_blank" rel="noopener" href="https://www.aliyun.com/product/mqc">EMAS 移动测试</a>产品进行线下测试。</li>
+</ol>
+<h3 id="生产灰度"><a href="#生产灰度" class="headerlink" title="生产灰度"></a>生产灰度</h3><p>基于热修复灰度功能，进行3轮灰度，灰度设备数依次为1%、5%、20%，然后观察以下指标：</p>
+<ul>
+<li>补丁生效率指标：补丁加载成功设备数/补丁下载成功设备数。（预期数值&gt;70%）<ul>
+<li>补丁清除率指标：补丁被动清除成功设备数/补丁下载成功设备数。（预期数值&lt;2%）</li>
+</ul>
+</li>
+</ul>
+<p><strong>说明</strong> </p>
+<p>端上发生启动Crash会触发端侧保护机制，自动清除热修复补丁。</p>
+<ul>
+<li>Crash监控指标（补丁发布后App的崩溃数据情况，您可以使用<a target="_blank" rel="noopener" href="https://www.aliyun.com/product/emascrash/crash">EMAS 崩溃分析</a>产品，预期热修复补丁发布后没有出现崩溃数据增长）</li>
+</ul>
+<h3 id="正式发布"><a href="#正式发布" class="headerlink" title="正式发布"></a>正式发布</h3><p>灰度数据符合预期后正式生产发布</p>
+<h2 id="查看计费数据"><a href="#查看计费数据" class="headerlink" title="查看计费数据"></a>查看计费数据</h2><p>查看补丁查询接口被调用次数、活跃设备数、补丁加载数量等，详情参见<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/93817.html">计费数据</a>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E7%83%AD%E4%BF%AE%E5%A4%8D/" rel="tag"># 热修复</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/05/%E3%80%90Git-01%E3%80%91Git%E6%B7%B1%E5%85%A5%E4%B9%8B%E6%A0%B8%E5%BF%83%E7%90%86%E5%BF%B5%EF%BC%9A%E4%B8%80%E5%88%87%E7%9A%86%E5%BC%95%E7%94%A8/" rel="next" title="【Git-01】Git深入之核心理念：一切皆引用">
+      【Git-01】Git深入之核心理念：一切皆引用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Sophix"><span class="nav-number">1.</span> <span class="nav-text">Sophix</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8E%A5%E5%85%A5%E7%83%AD%E4%BF%AE%E5%A4%8DSDK"><span class="nav-number">2.</span> <span class="nav-text">接入热修复SDK</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">创建应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E7%99%BB%E9%99%86"><span class="nav-number">2.1.1.</span> <span class="nav-text">注册登陆</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%B7%A5%E4%BD%9C%E7%A9%BA%E9%97%B4%E5%92%8C%E5%BA%94%E7%94%A8"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">创建工作空间和应用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDK%E9%9B%86%E6%88%90"><span class="nav-number">2.2.</span> <span class="nav-text">SDK集成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E6%8F%90%E6%9D%A1%E4%BB%B6"><span class="nav-number">2.2.1.</span> <span class="nav-text">前提条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%99%90%E5%88%B6"><span class="nav-number">2.2.2.</span> <span class="nav-text">使用限制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E6%88%90%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.2.3.</span> <span class="nav-text">集成步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%B7%A5%E7%A8%8B%E4%BE%9D%E8%B5%96"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">添加工程依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%BA%94%E7%94%A8%E6%9D%83%E9%99%90"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">添加应用权限</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEAndroidManifest%E6%96%87%E4%BB%B6%EF%BC%88%E6%9C%80%E5%A5%BD%E5%9C%A8Application%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E9%85%8D%E7%BD%AE%E8%80%8C%E4%B8%8D%E6%98%AFMainfest%E6%96%87%E4%BB%B6%EF%BC%89"><span class="nav-number">2.2.3.3.</span> <span class="nav-text">配置AndroidManifest文件（最好在Application初始化时配置而不是Mainfest文件）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%B7%E6%B7%86-%E6%B3%A8%E6%84%8F%E4%BF%AE%E5%A4%8D%E6%97%B6%E6%89%93%E5%BC%80mapping%E7%9A%84%E6%B3%A8%E9%87%8A%EF%BC%8C%E4%BF%9D%E5%AD%98%E5%A5%BDmapping%E6%96%87%E4%BB%B6"><span class="nav-number">2.2.3.4.</span> <span class="nav-text">混淆 (注意修复时打开mapping的注释，保存好mapping文件)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%86%85-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">2.2.3.5.</span> <span class="nav-text">应用内 初始化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%89%88%E6%9C%AC"><span class="nav-number">2.3.</span> <span class="nav-text">创建版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E8%A1%A5%E4%B8%81"><span class="nav-number">2.4.</span> <span class="nav-text">生成补丁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E"><span class="nav-number">2.4.1.</span> <span class="nav-text">补丁版本说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7%E4%B8%8B%E8%BD%BD"><span class="nav-number">2.4.2.</span> <span class="nav-text">打包工具下载</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A5%E4%B8%81%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E-1"><span class="nav-number">2.4.2.1.</span> <span class="nav-text">补丁版本说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7%E4%B8%8B%E8%BD%BD-1"><span class="nav-number">2.4.2.2.</span> <span class="nav-text">打包工具下载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7%E6%89%93%E5%8C%85"><span class="nav-number">2.4.2.3.</span> <span class="nav-text">使用打包工具打包</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8A%E4%BC%A0%E8%A1%A5%E4%B8%81"><span class="nav-number">2.5.</span> <span class="nav-text">上传补丁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E8%A1%A5%E4%B8%81"><span class="nav-number">2.6.</span> <span class="nav-text">调试补丁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95"><span class="nav-number">2.6.1.</span> <span class="nav-text">调试方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E6%9C%BA%E5%9E%8B"><span class="nav-number">2.7.</span> <span class="nav-text">过滤机型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%91%E5%B8%83%E8%A1%A5%E4%B8%81"><span class="nav-number">2.8.</span> <span class="nav-text">发布补丁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8B%E6%B5%8B%E8%AF%95"><span class="nav-number">2.8.1.</span> <span class="nav-text">线下测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E7%81%B0%E5%BA%A6"><span class="nav-number">2.8.2.</span> <span class="nav-text">生产灰度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83"><span class="nav-number">2.8.3.</span> <span class="nav-text">正式发布</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E8%AE%A1%E8%B4%B9%E6%95%B0%E6%8D%AE"><span class="nav-number">2.9.</span> <span class="nav-text">查看计费数据</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
