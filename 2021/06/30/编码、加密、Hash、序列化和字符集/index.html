@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="编码、加密、Hash、序列化和字符集加密古典密码学12起源于古代战争:在战争中，为了防止书信被截获后重要信息泄露，人们开始对书信进行加密。 移位式加密如密码棒，使用布条缠绕在木棒上的方式来对书信进行加密。加密算法:缠绕后书写密钥: 木棒的尺寸 替换式加密按规则使用不同的文字来替换掉原先的文字来进行加密。 码表:  原始字符:ABCDEFGHIJKLMNOPQRSTUVWXYZ  密码字符:BCDE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编码、加密、Hash、序列化和字符集">
+<meta property="og:url" content="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="编码、加密、Hash、序列化和字符集加密古典密码学12起源于古代战争:在战争中，为了防止书信被截获后重要信息泄露，人们开始对书信进行加密。 移位式加密如密码棒，使用布条缠绕在木棒上的方式来对书信进行加密。加密算法:缠绕后书写密钥: 木棒的尺寸 替换式加密按规则使用不同的文字来替换掉原先的文字来进行加密。 码表:  原始字符:ABCDEFGHIJKLMNOPQRSTUVWXYZ  密码字符:BCDE">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630182947664.png">
+<meta property="og:image" content="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630183135104.png">
+<meta property="og:image" content="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630183157872.png">
+<meta property="og:image" content="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630183246700.png">
+<meta property="og:image" content="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630183321546.png">
+<meta property="og:image" content="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630180946380.png">
+<meta property="og:image" content="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630181039083.png">
+<meta property="article:published_time" content="2021-06-30T08:06:55.000Z">
+<meta property="article:modified_time" content="2021-07-01T11:18:28.998Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="计算机基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630182947664.png">
+
+<link rel="canonical" href="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>编码、加密、Hash、序列化和字符集 | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编码、加密、Hash、序列化和字符集
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-30 16:06:55" itemprop="dateCreated datePublished" datetime="2021-06-30T16:06:55+08:00">2021-06-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-01 19:18:28" itemprop="dateModified" datetime="2021-07-01T19:18:28+08:00">2021-07-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">计算机基础</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="编码、加密、Hash、序列化和字符集"><a href="#编码、加密、Hash、序列化和字符集" class="headerlink" title="编码、加密、Hash、序列化和字符集"></a>编码、加密、Hash、序列化和字符集</h1><h2 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h2><h3 id="古典密码学"><a href="#古典密码学" class="headerlink" title="古典密码学"></a>古典密码学</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">起源于古代战争:在战争中，为了防止书信被截获后重要信息泄露，人们开始对书</span><br><span class="line">信进行加密。</span><br></pre></td></tr></table></figure>
+<h4 id="移位式加密"><a href="#移位式加密" class="headerlink" title="移位式加密"></a>移位式加密</h4><p>如密码棒，使用布条缠绕在木棒上的方式来对书信进行加密。<br>加密算法:缠绕后书写<br>密钥: 木棒的尺寸</p>
+<h4 id="替换式加密"><a href="#替换式加密" class="headerlink" title="替换式加密"></a>替换式加密</h4><p>按规则使用不同的文字来替换掉原先的文字来进行加密。</p>
+<p>码表: </p>
+<p>原始字符:ABCDEFGHIJKLMNOPQRSTUVWXYZ </p>
+<p>密码字符:BCDEFGHIJKLMNOPQRSTUVWXYZA </p>
+<p>原始书信:I love you<br>加密书信:J mpwf zpv<br>解读后:I love you</p>
+<p>加密算法:替换文字<br>密钥:替换的码表</p>
+<h3 id="现代密码学"><a href="#现代密码学" class="headerlink" title="现代密码学"></a>现代密码学</h3><p>可以加密任何二进制数据<br>非对称加密的出现使得密码学有了更广泛的用途:数字签名</p>
+<h4 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h4><h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><p>加密：通信双方使用同一个密钥，使用加密算法配合上密钥来加密，得到无意义的数据即为密文。</p>
+<p>解密：使用加密过程的完全逆过程配合密钥来进行解密，得到原数据。</p>
+<p>简化模型即上面的古典密码学中替换式加密的模型:对文字进行规则化替换来加<br>密，对密文进行逆向的规则化替换来解密。</p>
+<p><img src="/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630182947664.png" alt="image-20210630182947664"></p>
+<h5 id="经典算法"><a href="#经典算法" class="headerlink" title="经典算法"></a>经典算法</h5><p>DES(56 位密钥，密钥太短而逐渐被弃用)、AES(128 位、192 位、256 位密钥， 现在最流行)</p>
+<h5 id="对称加密的作用"><a href="#对称加密的作用" class="headerlink" title="对称加密的作用"></a>对称加密的作用</h5><p>加密通信，防止信息在不安全网络上被截获后，信息被人读取或篡改。</p>
+<p>对称加密(如 <strong>AES</strong>)的破解 </p>
+<h5 id="破解思路"><a href="#破解思路" class="headerlink" title="破解思路"></a>破解思路</h5><p>拿到一组或多组原文-密文对 设法找到一个密钥，这个密钥可以将这些原文-密文对中的原文加密为密文，以 及将密文解密为原文的组合，即为成功破解</p>
+<h5 id="反破解"><a href="#反破解" class="headerlink" title="反破解"></a>反破解</h5><p>一种优秀的对称加密算法的标准是，让破解者找不到比穷举法(暴力破解法)更有效的破解手段，并且穷举法的破解时间足够⻓(例如数千年)。</p>
+<h5 id="对称加密的缺点"><a href="#对称加密的缺点" class="headerlink" title="对称加密的缺点"></a>对称加密的缺点</h5><p>密钥泄露:不能在不安全网络上传输密钥，一旦密钥泄露则加密通信失败。</p>
+<h4 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h4><h5 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h5><p>使用公钥对数据进行加密得到密文;使用私钥对数据进行解密得到原数据。</p>
+<p>非对称加密使用的是复杂的数学技巧，在古典密码学中没有对应的原型。</p>
+<img src="/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630183135104.png" alt="image-20210630183135104" style="zoom:50%;">
+
+<p>使用非对称加密通信，可以在不可信网络上将双方的公钥传给对方，然后在发消息前分别对消息使用对方的公钥来加密和使用自己的私钥来签名，做到不可信网络上的可靠密钥传播及加密通信。</p>
+<img src="/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630183157872.png" alt="image-20210630183157872" style="zoom:50%;">
+
+<p>由于私钥和公钥互相可解，因此非对称加密还可以应用于数字签名技术。</p>
+<p>ps：（公钥一般是私钥算出来的，私钥不适合暴露，因为可以计算出来，比特币的公钥使用的椭圆曲线算法）</p>
+<img src="/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630183246700.png" alt="image-20210630183246700" style="zoom:50%;">
+
+<p>通常会对原数据 hash 以后对 hash 签名，然后附加在原数据的后面作为签名。这是 为了让数据更小。</p>
+<p><img src="/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630183321546.png" alt="image-20210630183321546"></p>
+<p>ps一个简单的模型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">原数据：110 算法：加法 加密密钥：4 解密密钥 6</span><br><span class="line">加密： 110 按位+4  </span><br><span class="line">加密结果：554</span><br><span class="line">解密： 554 按位+6</span><br><span class="line">解密结果： 11，11，</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="经典算法-1"><a href="#经典算法-1" class="headerlink" title="经典算法"></a>经典算法</h5><p><strong>RSA</strong>(可用于加密和签名)、<strong>DSA</strong>(仅用于签名，但速度更快)</p>
+<h5 id="非对称加密的优缺点"><a href="#非对称加密的优缺点" class="headerlink" title="非对称加密的优缺点"></a>非对称加密的优缺点</h5><p>  优点:可以在不安全网络上传输密钥<br>  缺点:计算复杂，因此性能相比对称加密差很多</p>
+<h5 id="非对称加密-如-RSA、ECDSA-的破解-破解思路"><a href="#非对称加密-如-RSA、ECDSA-的破解-破解思路" class="headerlink" title="非对称加密(如 RSA、ECDSA)的破解 破解思路"></a>非对称加密(如 <strong>RSA</strong>、<strong>ECDSA</strong>)的破解 破解思路</h5><p>和对称加密不同之处在于，非对称加密的公钥很容易获得，因此制造原文-密文 对是没有困难的事 所以，非对称加密的关键只在于，如何找到一个正确的私钥，可以解密所有经过 公钥加密过的密文。找到这样的私钥即为成功破解 由于非对称加密的自身特性，怎样通过公钥来推断出私钥通常是一种思路(例如 RSA)，但往往最佳手段依然是穷举法，只是和对称加密破解的区别在于，对称 加密破解是不断尝试自己的新密钥是否可以将自己拿到的原文-密文对进行加密 和解密，而非对称加密时不断尝试自己的新私钥是否和公钥互相可解。</p>
+<h5 id="反破解-1"><a href="#反破解-1" class="headerlink" title="反破解"></a>反破解</h5><p>和对称加密一样，非对称加密算法优秀的标准同样在于，让破解者找不到比穷举法<br>更有效的破解手段，并且穷举法的破解时间足够⻓。</p>
+<h3 id="密码学密钥和登录密码"><a href="#密码学密钥和登录密码" class="headerlink" title="密码学密钥和登录密码"></a>密码学密钥和登录密码</h3><p>密钥(key)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">场景:用于加密和解密</span><br><span class="line">目的:保证数据被盗时不会被人读懂内容</span><br><span class="line">焦点:数据</span><br></pre></td></tr></table></figure>
+<p>登录密码(password)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">   场景:用户进入网站或游戏前的身份验证</span><br><span class="line">   目的:数据提供方或应用服务方对账户拥有者数据的保护，保证「你是你」</span><br><span class="line">   的时候才提供权限</span><br><span class="line">   焦点:身份</span><br><span class="line">上面这些区别不必背会，理解就可以了</span><br></pre></td></tr></table></figure>
+<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><h3 id="Base64"><a href="#Base64" class="headerlink" title="Base64"></a>Base64</h3><p>将二进制数据转换成由 64 个字符组成的字符串的编码算法 </p>
+<h4 id="什么是二进制数据"><a href="#什么是二进制数据" class="headerlink" title="什么是二进制数据?"></a>什么是二进制数据?</h4><p>  广义:所有计算机数据都是二进制数据<br>  狭义:非文本数据即二进制数据</p>
+<h4 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h4><p>将原数据每 6 位对应成 Base 64 索引表中的一个字符编排成一个字符串(每个字符 8 位)。</p>
+<h4 id="Base64-索引表"><a href="#Base64-索引表" class="headerlink" title="Base64 索引表"></a>Base64 索引表</h4><img src="/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630180946380.png" alt="image-20210630180946380" style="zoom:50%;">
+
+<p>编码示例:把「Man」进行 Base64 编码</p>
+<p><img src="/2021/06/30/%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86/image-20210630181039083.png" alt="image-20210630181039083"></p>
+<p>编码示例:Base64 的末尾补足</p>
+<h4 id="Base64-的用途"><a href="#Base64-的用途" class="headerlink" title="Base64 的用途"></a>Base64 的用途</h4><ol>
+<li>将二进制数据扩充了储存和传输途径(例如可以把数据保存到文本文件、可以通 过聊天对话框或短信形式发送二进制数据、可以在 URL 中加入简单的二进制数据)</li>
+<li>普通的字符串在经过Base64编码后的结果会变得肉眼不可读，因此可以适用于 一定条件下的防偷窥(较少用)</li>
+</ol>
+<h4 id="Base64-的缺点"><a href="#Base64-的缺点" class="headerlink" title="Base64 的缺点"></a>Base64 的缺点</h4><p> 因为自身的原理(6 位变 8 位)，因此每次 Base64 编码之后，数据都会增大约1/3，所以会影响存储和传输性能。</p>
+<h4 id="「Base64-加密图片传输更安全和高效」"><a href="#「Base64-加密图片传输更安全和高效」" class="headerlink" title="「Base64 加密图片传输更安全和高效」"></a>「Base64 加密图片传输更安全和高效」</h4><p>???</p>
+<p>不。首先，Base64 并不是加密;另外，Base64 会导致数据增大 1/3，降低网络性 能，增大用户流量开销，是画蛇添足的手段。(最好不要拿来 diss 你们公司的后端 哟，友善)</p>
+<p>Base64 对图片进行编码的用于在于，有时需要使用文本形式来传输图片。除此之 外，完全没必要使用 Base64 对图片进行额外处理。</p>
+<h4 id="变种-Base58"><a href="#变种-Base58" class="headerlink" title="变种:Base58"></a>变种:Base58</h4><p>比特币使用的编码方式，去掉了 Base64 中的数字 “0”，字母大写 “O”，字母大写</p>
+<p>“I”，和字母小写 “l”，以及 “+” 和 “/“ 符号，用于比特币地址的表示。</p>
+<p>Base58 对于 Base64 的改动，主要目的在于用户的便捷性。由于去掉了难以区分的 字符，使得 Base58 对于「人工抄写」更加方便。另外，去掉了 “+” “/“ 号后也让大 多数的软件可以方便双击选取。</p>
+<h3 id="URL-Encoding-使用的百分号编码"><a href="#URL-Encoding-使用的百分号编码" class="headerlink" title="URL Encoding 使用的百分号编码"></a>URL Encoding 使用的百分号编码</h3><p> 在 URL 的字符串中，对一些不用于特殊用途的保留字符，使用百分号 “%” 为前缀进行单编码，以避免出现解析错误。</p>
+<p>例如，要在 <a target="_blank" rel="noopener" href="http://hencoder.com/users">http://hencoder.com/users</a> 后面添加查询字符串，查询 name 为「隐秘&amp;伟大」的用户，如果直接写成 <a target="_blank" rel="noopener" href="http://hencoder.com/user/?name=%E9%9A%90%E7%A7%98&amp;%E4%BC%9F%E5%A4%A7">http://hencoder.com/user/?name=隐秘&amp;伟大</a> ，”&amp;” 符号就会被解析为分隔符号，因此需要对它进行转码，转码后的 URL 为 http: //hencoder.com/user/?name=隐秘%26伟大 。</p>
+<p>这种编码仅用于 URL，目的是避免解析错误的出现。 </p>
+<h3 id="压缩与解压缩"><a href="#压缩与解压缩" class="headerlink" title="压缩与解压缩"></a>压缩与解压缩</h3><h4 id="含义"><a href="#含义" class="headerlink" title="含义"></a>含义</h4><p>  压缩:将数据使用更具有存储优势的编码算法进行编码（换一种存储方式，减小存储空间）。<br>  解压缩:将压缩数据解码还原成原来的形式，以方便使用。</p>
+<h4 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h4><p>减小数据占用的存储空间。</p>
+<h4 id="粗暴算法举例"><a href="#粗暴算法举例" class="headerlink" title="粗暴算法举例"></a>粗暴算法举例</h4><p>将下面文本内容压缩:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb</span><br><span class="line">bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb</span><br><span class="line">bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb</span><br><span class="line">使用某种算法压缩后的数据为:</span><br><span class="line">   compress:a:1062;b:105</span><br><span class="line"> 注:具体的压缩场景有很多，因此压缩算法也会复杂得多，上面只是一个原型</span><br><span class="line"> 算法。</span><br></pre></td></tr></table></figure>
+<h4 id="压缩是编码吗"><a href="#压缩是编码吗" class="headerlink" title="压缩是编码吗?"></a>压缩是编码吗?</h4><p>是。所谓编码，即把数据从一种形式转换为另一种形式。压缩过程属于编码过程，<br>解压缩过程属于解码过程。</p>
+<h4 id="常⻅压缩算法"><a href="#常⻅压缩算法" class="headerlink" title="常⻅压缩算法"></a>常⻅压缩算法</h4><p>DEFLATE（zip是归档过程，即把所有文档打包，顺便会做压缩，算法交deflate）、JPEG、MP3 等。</p>
+<h3 id="图片与音频、视频（媒体数据）编解码"><a href="#图片与音频、视频（媒体数据）编解码" class="headerlink" title="图片与音频、视频（媒体数据）编解码"></a>图片与音频、视频（媒体数据）编解码</h3><h4 id="含义-1"><a href="#含义-1" class="headerlink" title="含义"></a>含义</h4><p>将图像、音频、视频数据通过编码来转换成存档形式(编码)，以及从存档形式转<br>换回来(解码)。</p>
+<h4 id="目的-1"><a href="#目的-1" class="headerlink" title="目的"></a>目的</h4><p>存储和压缩媒体数据(大多数媒体编码算法会压缩数据，但不是全部)。</p>
+<p>有损压缩：不可逆，压缩过程丢弃一些数据，减少体积。</p>
+<p>无损压缩：编码后可以解码回原数据，无缝转换，不丢弃收据，可逆。</p>
+<h4 id="图片压缩粗暴算法举例"><a href="#图片压缩粗暴算法举例" class="headerlink" title="图片压缩粗暴算法举例"></a>图片压缩粗暴算法举例</h4><p>一张纯白(白色的 16 进制数值为 0xffffff)的 64x64 不透明像素图片，原数据格式 大致为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">width:64;height:64;fffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">ffffffffffffffffffffffffffffffffffffffffffffffffffffffff</span><br><span class="line">fffffffffffffffffffffffffffffffff.......ffffff</span><br><span class="line">使用某种算法压缩后的数据为:</span><br><span class="line">   width:64;height:64;ffffff:[0,0]-[63,63]</span><br><span class="line"> 注:具体的压缩场景有很多，因此压缩算法也会复杂得多，上面只是一个原型</span><br><span class="line"> 算法。</span><br><span class="line">音频与视频的编码与上面的图片编码同理。</span><br></pre></td></tr></table></figure>
+<h3 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h3><p>把数据对象(一般是内存中的，例如 JVM 中的对象)转换成字节序列的过程。对象 在程序内存里的存放形式是散乱的(存放在不同的内存区域、并且由引用进行 接)，通过序列化可以把内存中的对象转换成一个字节序列，从而使用 byte[] 等形 式进行本地存储或网络传输，在需要的时候重新组装(反序列化)来使用。</p>
+<h4 id="目的-2"><a href="#目的-2" class="headerlink" title="目的"></a>目的</h4><p>让内存中的对象可以被储存和传输。</p>
+<h4 id="序列化是编码吗"><a href="#序列化是编码吗" class="headerlink" title="序列化是编码吗?"></a>序列化是编码吗?</h4><p>不是</p>
+<h4 id="和编码的区别"><a href="#和编码的区别" class="headerlink" title="和编码的区别"></a>和编码的区别</h4><p>编码是把数据由一种数据格式转换成另一种数据格式;而序列化是把数据由内存中<br>的对象(而不是某种具体的格式)转换成字节序列。</p>
+<h3 id="Hash"><a href="#Hash" class="headerlink" title="Hash"></a>Hash</h3><h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>把任意数据转换成指定大小范围(通常很小，例如 256 字节以内)的数据。 </p>
+<h4 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h4><p>相当于从数据中提出摘要信息，因此最主要用途是数字指纹。</p>
+<h4 id="经典算法-2"><a href="#经典算法-2" class="headerlink" title="经典算法"></a>经典算法</h4><p>MD5，SHA1，SHA256 等 </p>
+<h4 id="Hash-的实际用途-数据完整性验证"><a href="#Hash-的实际用途-数据完整性验证" class="headerlink" title="Hash 的实际用途:数据完整性验证"></a>Hash 的实际用途:数据完整性验证</h4><p>从网络上下载文件后，通过比对文件的 Hash 值(例如 MD5、SHA1)，可以确认下载的文件是否有损坏。如果下载的文件 Hash 值和文件提供方给出的 Hash 值一致， 则证明下载的文件是完好无损的。</p>
+<h4 id="Hash-的实际用途-快速查找"><a href="#Hash-的实际用途-快速查找" class="headerlink" title="Hash 的实际用途:快速查找"></a>Hash 的实际用途:快速查找</h4><p>HashMap和HashCode(); </p>
+<p>一般来说hashcode 不够精细，hashcode不同可以确定两个对象一定不同，但是相等也不代表两个对象一定相等，需要equals 进行更高精度的比较，所以可以实现快速查找。</p>
+<h4 id="Hash-的实际用途：唯一性验证"><a href="#Hash-的实际用途：唯一性验证" class="headerlink" title="Hash 的实际用途：唯一性验证"></a>Hash 的实际用途：唯一性验证</h4><p> 例如 Java 中的 hashCode() 方法。</p>
+<h5 id="为什么每次重写-equals-方法都需要同事修改HashCode-方法"><a href="#为什么每次重写-equals-方法都需要同事修改HashCode-方法" class="headerlink" title="为什么每次重写 equals() 方法都需要同事修改HashCode()方法?"></a>为什么每次重写 equals() 方法都需要同事修改HashCode()方法?</h5><p>因为Hash 相关类（HashMap）初步判断是否相等会先用HashCode()比较而不是直接用equals。</p>
+<h5 id="怎么重写-hashCode-方法"><a href="#怎么重写-hashCode-方法" class="headerlink" title="怎么重写 hashCode 方法?"></a>怎么重写 hashCode 方法?</h5><p>把 equals() 方法中的每个用于判断相等的变量都放进 hashCode() 中，一起生成一 个尽量不会碰撞的整数即可</p>
+<h4 id="Hash-的实际用途-隐私保护"><a href="#Hash-的实际用途-隐私保护" class="headerlink" title="Hash 的实际用途:隐私保护"></a>Hash 的实际用途:隐私保护</h4><p>当重要数据必须暴露的时候，有事可以选择暴露它的 Hash 值(例如 MD5)，以保障原数据的安全。例如网站登录时，可以只保存用户密码的 Hash 值，在每次登录验 证时只需要将输入的密码的 Hash 值和数据库中保存的 Hash 值作比对就好，网站无 需知道用户的密码。这样，当网站数据失窃时，用户不会因为自己的密码被盗导致 其他网站的安全也受到威胁。</p>
+<p>注意:这不属于加密。</p>
+<p>彩虹表：</p>
+<p>常用密码的hash映射值数据库表表，如果你注册的网站脱库（数据库被盗），而你设置的密码很常见，那么即使网站存储的是hash值，你的密码也会很快在彩虹表中找到从而暴露。</p>
+<p>加盐：密码 经历hash之前先加入其他数据，提高破解难度。</p>
+<h4 id="Hash-是编码吗"><a href="#Hash-是编码吗" class="headerlink" title="Hash 是编码吗?"></a>Hash 是编码吗?</h4><p> 不是。 Hash 是单向过程，往往是不可逆的，无法进行逆向恢复操作，因此 Hash 不属于编码。</p>
+<h4 id="Hash是加密吗"><a href="#Hash是加密吗" class="headerlink" title="Hash是加密吗?"></a>Hash是加密吗?</h4><p> 不是。Hash 是单向过程，无法进行逆向回复操作，因此 Hash 不属于加密。(记住，MD5 不是加密!)</p>
+<h4 id="但百度百科说它是加密"><a href="#但百度百科说它是加密" class="headerlink" title="但百度百科说它是加密?"></a>但百度百科说它是加密?</h4><p>它说错啦!</p>
+<h2 id="字符集"><a href="#字符集" class="headerlink" title="字符集"></a>字符集</h2><h3 id="含义-2"><a href="#含义-2" class="headerlink" title="含义:"></a>含义:</h3><p>一个由整数向现实世界中的文字符号的 Map</p>
+<h3 id="分支"><a href="#分支" class="headerlink" title="分支:"></a>分支:</h3><ul>
+<li>ASCII:128 个字符，1 字节 </li>
+<li>ISO-8859-1:对 ASCII 进行扩充，1 字节 </li>
+<li>Unicode:13 万个字符，多字节<ul>
+<li>UTF-8:Unicode 的编码分支</li>
+<li>UTF-16 :Unicode 的编码分支</li>
+</ul>
+</li>
+<li>GBK / GB2312 / GB18030:中国自研标准，多字节，字符集 + 编码</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/" rel="tag"># 计算机基础</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/29/Http%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/" rel="prev" title="Http的原理和工作机制">
+      <i class="fa fa-chevron-left"></i> Http的原理和工作机制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/07/01/Android%E9%9D%A2%E7%BB%8F%EF%BC%9A%E4%BC%98%E5%8C%96/" rel="next" title="Android面经：优化">
+      Android面经：优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E3%80%81%E5%8A%A0%E5%AF%86%E3%80%81Hash%E3%80%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%AD%97%E7%AC%A6%E9%9B%86"><span class="nav-number">1.</span> <span class="nav-text">编码、加密、Hash、序列化和字符集</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.</span> <span class="nav-text">加密</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%A4%E5%85%B8%E5%AF%86%E7%A0%81%E5%AD%A6"><span class="nav-number">1.1.1.</span> <span class="nav-text">古典密码学</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A7%BB%E4%BD%8D%E5%BC%8F%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">移位式加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%BF%E6%8D%A2%E5%BC%8F%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">替换式加密</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%B0%E4%BB%A3%E5%AF%86%E7%A0%81%E5%AD%A6"><span class="nav-number">1.1.2.</span> <span class="nav-text">现代密码学</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">对称加密</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">1.1.2.1.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E7%AE%97%E6%B3%95"><span class="nav-number">1.1.2.1.2.</span> <span class="nav-text">经典算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.2.1.3.</span> <span class="nav-text">对称加密的作用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A0%B4%E8%A7%A3%E6%80%9D%E8%B7%AF"><span class="nav-number">1.1.2.1.4.</span> <span class="nav-text">破解思路</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%8D%E7%A0%B4%E8%A7%A3"><span class="nav-number">1.1.2.1.5.</span> <span class="nav-text">反破解</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">1.1.2.1.6.</span> <span class="nav-text">对称加密的缺点</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">非对称加密</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E7%90%86-1"><span class="nav-number">1.1.2.2.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E7%AE%97%E6%B3%95-1"><span class="nav-number">1.1.2.2.2.</span> <span class="nav-text">经典算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">1.1.2.2.3.</span> <span class="nav-text">非对称加密的优缺点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86-%E5%A6%82-RSA%E3%80%81ECDSA-%E7%9A%84%E7%A0%B4%E8%A7%A3-%E7%A0%B4%E8%A7%A3%E6%80%9D%E8%B7%AF"><span class="nav-number">1.1.2.2.4.</span> <span class="nav-text">非对称加密(如 RSA、ECDSA)的破解 破解思路</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%8D%E7%A0%B4%E8%A7%A3-1"><span class="nav-number">1.1.2.2.5.</span> <span class="nav-text">反破解</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E5%AD%A6%E5%AF%86%E9%92%A5%E5%92%8C%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81"><span class="nav-number">1.1.3.</span> <span class="nav-text">密码学密钥和登录密码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A0%81"><span class="nav-number">1.2.</span> <span class="nav-text">编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Base64"><span class="nav-number">1.2.1.</span> <span class="nav-text">Base64</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%95%B0%E6%8D%AE"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">什么是二进制数据?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%97%E6%B3%95"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Base64-%E7%B4%A2%E5%BC%95%E8%A1%A8"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">Base64 索引表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Base64-%E7%9A%84%E7%94%A8%E9%80%94"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">Base64 的用途</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Base64-%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">1.2.1.5.</span> <span class="nav-text">Base64 的缺点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E3%80%8CBase64-%E5%8A%A0%E5%AF%86%E5%9B%BE%E7%89%87%E4%BC%A0%E8%BE%93%E6%9B%B4%E5%AE%89%E5%85%A8%E5%92%8C%E9%AB%98%E6%95%88%E3%80%8D"><span class="nav-number">1.2.1.6.</span> <span class="nav-text">「Base64 加密图片传输更安全和高效」</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%98%E7%A7%8D-Base58"><span class="nav-number">1.2.1.7.</span> <span class="nav-text">变种:Base58</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#URL-Encoding-%E4%BD%BF%E7%94%A8%E7%9A%84%E7%99%BE%E5%88%86%E5%8F%B7%E7%BC%96%E7%A0%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">URL Encoding 使用的百分号编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%8B%E7%BC%A9%E4%B8%8E%E8%A7%A3%E5%8E%8B%E7%BC%A9"><span class="nav-number">1.2.3.</span> <span class="nav-text">压缩与解压缩</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AB%E4%B9%89"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">含义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E7%9A%84"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">目的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B2%97%E6%9A%B4%E7%AE%97%E6%B3%95%E4%B8%BE%E4%BE%8B"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">粗暴算法举例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%8B%E7%BC%A9%E6%98%AF%E7%BC%96%E7%A0%81%E5%90%97"><span class="nav-number">1.2.3.4.</span> <span class="nav-text">压缩是编码吗?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E2%BB%85%E5%8E%8B%E7%BC%A9%E7%AE%97%E6%B3%95"><span class="nav-number">1.2.3.5.</span> <span class="nav-text">常⻅压缩算法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E7%89%87%E4%B8%8E%E9%9F%B3%E9%A2%91%E3%80%81%E8%A7%86%E9%A2%91%EF%BC%88%E5%AA%92%E4%BD%93%E6%95%B0%E6%8D%AE%EF%BC%89%E7%BC%96%E8%A7%A3%E7%A0%81"><span class="nav-number">1.2.4.</span> <span class="nav-text">图片与音频、视频（媒体数据）编解码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AB%E4%B9%89-1"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">含义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E7%9A%84-1"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">目的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%BE%E7%89%87%E5%8E%8B%E7%BC%A9%E7%B2%97%E6%9A%B4%E7%AE%97%E6%B3%95%E4%B8%BE%E4%BE%8B"><span class="nav-number">1.2.4.3.</span> <span class="nav-text">图片压缩粗暴算法举例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">1.2.5.</span> <span class="nav-text">序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E7%9A%84-2"><span class="nav-number">1.2.5.1.</span> <span class="nav-text">目的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96%E6%98%AF%E7%BC%96%E7%A0%81%E5%90%97"><span class="nav-number">1.2.5.2.</span> <span class="nav-text">序列化是编码吗?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%92%8C%E7%BC%96%E7%A0%81%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.2.5.3.</span> <span class="nav-text">和编码的区别</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hash"><span class="nav-number">1.2.6.</span> <span class="nav-text">Hash</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.6.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8"><span class="nav-number">1.2.6.2.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E7%AE%97%E6%B3%95-2"><span class="nav-number">1.2.6.3.</span> <span class="nav-text">经典算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hash-%E7%9A%84%E5%AE%9E%E9%99%85%E7%94%A8%E9%80%94-%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%95%B4%E6%80%A7%E9%AA%8C%E8%AF%81"><span class="nav-number">1.2.6.4.</span> <span class="nav-text">Hash 的实际用途:数据完整性验证</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hash-%E7%9A%84%E5%AE%9E%E9%99%85%E7%94%A8%E9%80%94-%E5%BF%AB%E9%80%9F%E6%9F%A5%E6%89%BE"><span class="nav-number">1.2.6.5.</span> <span class="nav-text">Hash 的实际用途:快速查找</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hash-%E7%9A%84%E5%AE%9E%E9%99%85%E7%94%A8%E9%80%94%EF%BC%9A%E5%94%AF%E4%B8%80%E6%80%A7%E9%AA%8C%E8%AF%81"><span class="nav-number">1.2.6.6.</span> <span class="nav-text">Hash 的实际用途：唯一性验证</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%AF%8F%E6%AC%A1%E9%87%8D%E5%86%99-equals-%E6%96%B9%E6%B3%95%E9%83%BD%E9%9C%80%E8%A6%81%E5%90%8C%E4%BA%8B%E4%BF%AE%E6%94%B9HashCode-%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.6.6.1.</span> <span class="nav-text">为什么每次重写 equals() 方法都需要同事修改HashCode()方法?</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E9%87%8D%E5%86%99-hashCode-%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.6.6.2.</span> <span class="nav-text">怎么重写 hashCode 方法?</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hash-%E7%9A%84%E5%AE%9E%E9%99%85%E7%94%A8%E9%80%94-%E9%9A%90%E7%A7%81%E4%BF%9D%E6%8A%A4"><span class="nav-number">1.2.6.7.</span> <span class="nav-text">Hash 的实际用途:隐私保护</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hash-%E6%98%AF%E7%BC%96%E7%A0%81%E5%90%97"><span class="nav-number">1.2.6.8.</span> <span class="nav-text">Hash 是编码吗?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hash%E6%98%AF%E5%8A%A0%E5%AF%86%E5%90%97"><span class="nav-number">1.2.6.9.</span> <span class="nav-text">Hash是加密吗?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%86%E7%99%BE%E5%BA%A6%E7%99%BE%E7%A7%91%E8%AF%B4%E5%AE%83%E6%98%AF%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.6.10.</span> <span class="nav-text">但百度百科说它是加密?</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E9%9B%86"><span class="nav-number">1.3.</span> <span class="nav-text">字符集</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AB%E4%B9%89-2"><span class="nav-number">1.3.1.</span> <span class="nav-text">含义:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%94%AF"><span class="nav-number">1.3.2.</span> <span class="nav-text">分支:</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
