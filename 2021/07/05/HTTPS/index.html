@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="HTTPS定义HTTP over SSL 的简称，即工作在 SSL (或 TLS)上的 HTTP。说白了就是加密通信 的 HTTP。 HTTPS本是网景为了安全开发的协议，SSL和HTTP本是共生的，SSL后来独立出来演变成了TLS TSL定义：Http之下的一个安全层，其实就是http把数据交给TCP之前，先交给TLS加密，再交给IP层传输 工作原理在客户端和服务器之间用非对称加密协商出一套对称">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTPS">
+<meta property="og:url" content="http://example.com/2021/07/05/HTTPS/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="HTTPS定义HTTP over SSL 的简称，即工作在 SSL (或 TLS)上的 HTTP。说白了就是加密通信 的 HTTP。 HTTPS本是网景为了安全开发的协议，SSL和HTTP本是共生的，SSL后来独立出来演变成了TLS TSL定义：Http之下的一个安全层，其实就是http把数据交给TCP之前，先交给TLS加密，再交给IP层传输 工作原理在客户端和服务器之间用非对称加密协商出一套对称">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/image-20210706183554191.png">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/Xnip2021-07-07_17-38-17.jpg">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/image-20210707174217872.png">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/Xnip2021-07-07_17-47-04.jpg">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/Xnip2021-07-07_19-35-05.jpg">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/image-20210708145309372.png">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/image-20210708160808284.png">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/Xnip2021-07-08_16-05-31.jpg">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/image-20210708161110520.png">
+<meta property="og:image" content="http://example.com/2021/07/05/HTTPS/image-20210708161150472.png">
+<meta property="article:published_time" content="2021-07-05T09:36:33.000Z">
+<meta property="article:modified_time" content="2021-07-08T08:14:22.848Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="网络">
+<meta property="article:tag" content="https">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/07/05/HTTPS/image-20210706183554191.png">
+
+<link rel="canonical" href="http://example.com/2021/07/05/HTTPS/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>HTTPS | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/05/HTTPS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HTTPS
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-05 17:36:33" itemprop="dateCreated datePublished" datetime="2021-07-05T17:36:33+08:00">2021-07-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-08 16:14:22" itemprop="dateModified" datetime="2021-07-08T16:14:22+08:00">2021-07-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/https/" itemprop="url" rel="index"><span itemprop="name">https</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>HTTP over SSL 的简称，即工作在 SSL (或 TLS)上的 HTTP。说白了就是加密通信 的 HTTP。</p>
+<p>HTTPS本是网景为了安全开发的协议，SSL和HTTP本是共生的，SSL后来独立出来演变成了TLS</p>
+<p>TSL定义：Http之下的一个安全层，其实就是http把数据交给TCP之前，先交给TLS加密，再交给IP层传输</p>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p>在客户端和服务器之间用非对称加密协商出一套对称密钥，每次发送信息之前将内容加密，收到之后解密，达到内容的加密传输</p>
+<h3 id="为什么不直接用非对称加密"><a href="#为什么不直接用非对称加密" class="headerlink" title="为什么不直接用非对称加密?"></a>为什么不直接用非对称加密?</h3><p>非对称加密由于使用了复杂了数学原理，因此计算相当复杂，如果完全使用非对称加密来加密通信内容，会严重影响网络通信的性能</p>
+<h2 id="HTTPS链接"><a href="#HTTPS链接" class="headerlink" title="HTTPS链接"></a>HTTPS链接</h2><p>HTTP不是稳定链接，稳定的是TCP，HTTPS主要用于加密传输数据。</p>
+<h3 id="HTTPS-连接建立的过程"><a href="#HTTPS-连接建立的过程" class="headerlink" title="HTTPS 连接建立的过程"></a>HTTPS 连接建立的过程</h3><p>简单：</p>
+<ol>
+<li>客户端请求TLS连接<ol>
+<li>ClientHello</li>
+<li>ServerHello</li>
+</ol>
+</li>
+<li>服务器发回证书</li>
+<li>客户端验证服务器证书</li>
+<li>客户端信任服务器后，和服务器协商对称密钥（使用非对称加密）</li>
+<li>使用对称加密开始通信</li>
+</ol>
+<p>详细：</p>
+<ol>
+<li><p>ClientHello</p>
+<p><img src="/2021/07/05/HTTPS/image-20210706183554191.png" alt="image-20210706183554191"></p>
+<p>客户端向服务端发送一个字节数据，这个数据被称为ClientHello，是客户端对服务器第一次打招呼的意思</p>
+<p>除此之外还包含：</p>
+<p><strong>可选的TLS版本的集合</strong>，因为客户端可能包含好几个版本，给服务器一个选择。</p>
+<p><strong>可选的加密套件集合</strong>：</p>
+<ul>
+<li>可选的对称加密算法</li>
+<li>可选的非对称加密算法</li>
+<li>可选的hash算法</li>
+</ul>
+<p><strong>客户端的随机数</strong>，同时客户端也会本地保存一份随机数。</p>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-07_17-38-17.jpg" alt="Xnip2021-07-07_17-38-17"></p>
+</li>
+<li><p>ServerHello</p>
+<p><img src="/2021/07/05/HTTPS/image-20210707174217872.png" alt="image-20210707174217872"></p>
+<p>服务端返回一个自己的 Server Hello数据，表示响应客户端请求。1字节数据后面会紧跟着：</p>
+<ul>
+<li>服务端选好的TLS版本，加密套件</li>
+<li>服务端随机数（服务端也会保存一份）</li>
+</ul>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-07_17-47-04.jpg" alt="Xnip2021-07-07_17-47-04"></p>
+</li>
+<li><p>服务端发送证书到客户端</p>
+<p>服务端发送证书给给客户端 ，其中数据包括：</p>
+<ol>
+<li>服务器证书 （内容包含服务器主机名，证书名等，但最重要的数据是服务端公钥）</li>
+<li>服务器证书的签名</li>
+<li>证书签发机构的证书（包含签发机构的名字，地区等，最重要的是用于验证这个<code>服务端公钥签名</code>的公钥，也就是服务器服务器公钥的公钥）</li>
+<li>证书签发机构的证书的签名</li>
+<li>根证书的相关信息（证书签发机构的签发机构的公钥）</li>
+</ol>
+<p>根证书：系统中默认可以无条件信任的证书，比如Mac中的钥匙串。</p>
+<p>服务器证书的最大作用证书中的服务器公钥对数据非对称加密信息，和服务端协商一个对称加密密钥。</p>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-07_19-35-05.jpg" alt="Xnip2021-07-07_19-35-05"></p>
+</li>
+<li><p>客户端验证证书是否可信：（大量使用数字签名（非对称加密）技术）</p>
+<p>为了保证服务器证书（也就是服务器公钥）的可信，我们需要一个公钥来验证服务器证书的签名是否正确，这个用来验证服务器证书签名的公钥就是 证书签发机构的证书。</p>
+<p>但是证书签发机构可能也会被篡改，所以需要一个公钥来验证签发机构的证书的签名，这个用于验证签发机构的签名的公钥就是 根证书。</p>
+<p>因为系统里已经内置了根证书，所以我们只需要读取服务端发送的根证书相关的信息即可。</p>
+<p>除此之外，我们还需要验证服务器证书中的Host是否是我们想要的。</p>
+<p><strong>若黑客只更换Host不修改其他信息，是否能通过验证</strong></p>
+<p>不能，因为签名是对整个服务器证书的全部数据做的，只改Host hash值也会改变。</p>
+</li>
+<li><p>Pre-masterSecret</p>
+<p><img src="/2021/07/05/HTTPS/image-20210708145309372.png" alt="image-20210708145309372"></p>
+<ol>
+<li><p>客户端再次发送一次随机数，不过这次是通过服务端公钥加密过的。</p>
+</li>
+<li><p>接下来，客户端和服务端会结合之前发送的随机数计算出Master Secret</p>
+</li>
+<li><p>Master Secret会生成一些密钥（6个），可以实现对称加密通信</p>
+<ul>
+<li>客户端加密密钥</li>
+<li>服务端加密密钥</li>
+<li>客户端 MAC secret</li>
+<li>服务端 MAC secret</li>
+</ul>
+</li>
+</ol>
+<p><strong>Pre-masterSecret一个随机数就可以计算MasterSecret，为什么要结合之前发的两个个随机数？</strong></p>
+<p>虽然之前发送的随机数没有被加密，但是可以用它们防止重放攻击（Replay attack）如果你将今天的请求信息都保存下来在第二天发送，服务器会返回不同的随机数让你本地存储的信息失效。</p>
+<p><strong>为什么生成两个加密密钥？</strong></p>
+<p>因为客户端和服务端通信的时候各自使用不同的密钥。为了防止恶意将客户端发送的信息再发回来，由于密钥不同就根本无法解析，也就不会把这种重复发送的消息当作服务端发回来的。</p>
+<p><strong>MAC secret</strong></p>
+<p>是HMAC hash-based message authenticate code 带密钥的hash算法。不仅能验证数据的指纹，还能验证身份，且不能被公众验证身份。</p>
+<p><img src="/2021/07/05/HTTPS/image-20210708160808284.png" alt="image-20210708160808284"></p>
+</li>
+<li><p>客户端通知:将使用加密通信 </p>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-08_16-05-31.jpg" alt="Xnip2021-07-08_16-05-31"></p>
+</li>
+<li><p>客户端发送:Finished</p>
+<p>将前面五步的内容结合，用客户端加密密钥加密，再做一个HMAC ，再由服务器验证</p>
+<p><img src="/2021/07/05/HTTPS/image-20210708161110520.png" alt="image-20210708161110520"></p>
+</li>
+<li><p>服务器通知:将使用加密通信 </p>
+<p><img src="/2021/07/05/HTTPS/image-20210708161150472.png" alt="image-20210708161150472"></p>
+</li>
+<li><p>服务器发送:Finished</p>
+<p>将前面五步的内容结合，用服务端密钥加密在做一个HMAC，再由客户端验证，内容会比客户端Finished发送的多一点。</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"># 网络</a>
+              <a href="/tags/https/" rel="tag"># https</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/" rel="prev" title="TCP/IP协议族">
+      <i class="fa fa-chevron-left"></i> TCP/IP协议族
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTPS"><span class="nav-number">1.</span> <span class="nav-text">HTTPS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%9B%B4%E6%8E%A5%E7%94%A8%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">为什么不直接用非对称加密?</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTPS%E9%93%BE%E6%8E%A5"><span class="nav-number">1.3.</span> <span class="nav-text">HTTPS链接</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTPS-%E8%BF%9E%E6%8E%A5%E5%BB%BA%E7%AB%8B%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-number">1.3.1.</span> <span class="nav-text">HTTPS 连接建立的过程</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
