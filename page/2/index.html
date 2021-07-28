@@ -168,6 +168,358 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/05/HTTPS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/05/HTTPS/" class="post-title-link" itemprop="url">HTTPS</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-05 17:36:33" itemprop="dateCreated datePublished" datetime="2021-07-05T17:36:33+08:00">2021-07-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-16 01:51:26" itemprop="dateModified" datetime="2021-07-16T01:51:26+08:00">2021-07-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/https/" itemprop="url" rel="index"><span itemprop="name">https</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>HTTP over SSL 的简称，即工作在 SSL (或 TLS)上的 HTTP。说白了就是加密通信 的 HTTP。</p>
+<p>HTTPS本是网景为了安全开发的协议，SSL和HTTP本是共生的，SSL后来独立出来演变成了TLS</p>
+<p>TSL定义：Http之下的一个安全层，其实就是http把数据交给TCP之前，先交给TLS加密，再交给IP层传输</p>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p>在客户端和服务器之间用非对称加密协商出一套对称密钥，每次发送信息之前将内容加密，收到之后解密，达到内容的加密传输</p>
+<h3 id="为什么不直接用非对称加密"><a href="#为什么不直接用非对称加密" class="headerlink" title="为什么不直接用非对称加密?"></a>为什么不直接用非对称加密?</h3><p>非对称加密由于使用了复杂了数学原理，因此计算相当复杂，如果完全使用非对称加密来加密通信内容，会严重影响网络通信的性能</p>
+<h2 id="HTTPS链接"><a href="#HTTPS链接" class="headerlink" title="HTTPS链接"></a>HTTPS链接</h2><p>HTTP不是稳定链接，稳定的是TCP，HTTPS主要用于加密传输数据。</p>
+<h3 id="HTTPS-连接建立的过程"><a href="#HTTPS-连接建立的过程" class="headerlink" title="HTTPS 连接建立的过程"></a>HTTPS 连接建立的过程</h3><p>简单：</p>
+<ol>
+<li>客户端请求TLS连接 say hello<ol>
+<li>ClientHello</li>
+<li>ServerHello</li>
+</ol>
+</li>
+<li>服务器发回证书</li>
+<li>客户端验证服务器证书</li>
+<li>客户端信任服务器后，和服务器协商对称密钥（使用非对称加密）</li>
+<li>使用对称加密开始通信</li>
+</ol>
+<p>详细：</p>
+<ol>
+<li><p>ClientHello</p>
+<p><img src="/2021/07/05/HTTPS/image-20210706183554191.png" alt="image-20210706183554191"></p>
+<p>客户端向服务端发送一个字节数据，这个数据被称为ClientHello，是客户端对服务器第一次打招呼的意思</p>
+<p>除此之外还包含：</p>
+<p><strong>可选的TLS版本的集合</strong>，因为客户端可能包含好几个版本，给服务器一个选择。</p>
+<p><strong>可选的加密套件集合</strong>：</p>
+<ul>
+<li>可选的对称加密算法</li>
+<li>可选的非对称加密算法</li>
+<li>可选的hash算法</li>
+</ul>
+<p><strong>客户端的随机数</strong>，同时客户端也会本地保存一份随机数。</p>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-07_17-38-17.jpg" alt="Xnip2021-07-07_17-38-17"></p>
+</li>
+<li><p>ServerHello</p>
+<p><img src="/2021/07/05/HTTPS/image-20210707174217872.png" alt="image-20210707174217872"></p>
+<p>服务端返回一个自己的 Server Hello数据，表示响应客户端请求。1字节数据后面会紧跟着：</p>
+<ul>
+<li>服务端选好的TLS版本，加密套件</li>
+<li>服务端随机数（服务端也会保存一份）</li>
+</ul>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-07_17-47-04.jpg" alt="Xnip2021-07-07_17-47-04"></p>
+</li>
+<li><p>服务端发送证书到客户端</p>
+<p>服务端发送证书给给客户端 ，其中数据包括：</p>
+<ol>
+<li>服务器证书 （内容包含服务器主机名，证书名等，但最重要的数据是服务端公钥）</li>
+<li>服务器证书的签名</li>
+<li>证书签发机构的证书（包含签发机构的名字，地区等，最重要的是用于验证这个<code>服务端公钥签名</code>的公钥，也就是服务器服务器公钥的公钥）</li>
+<li>证书签发机构的证书的签名</li>
+<li>根证书的相关信息（证书签发机构的签发机构的公钥）</li>
+</ol>
+<p>根证书：系统中默认可以无条件信任的证书，比如Mac中的钥匙串。</p>
+<p>服务器证书的最大作用证书中的服务器公钥对数据非对称加密信息，和服务端协商一个对称加密密钥。</p>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-07_19-35-05.jpg" alt="Xnip2021-07-07_19-35-05"></p>
+</li>
+<li><p>客户端验证证书是否可信：（大量使用数字签名（非对称加密）技术）</p>
+<p>为了保证服务器证书（也就是服务器公钥）的可信，我们需要一个公钥来验证服务器证书的签名是否正确，这个用来验证服务器证书签名的公钥就是 证书签发机构的证书。</p>
+<p>但是证书签发机构可能也会被篡改，所以需要一个公钥来验证签发机构的证书的签名，这个用于验证签发机构的签名的公钥就是 根证书。</p>
+<p>因为系统里已经内置了根证书，所以我们只需要读取服务端发送的根证书相关的信息即可。</p>
+<p>除此之外，我们还需要验证服务器证书中的Host是否是我们想要的。</p>
+<p><strong>若黑客只更换Host不修改其他信息，是否能通过验证</strong></p>
+<p>不能，因为签名是对整个服务器证书的全部数据做的，只改Host hash值也会改变。</p>
+</li>
+<li><p>Pre-masterSecret</p>
+<p><img src="/2021/07/05/HTTPS/image-20210708145309372.png" alt="image-20210708145309372"></p>
+<ol>
+<li><p>客户端再次发送一次随机数，不过这次是通过服务端公钥加密过的。</p>
+</li>
+<li><p>接下来，客户端和服务端会结合之前发送的随机数计算出Master Secret</p>
+</li>
+<li><p>Master Secret会生成一些密钥（6个），可以实现对称加密通信</p>
+<ul>
+<li>客户端加密密钥</li>
+<li>服务端加密密钥</li>
+<li>客户端 MAC secret</li>
+<li>服务端 MAC secret</li>
+</ul>
+</li>
+</ol>
+<p><strong>Pre-masterSecret一个随机数就可以计算MasterSecret，为什么要结合之前发的两个个随机数？</strong></p>
+<p>虽然之前发送的随机数没有被加密，但是可以用它们防止重放攻击（Replay attack）如果你将今天的请求信息都保存下来在第二天发送，服务器会返回不同的随机数让你本地存储的信息失效。</p>
+<p><strong>为什么生成两个加密密钥？</strong></p>
+<p>因为客户端和服务端通信的时候各自使用不同的密钥。为了防止恶意将客户端发送的信息再发回来，由于密钥不同就根本无法解析，也就不会把这种重复发送的消息当作服务端发回来的。</p>
+<p><strong>MAC secret</strong></p>
+<p>是HMAC hash-based message authenticate code 带密钥的hash算法。不仅能验证数据的指纹，还能验证身份，且不能被公众验证身份。</p>
+<p><img src="/2021/07/05/HTTPS/image-20210708160808284.png" alt="image-20210708160808284"></p>
+</li>
+<li><p>客户端通知:将使用加密通信 </p>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-08_16-05-31.jpg" alt="Xnip2021-07-08_16-05-31"></p>
+</li>
+<li><p>客户端发送:Finished</p>
+<p>将前面五步的内容结合，用客户端加密密钥加密，再做一个HMAC ，再由服务器验证</p>
+<p><img src="/2021/07/05/HTTPS/image-20210708161110520.png" alt="image-20210708161110520"></p>
+</li>
+<li><p>服务器通知:将使用加密通信 </p>
+<p><img src="/2021/07/05/HTTPS/image-20210708161150472.png" alt="image-20210708161150472"></p>
+</li>
+<li><p>服务器发送:Finished</p>
+<p>将前面五步的内容结合，用服务端密钥加密在做一个HMAC，再由客户端验证，内容会比客户端Finished发送的多一点。</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/" class="post-title-link" itemprop="url">TCP/IP协议族</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-02 17:07:33" itemprop="dateCreated datePublished" datetime="2021-07-02T17:07:33+08:00">2021-07-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-08 15:09:37" itemprop="dateModified" datetime="2021-07-08T15:09:37+08:00">2021-07-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/TCP-IP/" itemprop="url" rel="index"><span itemprop="name">TCP/IP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="TCP-IP"><a href="#TCP-IP" class="headerlink" title="TCP/IP"></a>TCP/IP</h1><p>概念：一系列协议组成的网络分层模型。</p>
+<h2 id="为什么要分层？"><a href="#为什么要分层？" class="headerlink" title="为什么要分层？"></a><strong>为什么要分层？</strong></h2><p>因为网络不稳定。</p>
+<p><strong>网络不稳定造成的问题：</strong></p>
+<ul>
+<li><p>传输较大数据时，在复杂网络环境中容易传输失败。</p>
+</li>
+<li><p>若传输失败时，需要把整个报文重新传因此</p>
+</li>
+</ul>
+<p>为了解决这些问题：我们需要将报文分块，传输成功后接收方再将报文拼装好。</p>
+<p><strong>分块传输的优点：</strong></p>
+<ul>
+<li><p>数据分块后，体积变小了，提高了传输的成功率</p>
+</li>
+<li><p>数据分块后，若传输失败，可以只重新传失败的数据块而不是重传全部数据</p>
+</li>
+</ul>
+<p><strong>实际应用中，我们使用的网络协议不止有HTTP，还有FTP，DNS等协议都有分块传输的需求，我们需要划分两个层级：</strong></p>
+<ol>
+<li>HTTP，FTP，DNS等协议组成的应用层。</li>
+<li>用于分块传输/接收组装报文的传输层。</li>
+</ol>
+<p><strong>两层分层仍然不能满足实际应用，因为不是所有请求都是需要失败重传的</strong>，游戏/直播等追求实时性的应用是不需要失败重传的，使用的是UDP协议，而失败重传的是TCP协议，所以我们需要拆分一个网络层（IP层）来支持传输层，进行网络数据传输。</p>
+<p><strong>最后，网络层（IP层）也只是一个协议/标准，我们仍然需要真正的物理层面的支持</strong>，这部分能力被划分为数据链路层。</p>
+<img src="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/image-20210705143657813.png" alt="image-20210705143657813" style="zoom:50%;">
+
+<ul>
+<li><p>Application Layer 应用层:HTTP、FTP、DNS </p>
+</li>
+<li><p>Transport Layer 传输层:TCP、UDP</p>
+</li>
+<li><p>Internet Layer 网络层:IP</p>
+</li>
+<li><p>Link Layer 数据链路层:以太网、Wi-Fi</p>
+</li>
+</ul>
+<h2 id="TCP-连接"><a href="#TCP-连接" class="headerlink" title="TCP 连接"></a>TCP 连接</h2><h3 id="TCP链接"><a href="#TCP链接" class="headerlink" title="TCP链接"></a>TCP链接</h3><p>链接：通信双方互相确认可以通信</p>
+<p>建立链接：通信双方建立确认「可以通信」，不会将对方的消息丢弃，即为「建立连接」</p>
+<p>TCP链接是有状态的（HTTP是无状态的）</p>
+<p>所谓状态是指：我不用每次通信都告知对方自己是谁，要请求什么，对方已经了解你的状态了。</p>
+<p>而Http则需要每次请求时都带上header等信息确认状态。</p>
+<h3 id="Java中的TCP实现-：Socket-套接字"><a href="#Java中的TCP实现-：Socket-套接字" class="headerlink" title="Java中的TCP实现 ：Socket(套接字)"></a>Java中的TCP实现 ：Socket(套接字)</h3><p>是对TCP端口的具象化，可以收发消息。</p>
+<p>端口：  和外界链接，确认对象状态需要一个收发器，这个收发器就是端口。它只和链接对象做交互，这样的话每个对象对应的链接身份一定是确认过的。Java中端口的具像化则是套接字（Socket英文原意则为插座，正如连根线相连需要插座一样）</p>
+<img src="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/image-20210705152317860.png" alt="image-20210705152317860" style="zoom:50%;">
+
+<h3 id="TCP连接的建立与关闭"><a href="#TCP连接的建立与关闭" class="headerlink" title="TCP连接的建立与关闭"></a>TCP连接的建立与关闭</h3><p>Tcp报文结构：首部+数据</p>
+<p>首部部分字段定义：</p>
+<p>序号（seq number）：TCP链接中传送到字节流中的每一个字节都按顺序编号。首部的序号指本报文段发送的数据的第一个字节的序号。</p>
+<p>两个ACK：一个是确认值(Acknowledgement)，为1便是确认连接，是首部的一个字段。<br>另一个是确认编号(Acknowledgement Number)，即接收到的上一次远端主机传来的seq然后+1，再发送给远端主机。提示远端主机已经成功接收上一次所有数据。</p>
+<p>同步（syn）：建立连接时用来同步序号。</p>
+<p>终止FIN：用来释放一个链接。</p>
+<h4 id="建立："><a href="#建立：" class="headerlink" title="建立："></a>建立：</h4><p>三次握手：</p>
+<p>所谓三次握手(Three-way Handshake)，是指建立一个 TCP 连接时，需要客户端和服务器总共发送3个包。 三次握手的目的是连接服务器指定端口，建立 TCP 连接，并同步连接双方的序列号和确认号，交换 TCP 窗口大小信 息。在 socket 编程中，客户端执行 connect() 时。将触发三次握手。</p>
+<p>简单模型：</p>
+<ol>
+<li>A给B发一个消息 </li>
+<li>B：知道了，我也要给你发消息</li>
+<li>A: 我也知道你要给我发消息了</li>
+</ol>
+<p>详细：</p>
+<p><strong>第一次握手(SYN=1, seq=x):</strong> </p>
+<p>客户端发送一个 TCP 的 SYN 标志位置1的包，指明客户端打算连接的服务器的端口，以及初始序号 X,保存在包头 的序列号(Sequence Number)字段里。发送完毕后，客户端进入 SYN_SEND 状态。</p>
+<p><strong>第二次握手(SYN=1, ACK=1, seq=y, ACKnum=x+1)：</strong></p>
+<p>服务器发回确认包(ACK)应答。即 SYN 标志位和 ACK 标志位均为1。服务器端选择自己 ISN 序列号，放到 Seq 域 里，同时将确认序号(Acknowledgement Number)设置为客户的 ISN 加1，即X+1。 发送完毕后，服务器端进入</p>
+<p>SYN_RCVD 状态。</p>
+<p><strong>第三次握手(ACK=1，ACKnum=y+1)：</strong></p>
+<p>客户端再次发送确认包(ACK)，SYN 标志位为0，ACK 标志位为1，并且把服务器发来 ACK 的序号字段+1，放在确 定字段中发送给对方，并且在数据段放写ISN的+1<br> 发送完毕后，客户端进入 ESTABLISHED 状态，当服务器端接收到这个包时，也进入 ESTABLISHED 状态，TCP 握手 结束。</p>
+<p>完成三次握手，主机A与主机B开始传送数据。</p>
+<p><strong>注意</strong> ：因为一个SYN将占用一个序号，所以要加1。</p>
+<p>各个状态名称与含义</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">- CLOSED: 这个没什么好说的了，表示初始状态。 </span><br><span class="line">- LISTEN: 这个也是非常容易理解的一个状态，表示服务器端的某个SOCKET处于监听状态，可以接受连接了。 </span><br><span class="line">- SYN_RECV: 这个状态表示接受到了SYN报文，在正常情况下，这个状态是服务器端的SOCKET在建立TCP连接时的三次握手会话过程中的一个中间状态，很短暂，基本 上用netstat你是很难看到这种状态的，除非你特意写了一个客户端测试程序，故意将三次TCP握手过程中最后一个ACK报文不予发送。因此这种状态 时，当收到客户端的ACK报文后，它会进入到ESTABLISHED状态。 </span><br><span class="line">- SYN_SENT: 这个状态与SYN_RECV遥想呼应，当客户端SOCKET执行CONNECT连接时，它首先发送SYN报文，因此也随即它会进入到了SYN_SENT状 态，并等待服务端的发送三次握手中的第2个报文。SYN_SENT状态表示客户端已发送SYN报文。</span><br><span class="line">- ESTABLISHED：这个容易理解了，表示连接已经建立了。</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/image-20210708150804856.png" alt="image-20210708150804856"></p>
+<h4 id="关闭"><a href="#关闭" class="headerlink" title="关闭"></a>关闭</h4><p>为什么关闭：省资源</p>
+<p>怎么关闭：释放链接</p>
+<p>四次挥手</p>
+<p>由于TCP连接是全双工的，因此每个方向都必须单独进行关闭。这个原则是当一方完成它的数据发送任务后就能发送一个FIN来终止这个方向的连接。收到一个 FIN只意味着这一方向上没有数据流动，一个TCP连接在收到一个FIN后仍能发送数据。首先进行关闭的一方将执行主动关闭，而另一方执行被动关闭。</p>
+<p>TCP的连接的拆除需要发送四个包，因此称为四次挥手(four-way handshake)。客户端或服务器均可主动发起挥手动作，在socket编程中，任何一方执行close()操作即可产生挥手操作。</p>
+<p>简单：</p>
+<p>第一条</p>
+<p>A：我没有消息给你了</p>
+<p>B：我知道了</p>
+<p>第二条：</p>
+<p>B：我也没有消息给你了</p>
+<p>A：我也知道了</p>
+<p>为何分两条发：A不发送的时候，B可能还有消息要发送。</p>
+<p>详细：</p>
+<p>TCP 的连接的拆除需要发送四个包，因此称为四次挥手(Four-way handshake)，也叫做改进的三次握手。客户端或服务器均可主动发起挥手动作，在 socket 编程中，任何一方执行 close() 操作即可产生挥手操作。</p>
+<ol>
+<li>**第一次挥手(FIN=1，seq=x)**假设客户端想要关闭连接，客户端发送一个 FIN 标志位置为1的包，表示自己已经没有数据可以发送了，但是仍然 可以接受数据。发送完毕后，客户端进入 FIN_WAIT_1 状态。</li>
+<li><strong>第二次挥手(ACK=1，ACKnum=x+1</strong>)服务器端确认客户端的 FIN 包，发送一个确认包，表明自己接受到了户端关闭连接的请求，但还没有准备好关闭 连接。发送完毕后，服务器端进入 CLOSE_WAIT 状态，客户端接收到这个确认包之后，进入 FIN_WAIT_2 状态，等待服务 器端关闭连接。</li>
+<li><strong>第三次挥手(FIN=1，seq=y)</strong> 服务器端准备好关闭连接时，向客户端发送结束连接请求，FIN 置为1。发送完毕后，服务器端进入 LAST_ACK 状态，等待来自客户端的最后一个ACK。 </li>
+<li><strong>第四次挥手(ACK=1，ACKnum=y+1)</strong><br>客户端接收到来自服务器端的关闭请求，发送一个确认包，并进入 TIME_WAIT 状态，等待可能出现的要求重传的 ACK 包。服务器端接收到这个确认包之后，关闭连接，进入 CLOSED 状态。 客户端等待了某个固定时间(两个最大段生命周期，2MSL，2 Maximum Segment Lifetime)之后，没有收到服务器端的 ACK ，认为服务器端已经正常关闭连接，于是自己也关闭连接，进入 四次挥手的示意图如下:</li>
+</ol>
+<p><img src="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/image-20210708144606170.png" alt="image-20210708144606170"></p>
+<h2 id="⻓连接"><a href="#⻓连接" class="headerlink" title="⻓连接"></a>⻓连接</h2><h3 id="为什么要⻓连接"><a href="#为什么要⻓连接" class="headerlink" title="为什么要⻓连接?"></a>为什么要⻓连接?</h3><p>因为移动网络并不在 Internet 中，而是在运营商的内网，并不具有真正的公网 IP， 因此当某个 TCP 连接在一段时间不通信之后，网关会出于网络性能考虑而关闭这条 TCP 连接和公网的连接通道，导致这个 TCP 端口不再能收到外部通信消息，即 TCP 连接被动关闭。</p>
+<h3 id="⻓连接的实现方式"><a href="#⻓连接的实现方式" class="headerlink" title="⻓连接的实现方式"></a>⻓连接的实现方式</h3><p>心跳。即在一定间隔时间内，使用 TCP 连接发送超短无意义消息来让网关不能将自 己定义为「空闲连接」，从而防止网关将自己的连接关闭。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1212,166 +1564,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/07/Zygote%E7%9A%84%E4%BD%9C%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/07/Zygote%E7%9A%84%E4%BD%9C%E7%94%A8/" class="post-title-link" itemprop="url">Zygote的作用</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-07 13:47:03" itemprop="dateCreated datePublished" datetime="2021-04-07T13:47:03+08:00">2021-04-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-04-30 08:35:31" itemprop="dateModified" datetime="2021-04-30T08:35:31+08:00">2021-04-30</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Framework/" itemprop="url" rel="index"><span itemprop="name">Framework</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <a id="more"></a>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/06/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8B%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/06/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8B%EF%BC%89/" class="post-title-link" itemprop="url">排序（下）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-06 15:48:43" itemprop="dateCreated datePublished" datetime="2021-04-06T15:48:43+08:00">2021-04-06</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-25 17:27:32" itemprop="dateModified" datetime="2021-06-25T17:27:32+08:00">2021-06-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">排序</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="排序（下）归并-快速，用快排思想在O-n-内查找第K大元素"><a href="#排序（下）归并-快速，用快排思想在O-n-内查找第K大元素" class="headerlink" title="排序（下）归并 快速，用快排思想在O(n)内查找第K大元素"></a>排序（下）归并 快速，用快排思想在O(n)内查找第K大元素</h1>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/06/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8B%EF%BC%89/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1443,20 +1635,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">36</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-count">37</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-count">37</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

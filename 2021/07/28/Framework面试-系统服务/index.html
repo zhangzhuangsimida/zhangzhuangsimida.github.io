@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Framework面试之系统服务谈谈对Zygote的理解 Zygote的作用（初） 启动SystemServer 孵化应用进程   熟悉Zygote的启动流程（中） 深刻理解Zygote的工作原理（高）  Zygote的作用是什么？ 启动SystemServer 常用类,JNI函数,主题资源,共享库如果都从Zygote继承比较方便  孵化应用进程   启动三段式Android进程启动常用套路： 1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Framework面试-系统服务">
+<meta property="og:url" content="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="Framework面试之系统服务谈谈对Zygote的理解 Zygote的作用（初） 启动SystemServer 孵化应用进程   熟悉Zygote的启动流程（中） 深刻理解Zygote的工作原理（高）  Zygote的作用是什么？ 启动SystemServer 常用类,JNI函数,主题资源,共享库如果都从Zygote继承比较方便  孵化应用进程   启动三段式Android进程启动常用套路： 1">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728092209535.png">
+<meta property="og:image" content="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728092629781.png">
+<meta property="og:image" content="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728095502377.png">
+<meta property="og:image" content="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728101441277.png">
+<meta property="og:image" content="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728104550796.png">
+<meta property="og:image" content="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728105334941.png">
+<meta property="article:published_time" content="2021-07-28T00:32:58.000Z">
+<meta property="article:modified_time" content="2021-07-28T09:00:59.093Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Framework">
+<meta property="article:tag" content="Zygote">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728092209535.png">
+
+<link rel="canonical" href="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Framework面试-系统服务 | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Framework面试-系统服务
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-28 08:32:58 / 修改时间：17:00:59" itemprop="dateCreated datePublished" datetime="2021-07-28T08:32:58+08:00">2021-07-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/Framework/" itemprop="url" rel="index"><span itemprop="name">Framework</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/Framework/%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/" itemprop="url" rel="index"><span itemprop="name">系统服务</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Framework面试之系统服务"><a href="#Framework面试之系统服务" class="headerlink" title="Framework面试之系统服务"></a>Framework面试之系统服务</h1><h2 id="谈谈对Zygote的理解"><a href="#谈谈对Zygote的理解" class="headerlink" title="谈谈对Zygote的理解"></a>谈谈对Zygote的理解</h2><ul>
+<li>Zygote的作用（初）<ul>
+<li>启动SystemServer</li>
+<li>孵化应用进程</li>
+</ul>
+</li>
+<li>熟悉Zygote的启动流程（中）</li>
+<li>深刻理解Zygote的工作原理（高）</li>
+</ul>
+<h3 id="Zygote的作用是什么？"><a href="#Zygote的作用是什么？" class="headerlink" title="Zygote的作用是什么？"></a>Zygote的作用是什么？</h3><ul>
+<li><p>启动SystemServer</p>
+<p><code>常用类</code>,<code>JNI函数</code>,<code>主题资源</code>,<code>共享库</code>如果都从<code>Zygote</code>继承比较方便</p>
+</li>
+<li><p>孵化应用进程</p>
+</li>
+</ul>
+<h3 id="启动三段式"><a href="#启动三段式" class="headerlink" title="启动三段式"></a>启动三段式</h3><p>Android进程启动常用套路：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">A[进程启动] --&gt; B[准备工作]</span><br><span class="line">B --&gt; C[Loop-不停接收&#x2F;处理消息]</span><br></pre></td></tr></table></figure>
+<h3 id="Zygote是怎么启动的？"><a href="#Zygote是怎么启动的？" class="headerlink" title="Zygote是怎么启动的？"></a>Zygote是怎么启动的？</h3><p>Init进程：Linux启动后用户空间的第一个进程</p>
+<img src="/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728092209535.png" alt="image-20210728092209535" style="zoom:50%;">
+
+<ol>
+<li>Init进程启动后，首先会去加载一个启动配置文件<code>init.rc</code>。</li>
+<li>查看启动配置文件定义了哪些需要启动的系统服务 <code>Zygote</code>服务也是需要启动的进程之一，<code>Service Manager</code>也是需要启动的进程。</li>
+<li>通过 <code>fork</code>和 <code>execve</code>系统调用，启动<code>Zygote</code>。</li>
+</ol>
+<h4 id="启动配置"><a href="#启动配置" class="headerlink" title="启动配置"></a>启动配置</h4><img src="/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728092629781.png" alt="image-20210728092629781" style="zoom:50%;">
+
+<p>红色：service的名称。蓝色：可执行路径。黄色：参数。</p>
+<p>进程启动靠的是fork和exeve系统调用，需要传可执行的路径和参数，</p>
+<h4 id="启动进程"><a href="#启动进程" class="headerlink" title="启动进程"></a>启动进程</h4><p>启动进程有两种方式</p>
+<ul>
+<li><p>fork + handle</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pid_t</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span>( pid == <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="comment">// child process</span></span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  <span class="comment">// parent process</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>fork + exeve</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pid_t</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span>( pid == <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="comment">// child process</span></span><br><span class="line">  execve(path,argv,env);<span class="comment">// 执行程序路径，执行程序参数，环境变量</span></span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  <span class="comment">// parent process</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第一步都调用<code>fork</code>函数创建子进程。<code>fork()</code>函数会返回两次，子进程父进程各一次。区别在于子进程的<code>pid</code>返回0 ，父进程的pid返回的是子进程的<code>pid</code> ，所以可以根据判断pid是不是0判断是否是子进程还是父进程。</p>
+</li>
+</ul>
+<p>默认来说创建的子进程会继承父进程的所有资源，调用<code>execve</code>系统调用去启动新的二进制程序，子进程继承的父进程资源就会被清掉，完全被新的二进制程序替换。</p>
+<h4 id="信号处理-SiGCHILD"><a href="#信号处理-SiGCHILD" class="headerlink" title="信号处理- SiGCHILD"></a>信号处理- SiGCHILD</h4><p>fork进程的时候父进程一般都要关注这个信号。</p>
+<img src="/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728095502377.png" alt="image-20210728095502377" style="zoom:50%;">
+
+<p>如果父进程<code>fork</code>一个子进程，子进程挂了会发送一个<code>SIGCHILD</code>信号给父进程，这时父进程就可以做一些处理。比如<code>Zygote</code>挂了就会发送一个<code>SIGCHILD</code>信号给<code>Init</code>进程进行重启。</p>
+<h3 id="Zygote进程启动之后做了什么？"><a href="#Zygote进程启动之后做了什么？" class="headerlink" title="Zygote进程启动之后做了什么？"></a>Zygote进程启动之后做了什么？</h3><ul>
+<li><p>Zygote的Native世界 （准备工作）</p>
+<p>Zygote启动之后执行了一个<code>execve</code>系统调用,执行一个二进制可执行程序（c++，里面有一个<code>main</code>函数作为入口）所以说Zygote天生就是Native的，做一些准备工作之后就切到Java中运行了。</p>
+</li>
+<li><p>Zygote的Java世界 （实际运行）</p>
+</li>
+</ul>
+<h4 id="Zygote的Native世界"><a href="#Zygote的Native世界" class="headerlink" title="Zygote的Native世界"></a>Zygote的Native世界</h4><p>目的是为了Java执行做准备。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">A[启动Android虚拟机] --&gt; B[注册Android系统关键类的JNI函数]</span><br><span class="line">B --&gt; C[JNI调用进入Java世界]</span><br></pre></td></tr></table></figure>
+<h5 id="Native切换到Java"><a href="#Native切换到Java" class="headerlink" title="Native切换到Java"></a>Native切换到Java</h5><img src="/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728101441277.png" alt="image-20210728101441277" style="zoom:50%;">
+
+<p>关键： JNICreateJavaVM 函数创建虚拟机。</p>
+<ol>
+<li>JNICreateJavaVM 创建虚拟机</li>
+<li>找到ZygoteInit这个Java类</li>
+<li>在ZygoteInit类中找到 Main这个静态函数</li>
+<li>用CallStaticVOidMethod去调用这个函数</li>
+<li>最后DestoryJavaVM 销毁Java虚拟机</li>
+</ol>
+<p>应用进程不需要创建虚拟机，是因为在Zygote进程中已经加载好了，我们应用进程是由Zygote孵化出来的，继承了Java虚拟机，只需要在进程启动的时候重置一下虚拟机的状态，再重启一下虚拟机的属性就可以了</p>
+<h4 id="Zygote的Java世界"><a href="#Zygote的Java世界" class="headerlink" title="Zygote的Java世界"></a>Zygote的Java世界</h4><p>主要做了三件事</p>
+<ol>
+<li>预加载资源：孵化子进程的时候可以继承给他们，包括常用类主题相关的资源、共享库。</li>
+<li>fork SystemServer进程。</li>
+<li>进入Loop循环，等待Socket消息，Socket用一个名称表示就行了，别人知道这个名称就可以跟这个Socket通信。</li>
+</ol>
+<img src="/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728104550796.png" alt="image-20210728104550796" style="zoom:50%;">
+
+<h5 id="Loop循环"><a href="#Loop循环" class="headerlink" title="Loop循环"></a>Loop循环</h5><p>Zygote启动之后，会启动Socket Loop循环，会不断轮询Socket，当有请求过来的时候会执行runOnce函数。</p>
+<p>runOnece方法：</p>
+<ol>
+<li><p>读取参数列表 readArgumentLIst()。</p>
+</li>
+<li><p>根据参数启动子进程 forkAndSpecialize()。</p>
+</li>
+<li><p>子进程启动后调用ActivityThread.Main函数</p>
+<p>子进程中调用 handleChidPro()，它会在子进程中调用一个Java类的Main函数，Java类名来自于读取的参数列表，是由AMS跨进程发过来的，类名其实是ActivityThread</p>
+</li>
+</ol>
+<img src="/2021/07/28/Framework%E9%9D%A2%E8%AF%95-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20210728105334941.png" alt="image-20210728105334941" style="zoom:33%;">
+
+
+
+<h3 id="需要注意的细节"><a href="#需要注意的细节" class="headerlink" title="需要注意的细节"></a>需要注意的细节</h3><h4 id="Zygote-fork-要单线程"><a href="#Zygote-fork-要单线程" class="headerlink" title="Zygote fork 要单线程"></a>Zygote fork 要单线程</h4><p>不管父进程里有多少线程，子进程在创建的时候就只有一个线程，对于子进程来说，这些多的线程就不见了，可能会导致奇怪的问题，比如死锁，状态不一致等。所以fork创建子进程的时候，把主线程之外的其他线程都停了，创建完进程之后再把这些线程重启。</p>
+<p>Zygote本身就是这样做的，Zygote本身不是单线程的，跑了很多虚拟机相关的守护线程。</p>
+<h3 id="扩展问题"><a href="#扩展问题" class="headerlink" title="扩展问题"></a>扩展问题</h3><h4 id="Zygote的IPC通信机制没有采用binder"><a href="#Zygote的IPC通信机制没有采用binder" class="headerlink" title="Zygote的IPC通信机制没有采用binder"></a>Zygote的IPC通信机制没有采用binder</h4><p>才用了本地Socket所以应用系统的binder机制，不是从Zygote继承过来的，而是在应用程序的进程创建之后自己启动的Binder机制。</p>
+<h4 id="孵化应用进程为什么不给SystemServer来做，而专门设计一个Zygote？"><a href="#孵化应用进程为什么不给SystemServer来做，而专门设计一个Zygote？" class="headerlink" title="孵化应用进程为什么不给SystemServer来做，而专门设计一个Zygote？"></a>孵化应用进程为什么不给SystemServer来做，而专门设计一个Zygote？</h4><p>我们知道，应用在启动的时候需要做很多准备工作，包括启动虚拟机，加载各类系统资源等等，这些都是非常耗时的，如果能在zygote里就给这些必要的初始化工作做好，子进程在fork的时候就能直接共享，那么这样的话效率就会非常高。这个就是zygote存在的价值，这一点呢SystemServer是替代不了的，主要是因为SystemServer里跑了一堆系统服务，这些是不能继承到应用进程的。而且我们应用进程在启动的时候，内存空间除了必要的资源外，最好是干干净净的，不要继承一堆乱七八糟的东西。所以呢，不如给SystemServer和应用进程里都要用到的资源抽出来单独放在一个进程里，也就是这的zygote进程，然后zygote进程再分别孵化出SystemServer进程和应用进程。孵化出来之后，SystemServer进程和应用进程就可以各干各的事了。</p>
+<h4 id="Zygote的IPC通信机制为什么不采用binder？如果采用binder的话会有什么问题？"><a href="#Zygote的IPC通信机制为什么不采用binder？如果采用binder的话会有什么问题？" class="headerlink" title="Zygote的IPC通信机制为什么不采用binder？如果采用binder的话会有什么问题？"></a>Zygote的IPC通信机制为什么不采用binder？如果采用binder的话会有什么问题？</h4><p>android间的进程通信是使用Binder，唯独Zygote和SystemService是使用socket</p>
+<h5 id="第一种解释："><a href="#第一种解释：" class="headerlink" title="第一种解释："></a>第一种解释：</h5><p>第一个原因，我们可以设想一下采用binder调用的话该怎么做，首先zygote要启用binder机制，需要打开binder驱动，获得一个描述符，再通过mmap进行内存映射，还要注册binder线程，这还不够，还要创建一个binder对象注册到serviceManager，另外AMS要向zygote发起创建应用进程请求的话，要先从serviceManager查询zygote的binder对象，然后再发起binder调用，这来来回回好几趟非常繁琐，相比之下，zygote和SystemServer进程本来就是父子关系，对于简单的消息通信，用管道或者socket非常方便省事。</p>
+<p>第二个原因，如果zygote启用binder机制，再fork出SystemServer，那么SystemServer就会继承了zygote的描述符以及映射的内存，这两个进程在binder驱动层就会共用一套数据结构，这显然是不行的，所以还得先给原来的旧的描述符关掉，再重新启用一遍binder机制，这个就是自找麻烦了。</p>
+<h5 id="第二种解释："><a href="#第二种解释：" class="headerlink" title="第二种解释："></a>第二种解释：</h5><p>怕父进程binder线程有锁，然后子进程的主线程一直在等其子线程(从父进程拷贝过来的子进程)的资源，但是其实父进程的子进程并没有被拷贝过来，造成死锁，所以fork不允许存在多线程。而非常巧的是Binder通讯偏偏就是多线程，所以干脆父进程（Zgote）这个时候就不使用binder线程。</p>
+<h2 id="说一说Android系统的启动流程"><a href="#说一说Android系统的启动流程" class="headerlink" title="说一说Android系统的启动流程"></a>说一说Android系统的启动流程</h2><p>这道题想考察什么</p>
+<ul>
+<li>Android有哪些主要的系统进程</li>
+<li>这些系统进程是怎么启动的</li>
+<li>进程启动之后主要做了什么事</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/Framework/" rel="tag"># Framework</a>
+              <a href="/tags/Zygote/" rel="tag"># Zygote</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/27/%E4%BB%8EOkHttp%E7%9A%84%E5%8E%9F%E7%90%86%E6%9D%A5%E7%9C%8BHTTP/" rel="prev" title="从OkHttp的原理来看HTTP">
+      <i class="fa fa-chevron-left"></i> 从OkHttp的原理来看HTTP
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Framework%E9%9D%A2%E8%AF%95%E4%B9%8B%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">Framework面试之系统服务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%88%E8%B0%88%E5%AF%B9Zygote%E7%9A%84%E7%90%86%E8%A7%A3"><span class="nav-number">1.1.</span> <span class="nav-text">谈谈对Zygote的理解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Zygote%E7%9A%84%E4%BD%9C%E7%94%A8%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">1.1.1.</span> <span class="nav-text">Zygote的作用是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E4%B8%89%E6%AE%B5%E5%BC%8F"><span class="nav-number">1.1.2.</span> <span class="nav-text">启动三段式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Zygote%E6%98%AF%E6%80%8E%E4%B9%88%E5%90%AF%E5%8A%A8%E7%9A%84%EF%BC%9F"><span class="nav-number">1.1.3.</span> <span class="nav-text">Zygote是怎么启动的？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">启动配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E8%BF%9B%E7%A8%8B"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">启动进程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86-SiGCHILD"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">信号处理- SiGCHILD</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Zygote%E8%BF%9B%E7%A8%8B%E5%90%AF%E5%8A%A8%E4%B9%8B%E5%90%8E%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">1.1.4.</span> <span class="nav-text">Zygote进程启动之后做了什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Zygote%E7%9A%84Native%E4%B8%96%E7%95%8C"><span class="nav-number">1.1.4.1.</span> <span class="nav-text">Zygote的Native世界</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Native%E5%88%87%E6%8D%A2%E5%88%B0Java"><span class="nav-number">1.1.4.1.1.</span> <span class="nav-text">Native切换到Java</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zygote%E7%9A%84Java%E4%B8%96%E7%95%8C"><span class="nav-number">1.1.4.2.</span> <span class="nav-text">Zygote的Java世界</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Loop%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.1.4.2.1.</span> <span class="nav-text">Loop循环</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E7%BB%86%E8%8A%82"><span class="nav-number">1.1.5.</span> <span class="nav-text">需要注意的细节</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Zygote-fork-%E8%A6%81%E5%8D%95%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.1.5.1.</span> <span class="nav-text">Zygote fork 要单线程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.6.</span> <span class="nav-text">扩展问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Zygote%E7%9A%84IPC%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6%E6%B2%A1%E6%9C%89%E9%87%87%E7%94%A8binder"><span class="nav-number">1.1.6.1.</span> <span class="nav-text">Zygote的IPC通信机制没有采用binder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%B5%E5%8C%96%E5%BA%94%E7%94%A8%E8%BF%9B%E7%A8%8B%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%BB%99SystemServer%E6%9D%A5%E5%81%9A%EF%BC%8C%E8%80%8C%E4%B8%93%E9%97%A8%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AAZygote%EF%BC%9F"><span class="nav-number">1.1.6.2.</span> <span class="nav-text">孵化应用进程为什么不给SystemServer来做，而专门设计一个Zygote？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zygote%E7%9A%84IPC%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E9%87%87%E7%94%A8binder%EF%BC%9F%E5%A6%82%E6%9E%9C%E9%87%87%E7%94%A8binder%E7%9A%84%E8%AF%9D%E4%BC%9A%E6%9C%89%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%EF%BC%9F"><span class="nav-number">1.1.6.3.</span> <span class="nav-text">Zygote的IPC通信机制为什么不采用binder？如果采用binder的话会有什么问题？</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%A7%8D%E8%A7%A3%E9%87%8A%EF%BC%9A"><span class="nav-number">1.1.6.3.1.</span> <span class="nav-text">第一种解释：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%A7%8D%E8%A7%A3%E9%87%8A%EF%BC%9A"><span class="nav-number">1.1.6.3.2.</span> <span class="nav-text">第二种解释：</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B4%E4%B8%80%E8%AF%B4Android%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">说一说Android系统的启动流程</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
