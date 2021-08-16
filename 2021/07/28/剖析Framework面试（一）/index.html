@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="应用服务相关网络图，方便理解     谈谈对Zygote的理解考察点：Zygote的作用、Zygote的启动流程、Zygote的工作原理 作用 启动SystemServer 系统服务进程SystemServer是由Zygote进程fork出的（系统中比较重要的ActivityManagerService、PackageManagerService，WindowManagerService以及Pow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="剖析Framework面试（一）">
+<meta property="og:url" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="应用服务相关网络图，方便理解     谈谈对Zygote的理解考察点：Zygote的作用、Zygote的启动流程、Zygote的工作原理 作用 启动SystemServer 系统服务进程SystemServer是由Zygote进程fork出的（系统中比较重要的ActivityManagerService、PackageManagerService，WindowManagerService以及Pow">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210803102239629.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210810065021622.png">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-03255ea729dc76cdd3f4a6e195c4304f_1440w.jpg">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728092209535.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728092629781.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728095502377.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728101441277.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728104550796.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728105334941.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210402152226284.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0hVYW5kcm9pZA==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210802154029544.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210803170335310.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804063533311.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804073153462.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804073233676.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804073709062.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804074431859.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804080145885.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804075326480.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804075355725.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804080507956.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804080742597.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804081458144.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804081539244.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804082613885.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804082653707.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804082818267.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804083621329.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210407195759677.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0hVYW5kcm9pZA==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804174154785.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804174449051.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175100203.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175136552.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175259418.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175409056.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175629452.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175720944.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175836378.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804180002280.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804180031051.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804180132194.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804180946698.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181048614.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181152621.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181441522.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181504518.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181533453.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181607318.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181643148.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181725021.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181927911.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804182136345.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804182604515.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804184505501.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804185118638.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804185657489.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804185840788.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804190417559.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805173156984.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805173332193.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210513152139484.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0hVYW5kcm9pZA==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210513154936180.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0hVYW5kcm9pZA==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805174116712.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805174155699.png">
+<meta property="og:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805174251588.png">
+<meta property="article:published_time" content="2021-07-28T00:32:58.000Z">
+<meta property="article:modified_time" content="2021-08-16T02:02:26.891Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Framework">
+<meta property="article:tag" content="Zygote">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210803102239629.png">
+
+<link rel="canonical" href="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>剖析Framework面试（一） | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          剖析Framework面试（一）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-28 08:32:58" itemprop="dateCreated datePublished" datetime="2021-07-28T08:32:58+08:00">2021-07-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-16 10:02:26" itemprop="dateModified" datetime="2021-08-16T10:02:26+08:00">2021-08-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/Framework/" itemprop="url" rel="index"><span itemprop="name">Framework</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/Framework/%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/" itemprop="url" rel="index"><span itemprop="name">系统服务</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="应用服务相关"><a href="#应用服务相关" class="headerlink" title="应用服务相关"></a>应用服务相关</h1><p>网络图，方便理解</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210803102239629.png" alt="image-20210803102239629"></p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210810065021622.png" alt="image-20210810065021622" style="zoom: 50%;">
+
+<p><img src="https://pic4.zhimg.com/80/v2-03255ea729dc76cdd3f4a6e195c4304f_1440w.jpg" alt="img"></p>
+<h2 id="谈谈对Zygote的理解"><a href="#谈谈对Zygote的理解" class="headerlink" title="谈谈对Zygote的理解"></a>谈谈对Zygote的理解</h2><p>考察点：Zygote的作用、Zygote的启动流程、Zygote的工作原理</p>
+<h3 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h3><ul>
+<li><p>启动SystemServer</p>
+<p>系统服务进程SystemServer是由Zygote进程fork出的（系统中比较重要的ActivityManagerService、PackageManagerService，WindowManagerService以及PowerManagerService等也是由SystemServer进程创建而来的），fork出的SystemServer进程会继承Zygote的资源，比如：常用类、JNI函数、主题资源、共享库等。</p>
+</li>
+<li><p>孵化应用进程</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/HUandroid/article/details/103454434">参考android的启动流程</a><br>里面有一个方法zygoteSendArgsAndGetResult方法，就是AMS请求Zygote来创建新的应用程序进程的。</p>
+<h3 id="启动三段式"><a href="#启动三段式" class="headerlink" title="启动三段式"></a>启动三段式</h3><p>Android进程启动常用套路：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">A[进程启动] --&gt; B[准备工作]</span><br><span class="line">B --&gt; C[Loop-不停接收&#x2F;处理消息]</span><br></pre></td></tr></table></figure>
+<h3 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h3><h4 id="启动Zygote进程"><a href="#启动Zygote进程" class="headerlink" title="启动Zygote进程"></a>启动Zygote进程</h4><p>Init进程：Linux启动后用户空间的第一个进程</p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728092209535.png" alt="image-20210728092209535" style="zoom:50%;">
+
+<ol>
+<li>Init进程启动后，首先会去加载一个启动配置文件<code>init.rc</code>。</li>
+<li>查看启动配置文件定义了哪些需要启动的系统服务 <code>Zygote</code>服务也是需要启动的进程之一，<code>Service Manager</code>也是需要启动的进程。</li>
+<li>通过 <code>fork</code>和 <code>execve</code>系统调用，启动<code>Zygote</code>。</li>
+</ol>
+<h5 id="启动配置"><a href="#启动配置" class="headerlink" title="启动配置"></a>启动配置</h5><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728092629781.png" alt="image-20210728092629781" style="zoom:50%;">
+
+<p>红色：service的名称。蓝色：可执行路径。黄色：参数。</p>
+<p>进程启动靠的是fork和exeve系统调用，需要传可执行的路径和参数，</p>
+<h5 id="启动进程"><a href="#启动进程" class="headerlink" title="启动进程"></a>启动进程</h5><p>启动进程有两种方式</p>
+<ul>
+<li><p>fork + handle</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pid_t</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span>( pid == <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="comment">// child process</span></span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  <span class="comment">// parent process</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>fork + exeve</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pid_t</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span>( pid == <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="comment">// child process</span></span><br><span class="line">  execve(path,argv,env);<span class="comment">// 执行程序路径，执行程序参数，环境变量</span></span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">  <span class="comment">// parent process</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第一步都调用<code>fork</code>函数创建子进程。<code>fork()</code>函数会返回两次，子进程父进程各一次。区别在于子进程的<code>pid</code>返回0 ，父进程的pid返回的是子进程的<code>pid</code> ，所以可以根据判断pid是不是0判断是否是子进程还是父进程。</p>
+</li>
+</ul>
+<p>默认来说创建的子进程会继承父进程的所有资源，调用<code>execve</code>系统调用去启动新的二进制程序，子进程继承的父进程资源就会被清掉，完全被新的二进制程序替换。</p>
+<h5 id="信号处理-SiGCHILD"><a href="#信号处理-SiGCHILD" class="headerlink" title="信号处理- SiGCHILD"></a>信号处理- SiGCHILD</h5><p>fork进程的时候父进程一般都要关注这个信号。</p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728095502377.png" alt="image-20210728095502377" style="zoom:50%;">
+
+<p>如果父进程<code>fork</code>一个子进程，子进程挂了会发送一个<code>SIGCHILD</code>信号给父进程，这时父进程就可以做一些处理。比如<code>Zygote</code>挂了就会发送一个<code>SIGCHILD</code>信号给<code>Init</code>进程进行重启。</p>
+<h4 id="Zygote进程启动之后做了什么？"><a href="#Zygote进程启动之后做了什么？" class="headerlink" title="Zygote进程启动之后做了什么？"></a>Zygote进程启动之后做了什么？</h4><ul>
+<li><p>Native 部分（准备部分）</p>
+<p>Zygote启动之后执行了一个<code>execve</code>系统调用,执行一个二进制可执行程序（c++，里面有一个<code>main</code>函数作为入口）所以说Zygote天生就是Native的，做一些准备工作之后就切到Java中运行了。</p>
+</li>
+<li><p>Java 部分实际运行</p>
+</li>
+</ul>
+<h5 id="Native部分"><a href="#Native部分" class="headerlink" title="Native部分"></a>Native部分</h5><p>目的是为了Java执行做准备。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">A[启动Android虚拟机] --&gt; B[注册Android系统关键类的JNI函数]</span><br><span class="line">B --&gt; C[JNI调用进入Java部分]</span><br></pre></td></tr></table></figure>
+<h6 id="Native切换到Java"><a href="#Native切换到Java" class="headerlink" title="Native切换到Java"></a>Native切换到Java</h6><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728101441277.png" alt="image-20210728101441277" style="zoom:50%;">
+
+<p>关键： JNICreateJavaVM 函数创建虚拟机。</p>
+<ol>
+<li>JNICreateJavaVM 创建虚拟机</li>
+<li>找到ZygoteInit这个Java类</li>
+<li>在ZygoteInit类中找到 Main这个静态函数</li>
+<li>用CallStaticVoidMethod去调用这个函数</li>
+<li>最后DestoryJavaVM 销毁Java虚拟机</li>
+</ol>
+<p>应用进程不需要创建虚拟机，是因为在Zygote进程中已经加载好了，我们应用进程是由Zygote孵化出来的，继承了Java虚拟机，只需要在进程启动的时候重置一下虚拟机的状态属性，再重启一下虚拟机就可以了</p>
+<p>c++代码看着太难受，说下入口是哪里，想研究可看下：<br><code>app_main.cpp </code>是<code>app_process</code>的入口文件<br>创建虚拟机的位置在：<br><code>AndroidRuntime.cpp</code>中的<code>startVm</code>方法来启动虚拟机，<code>startReg</code>来注册JNI函数，<code>CallStaticVoidMethod(startClass, startMeth, strArray)</code>来调用<code>ZygoteInit</code>类的<code>main</code>方法，启动Java部分。<br>注意点：应用程序的虚拟机是继承Zygote进程的，然后再重置虚拟机的状态，再重启下虚拟机。</p>
+<h5 id="Java部分"><a href="#Java部分" class="headerlink" title="Java部分"></a>Java部分</h5><p>主要做了三件事</p>
+<ol>
+<li>预加载资源：孵化子进程的时候可以继承给他们，包括常用类、主题相关的资源、共享库。</li>
+<li>fork 启动SystemServer进程。</li>
+<li>进入Loop循环，等待Socket消息。用于AMS通信，参考android启动流程中的ZygoteState.connect(mSocket)，这里会创建Socket链接，在接受到AMS跨进程发过来的消息后，会调用handleChildProc启动ActivityThread.main()方法，进入新的进程了。</li>
+</ol>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728104550796.png" alt="image-20210728104550796" style="zoom:50%;">
+
+<h6 id="Loop循环"><a href="#Loop循环" class="headerlink" title="Loop循环"></a>Loop循环</h6><p>Zygote启动之后，会启动Socket Loop循环，会不断轮询Socket，当有请求过来的时候会执行runOnce函数。</p>
+<p>runOnece方法：</p>
+<ol>
+<li><p>读取参数列表 readArgumentLIst()。</p>
+</li>
+<li><p>根据参数启动子进程 forkAndSpecialize()。</p>
+</li>
+<li><p>子进程启动后调用ActivityThread.Main函数</p>
+<p>子进程中调用 handleChidPro()，它会在子进程中调用一个Java类的Main函数，Java类名来自于读取的参数列表，是由AMS跨进程发过来的，类名其实是ActivityThread</p>
+</li>
+</ol>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210728105334941.png" alt="image-20210728105334941" style="zoom:33%;">
+
+
+
+<h3 id="细节与问题"><a href="#细节与问题" class="headerlink" title="细节与问题"></a>细节与问题</h3><h4 id="Zygote-fork-要单线程"><a href="#Zygote-fork-要单线程" class="headerlink" title="Zygote fork 要单线程"></a>Zygote fork 要单线程</h4><p>Zygote里面有很多其他线程，为了保证状态一致并避免死锁，在fork子进程的时候，会停掉其他线程，在fork完成后，再恢复。可以理解为fork只能拷贝当前线程，不支持多线程的fork。</p>
+<p>我们知道，应用在启动的时候需要做很多准备工作，包括启动虚拟机，加载各类系统资源等等，这些都是非常耗时的，如果能在zygote里就给这些必要的初始化工作做好，子进程在fork的时候就能直接共享，那么这样的话效率就会非常高。</p>
+<p>这个就是zygote存在的价值，这一点呢SystemServer是替代不了的，主要是因为SystemServer里跑了一堆系统服务，这些是不能继承到应用进程的。所以给SystemServer和应用进程里都要用到的资源抽出来单独放在一个进程里，也就是这的zygote进程，然后zygote进程再分别孵化出SystemServer进程和应用进程。</p>
+<h4 id="Zygote的IPC为啥没有采用binder通信？"><a href="#Zygote的IPC为啥没有采用binder通信？" class="headerlink" title="Zygote的IPC为啥没有采用binder通信？"></a>Zygote的IPC为啥没有采用binder通信？</h4><p>Zygote的mian方法中会创建一个server端Socket（LocalSocket\LocalServerSocket），用于等待AMS请求Zygote来创建新的应用程序进程的，并且封装了TCP/IP协议，去掉网络相关。<br>首先这里<strong>有一坑</strong>，别跳：binder线程的初始化是在ServiceManger初始化的，而ServiceManger是Init进程孵化的，比Zygote进程更早，所以就<strong>不存在先后顺序问题</strong>。<br>原因：</p>
+<ol>
+<li>为了避免父亲进程死锁、状态不一致等其他多线程问题，如果采用binder，在父进程binder线程有锁，然后子进程的主线程一直在等其子线程的资源，但是其实父进程的子进程并没有被拷贝过来，造成死锁，所以fork进程不允许存在多线程。而Binder通信是多线程的。</li>
+<li>对于Zygote和SystemServer而言，Socket更加简单便捷，也符合单线程规范。</li>
+</ol>
+<h4 id="孵化应用进程为什么不交给SystemServer来做，而专门设计一个zygote？"><a href="#孵化应用进程为什么不交给SystemServer来做，而专门设计一个zygote？" class="headerlink" title="孵化应用进程为什么不交给SystemServer来做，而专门设计一个zygote？"></a>孵化应用进程为什么不交给SystemServer来做，而专门设计一个zygote？</h4><p>因为效率问题，SystemServer里面会跑一些其他的服务，如果SystemServer来fork进程，可能造成资源污染，不适合继承。而Zygote进程专门设计来干这事的。</p>
+<h2 id="说一说Android系统的启动流程"><a href="#说一说Android系统的启动流程" class="headerlink" title="说一说Android系统的启动流程"></a>说一说Android系统的启动流程</h2><h3 id="android有那些主要的系统进程？"><a href="#android有那些主要的系统进程？" class="headerlink" title="android有那些主要的系统进程？"></a>android有那些主要的系统进程？</h3><p>主要的系统进程，可以查看<code>init.rc</code></p>
+<ul>
+<li><p>service <code>zygote</code> system/bin/app_process..</p>
+</li>
+<li><p>service <code>servicemanager</code> system/bin/servicemanager..</p>
+</li>
+<li><p>service <code>surfacefilinger</code> system/bin/<code>surfacefilinger</code> ..</p>
+</li>
+<li><p>service <code>media</code> system/bin/media..</p>
+</li>
+<li><p>……</p>
+</li>
+</ul>
+<p><code>zygote</code> <code>ServiceManager</code> <code>surfaceflinger</code> <code>media</code> <code>SystemServer</code> <code>AMS</code> <code>PMS</code>等</p>
+<h3 id="这些系统进程怎么启动的？"><a href="#这些系统进程怎么启动的？" class="headerlink" title="这些系统进程怎么启动的？"></a>这些系统进程怎么启动的？</h3><p>主要说下<code>zygote</code>、<code>ServiceManager</code> <code>SystemServer</code></p>
+<h3 id="ServiceManager启动流程"><a href="#ServiceManager启动流程" class="headerlink" title="ServiceManager启动流程"></a>ServiceManager启动流程</h3><p>先看网上博主的流程图，方便理解：后面会讲。</p>
+<p><img src="https://img-blog.csdnimg.cn/20210402152226284.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0hVYW5kcm9pZA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3 id="Zygote启动流程"><a href="#Zygote启动流程" class="headerlink" title="Zygote启动流程"></a>Zygote启动流程</h3><p>参考上面。</p>
+<h3 id="SystemServer启动流程"><a href="#SystemServer启动流程" class="headerlink" title="SystemServer启动流程"></a>SystemServer启动流程</h3><h4 id="zygote启动部分"><a href="#zygote启动部分" class="headerlink" title="zygote启动部分"></a>zygote启动部分</h4><p>看下zygote启动SystemServer的伪代码：<br>pid为0就是处于fork后的子进程，大于0就是处于父进程。<br>具体源码位置：frameworks/base/core/java/com/android/internal/os/ZygoteInit.jav</p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210802154029544.png" alt="image-20210802154029544" style="zoom:50%;">
+
+<p>通过zygote来fork出SystemServer ，然后再处理<code>handleSystemServerProcess(parsedArgs)</code>方法了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Runnable <span class="title">handleSystemServerProcess</span><span class="params">(ZygoteConnection.Arguments parsedArgs)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再到<code>ZygoteInit.zygoteInit</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Runnable <span class="title">zygoteInit</span><span class="params">(<span class="keyword">int</span> targetSdkVersion, String[] argv, ClassLoader classLoader)</span> </span>&#123;</span><br><span class="line">        RuntimeInit.redirectLogStreams();</span><br><span class="line">        RuntimeInit.commonInit();</span><br><span class="line">        ZygoteInit.nativeZygoteInit();</span><br><span class="line">        <span class="keyword">return</span> RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>源码地址：/frameworks/base/core/java/com/android/internal/os/RuntimeInit.java<br><code>RuntimeInit.redirectLogStreams()是</code>初始化日志、<code>RuntimeInit.commonInit()</code>是公用初始化、<code>ZygoteInit.nativeZygoteInit()</code>是用来启用binder机制，注意不是创建，启动了一个binder线程、<code>RuntimeInit.applicationInit</code>来启动<code>SystemServer</code>的java类入口。</p>
+<h4 id="SystemServer的部分"><a href="#SystemServer的部分" class="headerlink" title="SystemServer的部分"></a>SystemServer的部分</h4><p>看下<code>RuntimeInit.applicationInit</code>代码，会调用到<code>findStaticMain()</code>方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">static</span> Runnable <span class="title">findStaticMain</span><span class="params">(String className, String[] argv,</span></span></span><br><span class="line"><span class="function"><span class="params">           ClassLoader classLoader)</span> </span>&#123;</span><br><span class="line">           <span class="comment">//className 就是上面传进来的 com.android.server.SystemServer</span></span><br><span class="line">       Class&lt;?&gt; cl;</span><br><span class="line">       cl = Class.forName(className, <span class="keyword">true</span>, classLoader);</span><br><span class="line">       Method m;</span><br><span class="line">       m = cl.getMethod(<span class="string">&quot;main&quot;</span>, <span class="keyword">new</span> Class[] &#123; String[].class &#125;);    </span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> MethodAndArgsCaller(m, argv);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>就是反射启动Java类调用main方法，类名为<code>com.android.server.SystemServer</code>，跟进看SystemServer.java的main方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> SystemServer().run();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>直接执行<code>run()</code>函数，代码太多，看伪代码了：</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210803170335310.png" alt="image-20210803170335310"></p>
+<p>根据上面伪代码，可看出主要干了：</p>
+<ol>
+<li>给主线程绑定一个Looper</li>
+<li>加载一个共享库android_servers，是SystemServer系统层的代码</li>
+<li>创建一个系统的上下文，可看成一个应用</li>
+<li>启动bootstrap引导相关Services，AMS、DisplayManagerService等服务。</li>
+<li>启动Core核心相关Services , BatteryService、UserStatsService和WebviewUpdateService。</li>
+<li>启动Other其他相关Services，AlarmMangerService、VibratorService。</li>
+<li>开始Looper的轮询</li>
+</ol>
+<h4 id="桌面的启动"><a href="#桌面的启动" class="headerlink" title="桌面的启动"></a>桌面的启动</h4><p>当SystemServer服务就绪的时候，会调用<code> startHomeActivityLocked(currentUserId, &quot;systemReady&quot;)</code>方法，然后会调用<code>ActivityInfo aInfo = resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);</code>去找到<code>Launcher</code>启动的<code>Activity</code>，然后调用<code>mActivityStartController.startHomeActivity(intent, aInfo, myReason)</code>来通过意图启动Launcher。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.MAIN&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.HOME&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;com.aliyun.ushell.action.detailpage&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="细节与问题-1"><a href="#细节与问题-1" class="headerlink" title="细节与问题"></a>细节与问题</h3><h4 id="系统服务是怎么发布，让应用程序可见？"><a href="#系统服务是怎么发布，让应用程序可见？" class="headerlink" title="系统服务是怎么发布，让应用程序可见？"></a>系统服务是怎么发布，让应用程序可见？</h4><p>绑定到ServiceManager</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804063533311.png" alt="image-20210804063533311"></p>
+<h4 id="系统服务跑在什么线程？"><a href="#系统服务跑在什么线程？" class="headerlink" title="系统服务跑在什么线程？"></a>系统服务跑在什么线程？</h4><p>几乎没有在主线程上的，大部分创建在binder线程，部分例如DisplayThread、FgThread(前台线程)、IoThread、UiThread跑在工作线程</p>
+<ol>
+<li>为什么系统服务不都跑在binder线程里？<br>因为binder线程是共享的，存在资源抢占问题，会影响系统服务响应的实时性。</li>
+<li>为什么系统服务不都跑在自己私有的工作线程里？<br>开辟的线程太多，系统负载高，同时会浪费资源在切换线程里。</li>
+<li>跑在binder线程和跑在工作线程，如何取舍？<br>对于实时性不高、耗时不多的可以跑在binder线程里</li>
+</ol>
+<h4 id="怎么解决系统服务之间的相互依赖"><a href="#怎么解决系统服务之间的相互依赖" class="headerlink" title="怎么解决系统服务之间的相互依赖"></a>怎么解决系统服务之间的相互依赖</h4><p>分批启动：比较基础的服务放在前面启动，比如AMS、PKMS<br>分阶段启动：每到一个阶段告诉Service，那些资源可用，可以做那些初始化</p>
+<h2 id="怎么添加一个系统服务"><a href="#怎么添加一个系统服务" class="headerlink" title="怎么添加一个系统服务"></a>怎么添加一个系统服务</h2><h3 id="如何使用系统服务"><a href="#如何使用系统服务" class="headerlink" title="如何使用系统服务"></a>如何使用系统服务</h3><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804073153462.png" alt="image-20210804073153462" style="zoom:50%;">
+
+<p>接着看下<code>ServiceFetcher</code>中<code>getService(ctx)</code>的实现：</p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804073233676.png" alt="image-20210804073233676" style="zoom: 33%;">
+
+<p>然后看createService()相关代码，这里以POWER_SERVICE为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">registerService(Context.POWER_SERVICE, PowerManager.class,</span><br><span class="line">        <span class="keyword">new</span> CachedServiceFetcher&lt;PowerManager&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> PowerManager <span class="title">createService</span><span class="params">(ContextImpl ctx)</span> <span class="keyword">throws</span> ServiceNotFoundException </span>&#123;</span><br><span class="line">               <span class="comment">//ServiceManager 通过名称拿到IBinder对象</span></span><br><span class="line">                IBinder b = ServiceManager.getServiceOrThrow(Context.POWER_SERVICE);</span><br><span class="line">                <span class="comment">//IPowerManager 是业务类</span></span><br><span class="line">                IPowerManager service = IPowerManager.Stub.asInterface(b);</span><br><span class="line">                <span class="comment">//PowerManager 是IPowerManager 的包装类，调用还是在IPowerManager里面</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> PowerManager(ctx.getOuterContext(),</span><br><span class="line">                        service, ctx.mMainThread.getHandler());</span><br><span class="line">            &#125;&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>具体来看<code>getServiceOrThrow</code>方法，就是调用<code>getService</code>方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Cache for the &quot;well known&quot; services, such as WM and AM.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">static</span> HashMap&lt;String, IBinder&gt; sCache = <span class="keyword">new</span> HashMap&lt;String, IBinder&gt;()</span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> IBinder <span class="title">getService</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            IBinder service = sCache.get(name);</span><br><span class="line">            <span class="keyword">if</span> (service != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> service;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> Binder.allowBlocking(rawGetService(name));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">            Log.e(TAG, <span class="string">&quot;error in getService&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>其中<code>rawGetService(name)</code>会通过<code>ServiceManagerNative .asInterface(Binder.allowBlocking(BinderInternal.getContextObject()));</code>返回IBinder对象。</p>
+<h3 id="服务的注册原理"><a href="#服务的注册原理" class="headerlink" title="服务的注册原理"></a>服务的注册原理</h3><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804073709062.png" alt="image-20210804073709062" style="zoom:50%;">
+
+<p>部分系统服务注册是在SystemService初始化注册的。<br>独立进程的系统服务，需要改init.rc的配置且要有main入口函数。</p>
+<h3 id="怎么添加一个系统服务-1"><a href="#怎么添加一个系统服务-1" class="headerlink" title="怎么添加一个系统服务"></a>怎么添加一个系统服务</h3><h4 id="添加时机"><a href="#添加时机" class="headerlink" title="添加时机"></a>添加时机</h4><p>添加系统服务的时机：如果想跑到SystemServer里，可以利用SystemServer发布自己的服务；如果想跑在单独的进程，需要改init.rc的配置且要有main入口函数</p>
+<h4 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h4><p>启用binder机制和其他线程通信</p>
+<ol>
+<li>打开binder驱动</li>
+<li>映射内存，分配缓冲区</li>
+<li>启动binder线程，进入binder loop</li>
+</ol>
+<p>初始化配置<br>把服务的binder注册到ServiceManager</p>
+<h4 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h4><p>为了保证调用方式一致，需要为这个服务注册ServiceFactory。</p>
+<h2 id="系统服务和bind的应用服务区别"><a href="#系统服务和bind的应用服务区别" class="headerlink" title="系统服务和bind的应用服务区别"></a>系统服务和bind的应用服务区别</h2><h3 id="启动方式"><a href="#启动方式" class="headerlink" title="启动方式"></a>启动方式</h3><h4 id="系统服务"><a href="#系统服务" class="headerlink" title="系统服务"></a>系统服务</h4><p>在SystemServer里面进行分批、分阶段启动，大部分都跑在binder线程里面。</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804074431859.png" alt="image-20210804074431859"></p>
+<h4 id="应用服务"><a href="#应用服务" class="headerlink" title="应用服务"></a>应用服务</h4><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804080145885.png" alt="image-20210804080145885" style="zoom:50%;">
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> ComponentName <span class="title">startServiceCommon</span><span class="params">(Intent service, <span class="keyword">boolean</span> requireForeground,</span></span></span><br><span class="line"><span class="function"><span class="params">            UserHandle user)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            validateServiceIntent(service);</span><br><span class="line">            service.prepareToLeaveProcess(<span class="keyword">this</span>);</span><br><span class="line">            ComponentName cn = ActivityManager.getService().startService(</span><br><span class="line">                mMainThread.getApplicationThread(), service, service.resolveTypeIfNeeded(</span><br><span class="line">                            getContentResolver()), requireForeground,</span><br><span class="line">                            getOpPackageName(), user.getIdentifier());</span><br><span class="line">            <span class="keyword">if</span> (cn != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (cn.getPackageName().equals(<span class="string">&quot;!&quot;</span>)) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> SecurityException(</span><br><span class="line">                            <span class="string">&quot;Not allowed to start service &quot;</span> + service</span><br><span class="line">                            + <span class="string">&quot; without permission &quot;</span> + cn.getClassName());</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cn.getPackageName().equals(<span class="string">&quot;!!&quot;</span>)) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> SecurityException(</span><br><span class="line">                            <span class="string">&quot;Unable to start service &quot;</span> + service</span><br><span class="line">                            + <span class="string">&quot;: &quot;</span> + cn.getClassName());</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cn.getPackageName().equals(<span class="string">&quot;?&quot;</span>)) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                            <span class="string">&quot;Not allowed to start service &quot;</span> + service + <span class="string">&quot;: &quot;</span> + cn.getClassName());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> cn;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> e.rethrowFromSystemServer();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>通过<code>ActivityManager.getService().startService()</code>启动的，后面会跟到源码<code>ActiveServices</code>这里：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/am/ActiveServices.java</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ActiveServices</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">realStartServiceLocked</span><span class="params">(ServiceRecord r,</span></span></span><br><span class="line"><span class="function"><span class="params">            ProcessRecord app, <span class="keyword">boolean</span> execInFg)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">        ... ...</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ... ...</span><br><span class="line"></span><br><span class="line">            app.thread.scheduleCreateService(r, r.serviceInfo,</span><br><span class="line">                    mAm.compatibilityInfoForPackage(r.serviceInfo.applicationInfo), app.getReportedProcState());</span><br><span class="line">            ... ...</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        ... ...</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>app 对象的 thread 会调用到客户端的 ActivityThread 中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ActivityThread</span> <span class="keyword">extends</span> <span class="title">ClientTransactionHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ApplicationThread 是一个 Binder</span></span><br><span class="line">    <span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationThread</span> <span class="keyword">extends</span> <span class="title">IApplicationThread</span>.<span class="title">Stub</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">scheduleCreateService</span><span class="params">(IBinder token,</span></span></span><br><span class="line"><span class="function"><span class="params">                ServiceInfo info, CompatibilityInfo compatInfo, <span class="keyword">int</span> processState)</span> </span>&#123;</span><br><span class="line">            updateProcessState(processState, <span class="keyword">false</span>);</span><br><span class="line">            CreateServiceData s = <span class="keyword">new</span> CreateServiceData();</span><br><span class="line">            s.token = token;</span><br><span class="line">            s.info = info;</span><br><span class="line">            s.compatInfo = compatInfo;</span><br><span class="line">            sendMessage(H.CREATE_SERVICE, s);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>很熟悉的<code>sendMessage</code>方法，会发送消息到<code>H</code>类里面：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">H</span> <span class="keyword">extends</span> <span class="title">Handler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">switch</span> (msg.what) &#123;</span><br><span class="line">			 ...	</span><br><span class="line">                <span class="keyword">case</span> CREATE_SERVICE:</span><br><span class="line">                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, (<span class="string">&quot;serviceCreate: &quot;</span> + String.valueOf(msg.obj)));</span><br><span class="line">                    handleCreateService((CreateServiceData)msg.obj);    <span class="comment">// 调用 handleCreateService() 方法</span></span><br><span class="line">                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">			...</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>跟入<code>handleCreateService((CreateServiceData)msg.obj)</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">handleCreateService</span><span class="params">(CreateServiceData data)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// If we are getting ready to gc after going to the background, well</span></span><br><span class="line">        <span class="comment">// we are back active so skip it.</span></span><br><span class="line">        unscheduleGcIdler();</span><br><span class="line"></span><br><span class="line">        LoadedApk packageInfo = getPackageInfoNoCheck(</span><br><span class="line">                data.info.applicationInfo, data.compatInfo);</span><br><span class="line">        Service service = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        java.lang.ClassLoader cl = packageInfo.getClassLoader();</span><br><span class="line">        service = packageInfo.getAppFactory()</span><br><span class="line">                .instantiateService(cl, data.info.name, data.intent);</span><br><span class="line">        </span><br><span class="line">        ContextImpl context = ContextImpl.createAppContext(<span class="keyword">this</span>, packageInfo);</span><br><span class="line">        context.setOuterContext(service);</span><br><span class="line"></span><br><span class="line">        Application app = packageInfo.makeApplication(<span class="keyword">false</span>, mInstrumentation);</span><br><span class="line">        service.attach(context, <span class="keyword">this</span>, data.info.name, data.token, app,</span><br><span class="line">                ActivityManager.getService());</span><br><span class="line">        service.onCreate();</span><br><span class="line">        mServices.put(data.token, service);</span><br><span class="line">        ActivityManager.getService().serviceDoneExecuting(</span><br><span class="line">                data.token, SERVICE_DONE_EXECUTING_ANON, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>分开看，<code>instantiateService</code>用来构建Service对象，<code>attach</code>给service赋予application，最后调用<code>onCreate</code>方法。</p>
+<h3 id="注册方式"><a href="#注册方式" class="headerlink" title="注册方式"></a>注册方式</h3><h4 id="系统服务-1"><a href="#系统服务-1" class="headerlink" title="系统服务"></a>系统服务</h4><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804075326480.png" alt="image-20210804075326480" style="zoom:50%;">
+
+<p>总体上无论SystemServer、还是单独进程，都是要注册到ServiceManager上的。</p>
+<h4 id="应用服务-1"><a href="#应用服务-1" class="headerlink" title="应用服务"></a>应用服务</h4><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804075355725.png" alt="image-20210804075355725"></p>
+<ol>
+<li>应用端会向AMS发起bindService。</li>
+<li>AMS会先判断这个Service是否已经注册过了，注册过就直接把之前发布的binder返回给应用；如果没有，AMS会像Service请求binder对象。（AMS请求的，属于被动注册）</li>
+<li>Service会响应AMS的请求，发布这个binder对象到AMS</li>
+<li>AMS再把这个binder对象回调给应用</li>
+</ol>
+<h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><h4 id="系统服务-2"><a href="#系统服务-2" class="headerlink" title="系统服务"></a>系统服务</h4><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804080507956.png" alt="image-20210804080507956"></p>
+<p>通过服务名去找到对应的ServiceFetcher对象：</p>
+<ol>
+<li>先通过SM.getService拿到binder对象</li>
+<li>封装了一层拿到服务的管理对象。</li>
+</ol>
+<h4 id="应用服务-2"><a href="#应用服务-2" class="headerlink" title="应用服务"></a>应用服务</h4><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804080742597.png" alt="image-20210804080742597" style="zoom: 50%;">
+
+<ol>
+<li>通过bindService向AMS发送绑定服务端请求</li>
+<li>AMS通过onServiceConnected()回调把服务的binder对象返回给业务端，然后把这个对象封装成业务接口对象给业务接口调用。</li>
+</ol>
+<h2 id="ServiceManager启动和工作原理"><a href="#ServiceManager启动和工作原理" class="headerlink" title="ServiceManager启动和工作原理"></a>ServiceManager启动和工作原理</h2><h3 id="ServiceManager启动流程-1"><a href="#ServiceManager启动流程-1" class="headerlink" title="ServiceManager启动流程"></a>ServiceManager启动流程</h3><ol>
+<li>启动进程</li>
+<li>启用Binder机制</li>
+<li>发布自己的服务</li>
+<li>等待并响应请求</li>
+</ol>
+<p><strong>具体流程：</strong><br>ServiceManager也是配置<code>init.rc</code>启动文件中的,也是通过init进程拉起来的。</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804081458144.png" alt="image-20210804081458144"></p>
+<p>然后执行了<code>service_manager.c</code>的main函数：<br>frameworks/native/cmds/servicemanager/service_manager.c</p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804081539244.png" alt="image-20210804081539244" style="zoom:33%;">
+
+<p><code>binder_open(128*1024)</code>，打开binder驱动。</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804082613885.png" alt="image-20210804082613885"></p>
+<p>主要是打开binder驱动，会返回一个描述符，然后再调用mmap给描述符创建一块内存（128K，业务比较简单，够用了）。</p>
+<p><code>binder_become_context_manager(bs)</code>，把自己注册成上下文管理者。</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804082653707.png" alt="image-20210804082653707"></p>
+<p>就是告诉binder驱动，自身已经准备就绪了。</p>
+<p><code>binder_loop(bs,svcmgr_handler)</code>，开启轮询，等待并处理请求。</p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804082818267.png" alt="image-20210804082818267" style="zoom:33%;">
+
+<p>binder_write用来处理读写请求的。<br>BINDER_WRITE_READ 是读写指令，如何判断是读还是写，是看read_size和write_size是否大于0，都大于0 ，优先写。）</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804083621329.png" alt="image-20210804083621329"></p>
+<p><code>for(;;)</code>开启轮询，然后调用<code>binder_parse</code>去执行请求。</p>
+<h3 id="获取ServiceManager的binder对象"><a href="#获取ServiceManager的binder对象" class="headerlink" title="获取ServiceManager的binder对象"></a>获取ServiceManager的binder对象</h3><p>以SurfaceFlinger获取SM为例子，<code>defaultServiceManager()</code>来获取ServiceManager：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210407195759677.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0hVYW5kcm9pZA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>先判断缓存是否存在，不存在会开启一个等待。SurfaceFlinger也是init.rc拉起来，存在ServiceManager还没初始化完成的状态。通过getContextObject获取ServiceManager的binder对象。</p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804174154785.png" alt="image-20210804174154785" style="zoom: 50%;">
+
+<p>IBinder对象就是BpBinder。    </p>
+<h3 id="向ServiceManager添加服务"><a href="#向ServiceManager添加服务" class="headerlink" title="向ServiceManager添加服务"></a>向ServiceManager添加服务</h3><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804174449051.png" alt="image-20210804174449051"></p>
+<p>通过remote()获得BpBinder对象，再调用BpBinder的transcat函数：</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175100203.png" alt="image-20210804175100203"></p>
+<p>IPCThreadState是线程内的单例，负责与binder交互的，通过Handle与驱动交互。<br>再看ServiceManager接收方：</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175136552.png" alt="image-20210804175136552"></p>
+<p>通过svcmgr_handler()，switch处理code，调用<code>do_add_service(bs,s,len,handle,...)</code>，注册一个handler插入到一个单链表里面。</p>
+<h3 id="从ServiceManager获取服务"><a href="#从ServiceManager获取服务" class="headerlink" title="从ServiceManager获取服务"></a>从ServiceManager获取服务</h3><p>跟注册服务差不多，发起binder调用：</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175259418.png" alt="image-20210804175259418"></p>
+<p>跟上面一样，ServiceManager接受handler消息处理：</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175409056.png" alt="image-20210804175409056"></p>
+<p>接收方也是通过svcmgr_handler()，switch处理code，调用<code>do_find_service</code>找到对应binder对象的handle值返回。</p>
+<h1 id="应用进程相关"><a href="#应用进程相关" class="headerlink" title="应用进程相关"></a>应用进程相关</h1><h2 id="应用进程是怎么启动的"><a href="#应用进程是怎么启动的" class="headerlink" title="应用进程是怎么启动的"></a>应用进程是怎么启动的</h2><h3 id="Linux下进程的启动方式"><a href="#Linux下进程的启动方式" class="headerlink" title="Linux下进程的启动方式"></a>Linux下进程的启动方式</h3><p>还记得前面提到SystemService的启动么，都是通过fork()孵化出来的：</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175629452.png" alt="image-20210804175629452"></p>
+<p>两者区别就是exevce方法的执行，普通fork()子进程会共享父进程资源，而exevce的fork()出的子进程资源会被path替换掉，path是一个二进制程序的路径。</p>
+<h3 id="应用进程启动的原理"><a href="#应用进程启动的原理" class="headerlink" title="应用进程启动的原理"></a>应用进程启动的原理</h3><h4 id="什么时候触发的进程启动？谁发起的？"><a href="#什么时候触发的进程启动？谁发起的？" class="headerlink" title="什么时候触发的进程启动？谁发起的？"></a>什么时候触发的进程启动？谁发起的？</h4><p>一般是被动触发的，对于android而言，如果要启动的组件所在进程未启动，就会启动进程了。</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175720944.png" alt="image-20210804175720944"></p>
+<p>解释下<code>app.thread</code>:</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804175836378.png" alt="image-20210804175836378"></p>
+<p>在应用启动的时候，会向AMS通信，即会调用IActivityManager的函数告诉AMS自身启动意图和注册IApplicationThread句柄（句柄是一个标识符）。</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804180002280.png" alt="image-20210804180002280"></p>
+<h4 id="进程是谁启动的？怎么启动？"><a href="#进程是谁启动的？怎么启动？" class="headerlink" title="进程是谁启动的？怎么启动？"></a>进程是谁启动的？怎么启动？</h4><p>启动参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/HUandroid/article/details/103454434">9.0app启动</a></p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804180031051.png" alt="image-20210804180031051"></p>
+<p>zygote启动loop后，收到消息会调用runOnce函数，里面会fork进程后，子进程（pid==0）会调用handleChildProc()方法，会启动ActivityThread的入口函数main；父进程（pid&gt;0）会调用handlePanrentProc（pid..）方法，会通过socket将pid写回去。</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804180132194.png" alt="image-20210804180132194"></p>
+<ol>
+<li>由AMS通过socket向zygote发起 –&gt; socket是为了避免启动多线程</li>
+<li>zygote fork出应用进程，即通过startProcessLocked方法，打开本地socket，发送参数列表，返回创建的进程id，执行ActivityThread的main函数</li>
+<li>进程启动之后向AMS报告，整个启动才算结束（AMS确定进程启动后才能去启动各个组件</li>
+</ol>
+<h2 id="应用怎么启用Binder机制的"><a href="#应用怎么启用Binder机制的" class="headerlink" title="应用怎么启用Binder机制的"></a>应用怎么启用Binder机制的</h2><h3 id="支持binder时机"><a href="#支持binder时机" class="headerlink" title="支持binder时机"></a>支持binder时机</h3><p>根据前面系统启动可知，binder机制是zygote拉起SystemServer时候就开始支持的。</p>
+<h3 id="怎么启动Binder机制"><a href="#怎么启动Binder机制" class="headerlink" title="怎么启动Binder机制"></a>怎么启动Binder机制</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">A[打开binder驱动] --&gt; B[映射内存分配缓冲区]</span><br><span class="line">B --&gt; C[注册Binder线程]</span><br><span class="line">C --&gt; D[进入BinderLoop]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="对Application的理解"><a href="#对Application的理解" class="headerlink" title="对Application的理解"></a>对Application的理解</h2><h3 id="作用-1"><a href="#作用-1" class="headerlink" title="作用"></a>作用</h3><ul>
+<li>保存应用进程内的全局变量</li>
+<li>提供应用的上下文</li>
+<li>提供初始化入口</li>
+</ul>
+<p>注意：Application是对应的进程，而不是应用。一般情况下，一个应用对应一个进程一个虚拟机，也可以在清单文件中配置多个进程，这样Application会初始化多次。</p>
+<h3 id="类继承关系及生命周期～"><a href="#类继承关系及生命周期～" class="headerlink" title="类继承关系及生命周期～"></a>类继承关系及生命周期～</h3><p>直接看图：</p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804180946698.png" alt="image-20210804180946698" style="zoom:70%;">
+
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181048614.png" alt="image-20210804181048614"></p>
+<p>Application就是一个全局的上下文。<br>生命周期：</p>
+<ul>
+<li>构造函数</li>
+<li>attachBaseContext</li>
+<li>onCreate</li>
+</ul>
+<p>调用顺序请查看：<a target="_blank" rel="noopener" href="https://blog.csdn.net/HUandroid/article/details/103454434">9.0app启动</a></p>
+<h3 id="初始化原理"><a href="#初始化原理" class="headerlink" title="初始化原理"></a>初始化原理</h3><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181152621.png" alt="image-20210804181152621"></p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181441522.png" alt="image-20210804181441522"></p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181504518.png" alt="image-20210804181504518"></p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181533453.png" alt="image-20210804181533453"></p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181607318.png" alt="image-20210804181607318"></p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181643148.png" alt="image-20210804181643148"></p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181725021.png" alt="image-20210804181725021"></p>
+<p>面试题：Application创建、Application.onCreate()、Activity创建、Activity.onCreate()的执行顺序？<br>答：Activity创建 -》Application创建-》Application.onCreate()-》Activity.onCreate()<br>注意点1：不要在Application初始化阶段，执行耗时操作。<br>注意点2: Application中使用使用静态变量的问题，在挂在后台后，再次进入应用可能会内存重建（内存不足，杀掉app，再进入前台后创建进程和恢复activity），这个静态变量可能没有初始化导致的bug。对Context的理解</p>
+<h2 id="对Context的理解"><a href="#对Context的理解" class="headerlink" title="对Context的理解"></a>对Context的理解</h2><h3 id="作用-2"><a href="#作用-2" class="headerlink" title="作用"></a>作用</h3><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804181927911.png" alt="image-20210804181927911"></p>
+<p>根据官方注解，Context是一个有关应用程序环境的全局信息的接口。这是一个抽象类，其实现由Android系统提供。它允许访问特定于应用程序的资源和类，以及对应用程序级操作（例如启动活动，广播和接收意图等）的调用。<br>而具体实现是由ContextImpl来实现的：包含了各类资源的调用。</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804182136345.png" alt="image-20210804182136345"></p>
+<h3 id="初始化流程"><a href="#初始化流程" class="headerlink" title="初始化流程"></a>初始化流程</h3><p>Context 的创建分为三种组件：<code>Application</code> <code>Activity</code> <code>Service</code>。</p>
+<h4 id="Application的Context"><a href="#Application的Context" class="headerlink" title="Application的Context"></a>Application的Context</h4><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804182604515.png" alt="image-20210804182604515"></p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804184505501.png" alt="image-20210804184505501"></p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804185118638.png" alt="image-20210804185118638"></p>
+<p>而Application继承于ContextWrapper的：</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804185657489.png" alt="image-20210804185657489"></p>
+<p>将创建的ContextImpl的实现类给交了ContextWrapper，ContextWrapper就是作为一个包装类来使用。</p>
+<h4 id="Activity的Context"><a href="#Activity的Context" class="headerlink" title="Activity的Context"></a>Activity的Context</h4><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804185840788.png" alt="image-20210804185840788"></p>
+<h4 id="Service的context"><a href="#Service的context" class="headerlink" title="Service的context"></a>Service的context</h4><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210804190417559.png" alt="image-20210804190417559"></p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><ol>
+<li>应用里面有多少个Context？不同Context之间有什么区别？<br>application+activity+service，注意多进程。activity的context是继承ContextThemeWrapper，多了UI组件。</li>
+<li>Activty里的this和getBaseContext有什么区别？<br>this是返回自身，而getBaseContext 是返回ContextWrapper里面的mBase。</li>
+<li>getApplication和getApplicationContext有什么区别？<br>getApplication是Activity和Service里面特有的，getApplicationContext是Context里面的抽象函数。</li>
+<li>Dialog使用Application作为context为什么会报错？<br>使用Application的context构建dialog会报BadTokenException，因为activity这类context是带有Token信息的。每一个ActivityRecord里面都有一个appToken变量，它是一个Binder对象，主要用于维持该Activity在AMS里与WindowManager之间的联系。它在ActivityRecord的构造函数中被初始化，通过调用WindowManager.addAppToken方法将该Token注册到WindowManagerService里面。</li>
+</ol>
+<h1 id="Activity组件相关"><a href="#Activity组件相关" class="headerlink" title="Activity组件相关"></a>Activity组件相关</h1><h2 id="Activity的启动流程"><a href="#Activity的启动流程" class="headerlink" title="Activity的启动流程"></a>Activity的启动流程</h2><p>参考9.0启动流程<a target="_blank" rel="noopener" href="https://blog.csdn.net/HUandroid/article/details/103454434">https://blog.csdn.net/HUandroid/article/details/103454434</a></p>
+<h2 id="Activity的显示原理"><a href="#Activity的显示原理" class="headerlink" title="Activity的显示原理"></a>Activity的显示原理</h2><h3 id="显示原理"><a href="#显示原理" class="headerlink" title="显示原理"></a>显示原理</h3><p>Activity启动的时候会调用到<code>handleResumeActivity()</code>，实现在<code>ActivityThread</code>里面的简化代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleResumeActivity</span><span class="params">(IBinder token, <span class="keyword">boolean</span> finalStateRequest, <span class="keyword">boolean</span> isForward,</span></span></span><br><span class="line"><span class="function"><span class="params">         String reason)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">final</span> ActivityClientRecord r = performResumeActivity(token, finalStateRequest, reason);</span><br><span class="line">     <span class="keyword">final</span> Activity a = r.activity;</span><br><span class="line">     r.window = r.activity.getWindow();</span><br><span class="line">     View decor = r.window.getDecorView();</span><br><span class="line">     <span class="comment">//makeVisible 方法会设置VISIBLE</span></span><br><span class="line">     decor.setVisibility(View.INVISIBLE);</span><br><span class="line">   	<span class="comment">//获取ViewManager 其实就是WindowManager</span></span><br><span class="line">     ViewManager wm = a.getWindowManager();</span><br><span class="line">     <span class="comment">//a.mWindowAdded = true;</span></span><br><span class="line">    <span class="comment">// wm.addView(decor, layoutParams);</span></span><br><span class="line">      r.activity.makeVisible()</span><br><span class="line">     Looper.myQueue().addIdleHandler(<span class="keyword">new</span> Idler());</span><br><span class="line"> &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>先理解两个概念Window、WindowManager：</p>
+<p><strong>Window</strong>是一个抽象类，<strong>PhoneWindow</strong>是它的唯一实现类。Android中的所有视图都是通过Window来实现的。不管是Activity、Dialog还是Toast，它们的视图实际上都是附加在Window上的。View是Android中呈现视图的方式，但是View不能单独存在，必须附着在Window这个抽象的概念上。<strong>每个Window都对应着一个View和一个ViewRootImpl</strong>，Window和View通过ViewRootImpl来建立联系。</p>
+<p><strong>WindowManager</strong><br>Window的管理者，可以<strong>创建Window</strong>。Window的具体实现是在WindowManagerService中，WindowManager和WindowManagerService之间的交互是一个<strong>IPC</strong>过程。WindowManager的实现类是WindowManagerImpl，而WindowManagerImpl是个包装类，真正干活的是WindowManagerGlobal，提供了WMS的通信。</p>
+<p>接着跟进<code>makeVisible</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">makeVisible</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (!mWindowAdded) &#123;</span><br><span class="line">           ViewManager wm = getWindowManager();</span><br><span class="line">           wm.addView(mDecor, getWindow().getAttributes());</span><br><span class="line">           mWindowAdded = <span class="keyword">true</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       mDecor.setVisibility(View.VISIBLE);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>回调用ViewManager的addView方法，其实就是就是调用WindowManager的addView方法，最后由<code>WindowManagerGlobal</code>实现<code>addView</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">@UnsupportedAppUsage</span></span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> ArrayList&lt;View&gt; mViews = <span class="keyword">new</span> ArrayList&lt;View&gt;();</span><br><span class="line">   <span class="meta">@UnsupportedAppUsage</span></span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> ArrayList&lt;ViewRootImpl&gt; mRoots = <span class="keyword">new</span> ArrayList&lt;ViewRootImpl&gt;();</span><br><span class="line">   <span class="meta">@UnsupportedAppUsage</span></span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> ArrayList&lt;WindowManager.LayoutParams&gt; mParams =</span><br><span class="line">           <span class="keyword">new</span> ArrayList&lt;WindowManager.LayoutParams&gt;();</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> ArraySet&lt;View&gt; mDyingViews = <span class="keyword">new</span> ArraySet&lt;View&gt;();</span><br><span class="line">   </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addView</span><span class="params">(View view, ViewGroup.LayoutParams params,</span></span></span><br><span class="line"><span class="function"><span class="params">           Display display, Window parentWindow)</span> </span>&#123;</span><br><span class="line">     </span><br><span class="line">       ViewRootImpl root;</span><br><span class="line">       View panelParentView = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">         </span><br><span class="line"></span><br><span class="line">           root = <span class="keyword">new</span> ViewRootImpl(view.getContext(), display);</span><br><span class="line"></span><br><span class="line">           view.setLayoutParams(wparams);</span><br><span class="line"></span><br><span class="line">           mViews.add(view);</span><br><span class="line">           mRoots.add(root);</span><br><span class="line">           mParams.add(wparams);</span><br><span class="line">           root.setView(view, wparams, panelParentView);</span><br><span class="line">           <span class="comment">// do this last because it fires off messages to start doing things</span></span><br><span class="line">           <span class="keyword">try</span> &#123;</span><br><span class="line">               root.setView(view, wparams, panelParentView);</span><br><span class="line">           &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">               <span class="comment">// BadTokenException or InvalidDisplayException, clean up.</span></span><br><span class="line">               <span class="keyword">if</span> (index &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                   removeViewLocked(index, <span class="keyword">true</span>);</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">throw</span> e;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>最后是调用<code>ViewRootImpl</code>去<code>setView</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setView</span><span class="params">(View view, WindowManager.LayoutParams attrs, View panelParentView)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">               ...</span><br><span class="line">               <span class="comment">//请求绘制</span></span><br><span class="line">               requestLayout();</span><br><span class="line">               <span class="comment">//收集属性</span></span><br><span class="line"> 				collectViewAttributes();</span><br><span class="line">               res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,</span><br><span class="line">                           getHostVisibility(), mDisplay.getDisplayId(), mTmpFrame,</span><br><span class="line">                           mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,</span><br><span class="line">                           mAttachInfo.mOutsets, mAttachInfo.mDisplayCutout, mInputChannel,</span><br><span class="line">                           mTempInsets);</span><br><span class="line">                   setFrame(mTmpFrame);</span><br><span class="line">             </span><br><span class="line">               ...               </span><br><span class="line">   &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>重要的方法<code>requestLayout()</code>，大家都很熟悉，会调用到<code>scheduleTraversals()</code>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">requestLayout</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (!mHandlingLayoutInLayoutRequest) &#123;</span><br><span class="line">           checkThread();</span><br><span class="line">           mLayoutRequested = <span class="keyword">true</span>;</span><br><span class="line">           scheduleTraversals();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>最终会走到<code>performTraversals()</code>方法，执行<code>performMeasure()</code> <code>performLayout()</code> <code>performDraw()</code>，完成view的绘制。</p>
+<p>分析<code>mWindowSession</code>：</p>
+<p>IWindowSession其实是个binder对象，其最后是一个Session对象，负责与WMS通信的。</p>
+<img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805173156984.png" alt="image-20210805173156984" style="zoom:50%;">
+
+<p>分析<code>addToDisplay</code>调用：</p>
+<p>主要是将mWindow注册到WMS端构成双向绑定，重要的是WMS将获取到的Window信息进行汇总即位置、层级、大小等进行合成，显示在屏幕的缓冲区里面。</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805173332193.png" alt="image-20210805173332193"></p>
+<p><strong>setContentView原理是什么：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContentView</span><span class="params">(<span class="meta">@LayoutRes</span> <span class="keyword">int</span> layoutResID)</span> </span>&#123;</span><br><span class="line">        getWindow().setContentView(layoutResID);</span><br><span class="line">        initWindowDecorActionBar();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><code>getWindow()</code> 是返回Window对象，在attach()函数里初始化的: <code>mWindow = new PhoneWindow(this, window, activityConfigCallback)</code>,跟进<code>PhoneWindow.setContentView</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContentView</span><span class="params">(<span class="keyword">int</span> layoutResID)</span> </span>&#123;</span><br><span class="line">       <span class="comment">// Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window</span></span><br><span class="line">       <span class="comment">// decor, when theme attributes and the like are crystalized. Do not check the feature</span></span><br><span class="line">       <span class="comment">// before this happens.</span></span><br><span class="line">       <span class="comment">// 用来装ContentView的</span></span><br><span class="line">       <span class="keyword">if</span> (mContentParent == <span class="keyword">null</span>) &#123;</span><br><span class="line">           installDecor();</span><br><span class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) &#123;</span><br><span class="line">           mContentParent.removeAllViews();</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">if</span> (hasFeature(FEATURE_CONTENT_TRANSITIONS)) &#123;</span><br><span class="line">           <span class="keyword">final</span> Scene newScene = Scene.getSceneForLayout(mContentParent, layoutResID,</span><br><span class="line">                   getContext());</span><br><span class="line">           transitionTo(newScene);</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="comment">//将生成的view 装入mContentParent里面</span></span><br><span class="line">           mLayoutInflater.inflate(layoutResID, mContentParent);</span><br><span class="line">       &#125;</span><br><span class="line">       mContentParent.requestApplyInsets();</span><br><span class="line">       <span class="keyword">final</span> Callback cb = getCallback();</span><br><span class="line">       <span class="keyword">if</span> (cb != <span class="keyword">null</span> &amp;&amp; !isDestroyed()) &#123;</span><br><span class="line">           cb.onContentChanged();</span><br><span class="line">       &#125;</span><br><span class="line">       mContentParentExplicitlySet = <span class="keyword">true</span>;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>所以要看看 <code>installDecor()</code>干了那些活：</p>
+<img src="https://img-blog.csdnimg.cn/20210513152139484.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0hVYW5kcm9pZA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;">
+
+<p>然后大致可以理解成这样的：</p>
+<img src="https://img-blog.csdnimg.cn/20210513154936180.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0hVYW5kcm9pZA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;">
+
+<h3 id="UI线程"><a href="#UI线程" class="headerlink" title="UI线程"></a>UI线程</h3><p>UI线程是刷新UI所在的线程，是单线程模型。</p>
+<h4 id="UI线程是主线程嘛？"><a href="#UI线程是主线程嘛？" class="headerlink" title="UI线程是主线程嘛？"></a>UI线程是主线程嘛？</h4><p>从<code>Activity.runOnUiThread(Runnable)</code>和<code>View.post(Runnable)</code>对比找到答案：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">runOnUiThread</span><span class="params">(Runnable action)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">if</span> (Thread.currentThread() != mUiThread) &#123;</span><br><span class="line">         mHandler.post(action);</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">         action.run();</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>其中mHandle是activity中创建的，所以对应的是activity创建所在的线程的Looper。<br>而mUiThread是在activty的attach函数中赋值的。而Activity的创建都是在主线程的，所以，对与 Activity来说，UI线程就是主线程。<br>再看View.post(Runnable)：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">post</span><span class="params">(Runnable action)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> AttachInfo attachInfo = mAttachInfo;</span><br><span class="line">        <span class="keyword">if</span> (attachInfo != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> attachInfo.mHandler.post(action);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Postpone the runnable until we know on which thread it needs to run.</span></span><br><span class="line">        <span class="comment">// Assume that the runnable will be successfully placed after attach.</span></span><br><span class="line">        getRunQueue().post(action);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>attachInfo是在视图被添加到window时候附加的信息，即是ViewTree在递归的时候对每个view赋予的，在ViewRootImpl构造函数里面创建的。所以attachInfo.mHandler就是ViewRootImpl.ViewRootHandler,所以对应的当前线程就是创建ViewRootImpl的线程。<br>另一种情况：attachInfo==null （因为ViewRootImpl是在onResume创建的）,会将action丢到HandlerActionQueue里面，也是绑定了创建ViewRootImpl的线程。所以，<strong>对View来说，它的UI线程就是ViewRootImpl创建时候所在的线程。</strong></p>
+<h4 id="一个异常"><a href="#一个异常" class="headerlink" title="一个异常"></a>一个异常</h4><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805174116712.png" alt="image-20210805174116712"></p>
+<p>具体位置：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">checkThread</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (mThread != Thread.currentThread()) &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> CalledFromWrongThreadException(</span><br><span class="line">                  <span class="string">&quot;Only the original thread that created a view hierarchy can touch its views.&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>其中mThread就是ViewRootImpl初始化的，对应就是ViewRootImpl创建的线程。所以要理解ViewRootImpl创建流程：</p>
+<p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805174155699.png" alt="image-20210805174155699"></p>
+<p>所以，<strong>Activty的DecorView对应的ViewRootImpl是在主线程创建的！</strong>    </p>
+<h4 id="三个结论"><a href="#三个结论" class="headerlink" title="三个结论"></a>三个结论</h4><p><img src="/2021/07/28/%E5%89%96%E6%9E%90Framework%E9%9D%A2%E8%AF%95%EF%BC%88%E4%B8%80%EF%BC%89/image-20210805174251588.png" alt="image-20210805174251588"></p>
+<p>根据上面的结论，可退出：<strong>UI线程==主线程</strong></p>
+<h4 id="非UI线程能更新UI嘛"><a href="#非UI线程能更新UI嘛" class="headerlink" title="非UI线程能更新UI嘛"></a>非UI线程能更新UI嘛</h4><p>所以，又有一个经典问题：非UI线程能更新UI嘛？<br>答：特定情况能更新，为啥了？<br>还记得checkThread()的报错么？是ViewRootImpl报的，如果ViewRootImpl还没被创建，就能更新UI了。ViewRootImpl的创建是在onResume之后执行的。<br>测试代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">      setContentView(R.layout.activity_test);</span><br><span class="line">      TextView textView = (TextView) findViewById(R.id.actv_test);</span><br><span class="line">      <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">              textView.setText(<span class="string">&quot;子线程更新UI&quot;</span>);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;).start();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>发现textView的文本发生了变化，是不是达到了非UI线程更新UI的效果了。<br>然后在理解理解这句话 对View来说，它的UI线程就是ViewRootImpl创建时候所在的线程，记得每个window是跟ViewRootImpl是对应关系的，所以我们也可以在非UI线程添加窗口，并操作。反而你在主线程操作反而会报错</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">WindowManager.LayoutParams layoutParams = <span class="keyword">new</span> WindowManager.LayoutParams(<span class="number">300</span>, <span class="number">300</span>, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, <span class="number">0</span>, PixelFormat.RGBA_8888);</span><br><span class="line">            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;</span><br><span class="line">            layoutParams.gravity = Gravity.CENTER;</span><br><span class="line">            WindowManager mWindowManager = (WindowManager) getApplicationContext().getSystemService(WINDOW_SERVICE);</span><br><span class="line"></span><br><span class="line">            mWindowManager.addView(button1,layoutParams);</span><br><span class="line">             <span class="comment">//当前线程绑定view，所以能操作view</span></span><br><span class="line">            button1.setText(<span class="string">&quot;非&quot;</span>);</span><br><span class="line">            button1.setTextSize(<span class="number">66</span>);</span><br><span class="line">            </span><br><span class="line">            Looper.loop();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).start();</span><br><span class="line"></span><br><span class="line">    Handler sHandler = <span class="keyword">new</span> Handler(Looper.getMainLooper());</span><br><span class="line">    sHandler.postDelayed(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//这里放开就会报CalledFromWrongThreadException错，就是checkThread()报的</span></span><br><span class="line">            <span class="comment">//   button1.setText(&quot;主&quot;);</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,<span class="number">5000</span>);</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/Framework/" rel="tag"># Framework</a>
+              <a href="/tags/Zygote/" rel="tag"># Zygote</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/27/%E4%BB%8EOkHttp%E7%9A%84%E5%8E%9F%E7%90%86%E6%9D%A5%E7%9C%8BHTTP/" rel="prev" title="从OkHttp的原理来看HTTP">
+      <i class="fa fa-chevron-left"></i> 从OkHttp的原理来看HTTP
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3"><span class="nav-number">1.</span> <span class="nav-text">应用服务相关</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%88%E8%B0%88%E5%AF%B9Zygote%E7%9A%84%E7%90%86%E8%A7%A3"><span class="nav-number">1.1.</span> <span class="nav-text">谈谈对Zygote的理解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E4%B8%89%E6%AE%B5%E5%BC%8F"><span class="nav-number">1.1.2.</span> <span class="nav-text">启动三段式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.3.</span> <span class="nav-text">启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8Zygote%E8%BF%9B%E7%A8%8B"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">启动Zygote进程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">1.1.3.1.1.</span> <span class="nav-text">启动配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E8%BF%9B%E7%A8%8B"><span class="nav-number">1.1.3.1.2.</span> <span class="nav-text">启动进程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86-SiGCHILD"><span class="nav-number">1.1.3.1.3.</span> <span class="nav-text">信号处理- SiGCHILD</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zygote%E8%BF%9B%E7%A8%8B%E5%90%AF%E5%8A%A8%E4%B9%8B%E5%90%8E%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">Zygote进程启动之后做了什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Native%E9%83%A8%E5%88%86"><span class="nav-number">1.1.3.2.1.</span> <span class="nav-text">Native部分</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Native%E5%88%87%E6%8D%A2%E5%88%B0Java"><span class="nav-number">1.1.3.2.1.1.</span> <span class="nav-text">Native切换到Java</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Java%E9%83%A8%E5%88%86"><span class="nav-number">1.1.3.2.2.</span> <span class="nav-text">Java部分</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Loop%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.1.3.2.2.1.</span> <span class="nav-text">Loop循环</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%86%E8%8A%82%E4%B8%8E%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.4.</span> <span class="nav-text">细节与问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Zygote-fork-%E8%A6%81%E5%8D%95%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.1.4.1.</span> <span class="nav-text">Zygote fork 要单线程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zygote%E7%9A%84IPC%E4%B8%BA%E5%95%A5%E6%B2%A1%E6%9C%89%E9%87%87%E7%94%A8binder%E9%80%9A%E4%BF%A1%EF%BC%9F"><span class="nav-number">1.1.4.2.</span> <span class="nav-text">Zygote的IPC为啥没有采用binder通信？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%B5%E5%8C%96%E5%BA%94%E7%94%A8%E8%BF%9B%E7%A8%8B%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E4%BA%A4%E7%BB%99SystemServer%E6%9D%A5%E5%81%9A%EF%BC%8C%E8%80%8C%E4%B8%93%E9%97%A8%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AAzygote%EF%BC%9F"><span class="nav-number">1.1.4.3.</span> <span class="nav-text">孵化应用进程为什么不交给SystemServer来做，而专门设计一个zygote？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B4%E4%B8%80%E8%AF%B4Android%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">说一说Android系统的启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#android%E6%9C%89%E9%82%A3%E4%BA%9B%E4%B8%BB%E8%A6%81%E7%9A%84%E7%B3%BB%E7%BB%9F%E8%BF%9B%E7%A8%8B%EF%BC%9F"><span class="nav-number">1.2.1.</span> <span class="nav-text">android有那些主要的系统进程？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%99%E4%BA%9B%E7%B3%BB%E7%BB%9F%E8%BF%9B%E7%A8%8B%E6%80%8E%E4%B9%88%E5%90%AF%E5%8A%A8%E7%9A%84%EF%BC%9F"><span class="nav-number">1.2.2.</span> <span class="nav-text">这些系统进程怎么启动的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceManager%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.3.</span> <span class="nav-text">ServiceManager启动流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Zygote%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.4.</span> <span class="nav-text">Zygote启动流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SystemServer%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.5.</span> <span class="nav-text">SystemServer启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#zygote%E5%90%AF%E5%8A%A8%E9%83%A8%E5%88%86"><span class="nav-number">1.2.5.1.</span> <span class="nav-text">zygote启动部分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SystemServer%E7%9A%84%E9%83%A8%E5%88%86"><span class="nav-number">1.2.5.2.</span> <span class="nav-text">SystemServer的部分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%8C%E9%9D%A2%E7%9A%84%E5%90%AF%E5%8A%A8"><span class="nav-number">1.2.5.3.</span> <span class="nav-text">桌面的启动</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%86%E8%8A%82%E4%B8%8E%E9%97%AE%E9%A2%98-1"><span class="nav-number">1.2.6.</span> <span class="nav-text">细节与问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E6%98%AF%E6%80%8E%E4%B9%88%E5%8F%91%E5%B8%83%EF%BC%8C%E8%AE%A9%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%8F%AF%E8%A7%81%EF%BC%9F"><span class="nav-number">1.2.6.1.</span> <span class="nav-text">系统服务是怎么发布，让应用程序可见？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E8%B7%91%E5%9C%A8%E4%BB%80%E4%B9%88%E7%BA%BF%E7%A8%8B%EF%BC%9F"><span class="nav-number">1.2.6.2.</span> <span class="nav-text">系统服务跑在什么线程？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E4%B9%8B%E9%97%B4%E7%9A%84%E7%9B%B8%E4%BA%92%E4%BE%9D%E8%B5%96"><span class="nav-number">1.2.6.3.</span> <span class="nav-text">怎么解决系统服务之间的相互依赖</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E6%B7%BB%E5%8A%A0%E4%B8%80%E4%B8%AA%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.3.</span> <span class="nav-text">怎么添加一个系统服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.3.1.</span> <span class="nav-text">如何使用系统服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%B3%A8%E5%86%8C%E5%8E%9F%E7%90%86"><span class="nav-number">1.3.2.</span> <span class="nav-text">服务的注册原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E6%B7%BB%E5%8A%A0%E4%B8%80%E4%B8%AA%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1-1"><span class="nav-number">1.3.3.</span> <span class="nav-text">怎么添加一个系统服务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E6%97%B6%E6%9C%BA"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">添加时机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">服务端</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">1.3.3.3.</span> <span class="nav-text">客户端</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E5%92%8Cbind%E7%9A%84%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%8C%BA%E5%88%AB"><span class="nav-number">1.4.</span> <span class="nav-text">系统服务和bind的应用服务区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">1.4.1.</span> <span class="nav-text">启动方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">系统服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">应用服务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E6%96%B9%E5%BC%8F"><span class="nav-number">1.4.2.</span> <span class="nav-text">注册方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1-1"><span class="nav-number">1.4.2.1.</span> <span class="nav-text">系统服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1-1"><span class="nav-number">1.4.2.2.</span> <span class="nav-text">应用服务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">1.4.3.</span> <span class="nav-text">使用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1-2"><span class="nav-number">1.4.3.1.</span> <span class="nav-text">系统服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1-2"><span class="nav-number">1.4.3.2.</span> <span class="nav-text">应用服务</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ServiceManager%E5%90%AF%E5%8A%A8%E5%92%8C%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.5.</span> <span class="nav-text">ServiceManager启动和工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceManager%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1"><span class="nav-number">1.5.1.</span> <span class="nav-text">ServiceManager启动流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96ServiceManager%E7%9A%84binder%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.5.2.</span> <span class="nav-text">获取ServiceManager的binder对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91ServiceManager%E6%B7%BB%E5%8A%A0%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.5.3.</span> <span class="nav-text">向ServiceManager添加服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8EServiceManager%E8%8E%B7%E5%8F%96%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.5.4.</span> <span class="nav-text">从ServiceManager获取服务</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E8%BF%9B%E7%A8%8B%E7%9B%B8%E5%85%B3"><span class="nav-number">2.</span> <span class="nav-text">应用进程相关</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E8%BF%9B%E7%A8%8B%E6%98%AF%E6%80%8E%E4%B9%88%E5%90%AF%E5%8A%A8%E7%9A%84"><span class="nav-number">2.1.</span> <span class="nav-text">应用进程是怎么启动的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux%E4%B8%8B%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.1.</span> <span class="nav-text">Linux下进程的启动方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E8%BF%9B%E7%A8%8B%E5%90%AF%E5%8A%A8%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-number">2.1.2.</span> <span class="nav-text">应用进程启动的原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E8%A7%A6%E5%8F%91%E7%9A%84%E8%BF%9B%E7%A8%8B%E5%90%AF%E5%8A%A8%EF%BC%9F%E8%B0%81%E5%8F%91%E8%B5%B7%E7%9A%84%EF%BC%9F"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">什么时候触发的进程启动？谁发起的？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E6%98%AF%E8%B0%81%E5%90%AF%E5%8A%A8%E7%9A%84%EF%BC%9F%E6%80%8E%E4%B9%88%E5%90%AF%E5%8A%A8%EF%BC%9F"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">进程是谁启动的？怎么启动？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%80%8E%E4%B9%88%E5%90%AF%E7%94%A8Binder%E6%9C%BA%E5%88%B6%E7%9A%84"><span class="nav-number">2.2.</span> <span class="nav-text">应用怎么启用Binder机制的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81binder%E6%97%B6%E6%9C%BA"><span class="nav-number">2.2.1.</span> <span class="nav-text">支持binder时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E5%90%AF%E5%8A%A8Binder%E6%9C%BA%E5%88%B6"><span class="nav-number">2.2.2.</span> <span class="nav-text">怎么启动Binder机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9Application%E7%9A%84%E7%90%86%E8%A7%A3"><span class="nav-number">2.3.</span> <span class="nav-text">对Application的理解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8-1"><span class="nav-number">2.3.1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB%E5%8F%8A%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%EF%BD%9E"><span class="nav-number">2.3.2.</span> <span class="nav-text">类继承关系及生命周期～</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8E%9F%E7%90%86"><span class="nav-number">2.3.3.</span> <span class="nav-text">初始化原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9Context%E7%9A%84%E7%90%86%E8%A7%A3"><span class="nav-number">2.4.</span> <span class="nav-text">对Context的理解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8-2"><span class="nav-number">2.4.1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="nav-number">2.4.2.</span> <span class="nav-text">初始化流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Application%E7%9A%84Context"><span class="nav-number">2.4.2.1.</span> <span class="nav-text">Application的Context</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity%E7%9A%84Context"><span class="nav-number">2.4.2.2.</span> <span class="nav-text">Activity的Context</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Service%E7%9A%84context"><span class="nav-number">2.4.2.3.</span> <span class="nav-text">Service的context</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">2.4.3.</span> <span class="nav-text">问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Activity%E7%BB%84%E4%BB%B6%E7%9B%B8%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">Activity组件相关</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Activity%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">3.1.</span> <span class="nav-text">Activity的启动流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Activity%E7%9A%84%E6%98%BE%E7%A4%BA%E5%8E%9F%E7%90%86"><span class="nav-number">3.2.</span> <span class="nav-text">Activity的显示原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E5%8E%9F%E7%90%86"><span class="nav-number">3.2.1.</span> <span class="nav-text">显示原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UI%E7%BA%BF%E7%A8%8B"><span class="nav-number">3.2.2.</span> <span class="nav-text">UI线程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#UI%E7%BA%BF%E7%A8%8B%E6%98%AF%E4%B8%BB%E7%BA%BF%E7%A8%8B%E5%98%9B%EF%BC%9F"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">UI线程是主线程嘛？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E5%BC%82%E5%B8%B8"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">一个异常</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E4%B8%AA%E7%BB%93%E8%AE%BA"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">三个结论</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9EUI%E7%BA%BF%E7%A8%8B%E8%83%BD%E6%9B%B4%E6%96%B0UI%E5%98%9B"><span class="nav-number">3.2.2.4.</span> <span class="nav-text">非UI线程能更新UI嘛</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
