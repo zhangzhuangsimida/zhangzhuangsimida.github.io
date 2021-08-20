@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Xfermode完全使用解析为什么要 Xfermode?为了把多次绘制进行「合成」，例如蒙版效果:用 A 的形状和 B 的图案 怎么做?  Canvas.saveLayer() 把绘制区域拉到单独的离屏缓冲里 绘制 A 图形 用 Paint.setXfermode() 设置 Xfermode 绘制 B 图形 用 Paint.setXfermode(null) 恢复 Xfermode 用 Canva">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自定义view绘制02-Xfermode">
+<meta property="og:url" content="http://example.com/2021/08/17/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B602-Xfermode/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="Xfermode完全使用解析为什么要 Xfermode?为了把多次绘制进行「合成」，例如蒙版效果:用 A 的形状和 B 的图案 怎么做?  Canvas.saveLayer() 把绘制区域拉到单独的离屏缓冲里 绘制 A 图形 用 Paint.setXfermode() 设置 Xfermode 绘制 B 图形 用 Paint.setXfermode(null) 恢复 Xfermode 用 Canva">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-08-17T04:10:56.000Z">
+<meta property="article:modified_time" content="2021-08-17T06:54:14.999Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="自定义view">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/08/17/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B602-Xfermode/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>自定义view绘制02-Xfermode | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/17/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B602-Xfermode/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          自定义view绘制02-Xfermode
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-08-17 12:10:56 / 修改时间：14:54:14" itemprop="dateCreated datePublished" datetime="2021-08-17T12:10:56+08:00">2021-08-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/%E8%87%AA%E5%AE%9A%E4%B9%89view/" itemprop="url" rel="index"><span itemprop="name">自定义view</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Xfermode完全使用解析"><a href="#Xfermode完全使用解析" class="headerlink" title="Xfermode完全使用解析"></a>Xfermode完全使用解析</h1><p>为什么要 Xfermode?为了把多次绘制进行「合成」，例如蒙版效果:用 A 的形状和 B 的图案</p>
+<p>怎么做?</p>
+<ol>
+<li>Canvas.saveLayer() 把绘制区域拉到单独的离屏缓冲里</li>
+<li>绘制 A 图形</li>
+<li>用 Paint.setXfermode() 设置 Xfermode</li>
+<li>绘制 B 图形</li>
+<li>用 Paint.setXfermode(null) 恢复 Xfermode</li>
+<li>用 Canvas.restoreToCount() 把离屏缓冲中的合成后的图形放回绘制区域</li>
+</ol>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> IMAGE_WIDTH = <span class="number">200f</span>.px</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> IMAGE_PADDING = <span class="number">20f</span>.px</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> XFERMODE = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AvatarView</span></span>(context: Context?, attrs: AttributeSet?) : View(context, attrs) &#123;</span><br><span class="line">    <span class="keyword">var</span> paint = Paint(Paint.ANTI_ALIAS_FLAG)</span><br><span class="line">    <span class="keyword">var</span> bounds = RectF()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onSizeChanged</span><span class="params">(w: <span class="type">Int</span>, h: <span class="type">Int</span>, oldw: <span class="type">Int</span>, oldh: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onSizeChanged(w, h, oldw, oldh)</span><br><span class="line">        bounds.left = IMAGE_PADDING</span><br><span class="line">        bounds.top = IMAGE_PADDING</span><br><span class="line">        bounds.right = IMAGE_PADDING + IMAGE_WIDTH</span><br><span class="line">        bounds.bottom = IMAGE_PADDING + IMAGE_WIDTH</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequiresApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line">        <span class="comment">//  把绘制区域拉到单独的离屏缓冲里</span></span><br><span class="line">        <span class="keyword">var</span> count = canvas.saveLayer(bounds,<span class="literal">null</span>)</span><br><span class="line">        <span class="comment">// 绘制图形a</span></span><br><span class="line">        canvas.drawOval(</span><br><span class="line">            bounds,</span><br><span class="line">            paint</span><br><span class="line">        )</span><br><span class="line">        <span class="comment">// 设置 Xfermode，PorterDuff是创作者的名字，其他模式已经过时</span></span><br><span class="line">        paint.xfermode = XFERMODE</span><br><span class="line">        <span class="comment">//绘制图形b</span></span><br><span class="line">        canvas.drawBitmap(</span><br><span class="line">            getAvatar(IMAGE_WIDTH.toInt()),</span><br><span class="line">            IMAGE_PADDING, IMAGE_PADDING,</span><br><span class="line">            paint</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 恢复 Xfermode</span></span><br><span class="line">        paint.xfermode = <span class="literal">null</span></span><br><span class="line">        <span class="comment">// 把离屏缓冲中的合成后的图形放回绘制区域 count 记录了绘制状态</span></span><br><span class="line">        canvas.restoreToCount(count)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getAvatar</span><span class="params">(width: <span class="type">Int</span>)</span></span>: Bitmap &#123;</span><br><span class="line">        <span class="comment">// 利用option 可以提高读取bitmap的速度（只读取指定的大小）</span></span><br><span class="line">        <span class="keyword">val</span> options = BitmapFactory.Options()</span><br><span class="line">        options.inJustDecodeBounds = <span class="literal">true</span></span><br><span class="line">        BitmapFactory.decodeResource(resources, R.drawable.avatar_rengwuxian, options)</span><br><span class="line">        options.inJustDecodeBounds = <span class="literal">false</span></span><br><span class="line">        options.inDensity = options.outWidth</span><br><span class="line">        options.inTargetDensity = width</span><br><span class="line">        <span class="keyword">return</span> BitmapFactory.decodeResource(resources, R.drawable.avatar_rengwuxian, options)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为什么要用 saveLayer() 才能正确绘制 ?</p>
+<p>为了把需要互相作用的图形放在单独的位置来绘制，不会受 View 本身的影响。 如果不使用 saveLayer()，绘制的目标区域将总是整个 View 的范围，两个图形 的交叉区域就错误了。</p>
+<p>Ps</p>
+<p>如果想做到像官网示例一样的效果，除了构建图形，还需要画出透明的bitmap底图</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> XFERMODE = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@RequiresApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">XfermodeView</span></span>(context: Context?, attrs: AttributeSet?) : View(context, attrs) &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint(Paint.ANTI_ALIAS_FLAG)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> bounds = RectF(<span class="number">150f</span>.px, <span class="number">50f</span>.px, <span class="number">300f</span>.px, <span class="number">200f</span>.px)</span><br><span class="line">    <span class="comment">// 本来是100dp 为了符合官方文档，增加50dp作为底部画布，</span></span><br><span class="line">    <span class="comment">// 合成并不仅仅是所画的图形，透明的部分也会参与合成</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> circleBitmap = Bitmap.createBitmap(<span class="number">150f</span>.px.toInt(), <span class="number">150f</span>.px.toInt(), Bitmap.Config.ARGB_8888)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> squareBitmap = Bitmap.createBitmap(<span class="number">150f</span>.px.toInt(), <span class="number">150f</span>.px.toInt(), Bitmap.Config.ARGB_8888)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span> &#123;</span><br><span class="line">        <span class="keyword">val</span> canvas = Canvas(circleBitmap)</span><br><span class="line">        paint.color = Color.parseColor(<span class="string">&quot;#D81B60&quot;</span>)</span><br><span class="line">        canvas.drawOval(<span class="number">50f</span>.px, <span class="number">0f</span>.px, <span class="number">150f</span>.px, <span class="number">100f</span>.px, paint)</span><br><span class="line">        paint.color = Color.parseColor(<span class="string">&quot;#2196F3&quot;</span>)</span><br><span class="line">        canvas.setBitmap(squareBitmap)</span><br><span class="line">        canvas.drawRect(<span class="number">0f</span>.px, <span class="number">50f</span>.px, <span class="number">100f</span>.px, <span class="number">150f</span>.px, paint)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> count = canvas.saveLayer(bounds, <span class="literal">null</span>)</span><br><span class="line">        canvas.drawBitmap(circleBitmap, <span class="number">150f</span>.px, <span class="number">50f</span>.px, paint)</span><br><span class="line">        paint.xfermode = XFERMODE</span><br><span class="line">        canvas.drawBitmap(squareBitmap, <span class="number">150f</span>.px, <span class="number">50f</span>.px, paint)</span><br><span class="line">        paint.xfermode = <span class="literal">null</span></span><br><span class="line">        canvas.restoreToCount(count)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E8%87%AA%E5%AE%9A%E4%B9%89view/" rel="tag"># 自定义view</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/16/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B601-%E5%9B%BE%E5%BD%A2%E7%9A%84%E4%BD%8D%E7%BD%AE%E5%92%8C%E5%B0%BA%E5%AF%B8%E6%B5%8B%E9%87%8F/" rel="prev" title="自定义view绘制01:图形的位置和尺寸测量">
+      <i class="fa fa-chevron-left"></i> 自定义view绘制01:图形的位置和尺寸测量
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/" rel="next" title="Jvm原理解析">
+      Jvm原理解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Xfermode%E5%AE%8C%E5%85%A8%E4%BD%BF%E7%94%A8%E8%A7%A3%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">Xfermode完全使用解析</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

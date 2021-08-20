@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Jvm原理解析基本原理 Java程序经过一次编译之后，将java代码编译为字节码也就是class文件，然后在不同的操作系统上依靠不同的Java虚拟机进行解释，最后再转换为不同平台的机器码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jvm原理解析">
+<meta property="og:url" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="Jvm原理解析基本原理 Java程序经过一次编译之后，将java代码编译为字节码也就是class文件，然后在不同的操作系统上依靠不同的Java虚拟机进行解释，最后再转换为不同平台的机器码。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819085657995.png">
+<meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819085835429.png">
+<meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210817183244039.png">
+<meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819100906212.png">
+<meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819101011107.png">
+<meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819164221930.png">
+<meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819165217192.png">
+<meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210820094705937.png">
+<meta property="article:published_time" content="2021-08-17T09:31:59.000Z">
+<meta property="article:modified_time" content="2021-08-20T02:23:05.997Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819085657995.png">
+
+<link rel="canonical" href="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Jvm原理解析 | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Jvm原理解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-17 17:31:59" itemprop="dateCreated datePublished" datetime="2021-08-17T17:31:59+08:00">2021-08-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-20 10:23:05" itemprop="dateModified" datetime="2021-08-20T10:23:05+08:00">2021-08-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Jvm原理解析"><a href="#Jvm原理解析" class="headerlink" title="Jvm原理解析"></a>Jvm原理解析</h1><h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p> Java程序经过一次编译之后，将java代码编译为字节码也就是class文件，然后在不同的操作系统上依靠不同的Java虚拟机进行解释，最后再转换为不同平台的机器码。</p>
+<a id="more"></a>
+
+<img src="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819085657995.png" alt="image-20210819085657995" style="zoom:50%;">
+
+<p>程序从编译到运行经过哪些步骤：</p>
+<p><code>public class HelloWorld &#123; public static void main(String[] args) &#123; System.out.print(&quot;Hello world&quot;); &#125; &#125;</code></p>
+<p><img src="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819085835429.png" alt="image-20210819085835429"></p>
+<p>通过jvm.cfg文件找到对应的jvm.dll，jvm.dll则是java虚拟机的主要实现。接下来会初始化JVM,并且获取JNI接口.</p>
+<p>JNI接口:Java被编译成了class文件，JVM通过JNI接口从硬盘上找到这个文件并装载到JVM里呢（它还常用于java与操作系统、硬件交互），找到class文件后并装载进JVM，然后找到main方法，最后执行。</p>
+<h2 id="字节码"><a href="#字节码" class="headerlink" title="字节码"></a>字节码</h2><h3 id="字节码结构"><a href="#字节码结构" class="headerlink" title="字节码结构"></a>字节码结构</h3><p>官方文档：<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html">https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html</a></p>
+<p>如下所示：字节码文件不使用分隔符</p>
+<p>Jvm.Java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.hencoder.customviewdrawing;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by amazingZZ on 8/17/21</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Jvm</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对Java文件执行Javac获得class文件</p>
+<p>使用 hexdump 命令可以用来查看我们的 16 进制字节码。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> javac Jvm.java</span> </span><br><span class="line"><span class="meta">$</span><span class="bash"> java Jvm.class</span> </span><br></pre></td></tr></table></figure>
+<p>Jvm.class对应的字节码：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">000000 ca fe ba be 00 00 00 34 00 1d 0a 00 06 00 0f 09</span><br><span class="line">0000010 00 10 00 11 08 00 12 0a 00 13 00 14 07 00 15 07</span><br><span class="line">0000020 00 16 01 00 06 3c 69 6e 69 74 3e 01 00 03 28 29</span><br><span class="line">0000030 56 01 00 04 43 6f 64 65 01 00 0f 4c 69 6e 65 4e</span><br><span class="line">0000040 75 6d 62 65 72 54 61 62 6c 65 01 00 04 6d 61 69</span><br><span class="line">0000050 6e 01 00 16 28 5b 4c 6a 61 76 61 2f 6c 61 6e 67</span><br><span class="line">0000060 2f 53 74 72 69 6e 67 3b 29 56 01 00 0a 53 6f 75</span><br><span class="line">0000070 72 63 65 46 69 6c 65 01 00 08 4a 76 6d 2e 6a 61</span><br><span class="line">0000080 76 61 0c 00 07 00 08 07 00 17 0c 00 18 00 19 01</span><br><span class="line">0000090 00 05 48 65 6c 6c 6f 07 00 1a 0c 00 1b 00 1c 01</span><br><span class="line">00000a0 00 22 63 6f 6d 2f 68 65 6e 63 6f 64 65 72 2f 63</span><br><span class="line">00000b0 75 73 74 6f 6d 76 69 65 77 64 72 61 77 69 6e 67</span><br><span class="line">00000c0 2f 4a 76 6d 01 00 10 6a 61 76 61 2f 6c 61 6e 67</span><br><span class="line">00000d0 2f 4f 62 6a 65 63 74 01 00 10 6a 61 76 61 2f 6c</span><br><span class="line">00000e0 61 6e 67 2f 53 79 73 74 65 6d 01 00 03 6f 75 74</span><br><span class="line">00000f0 01 00 15 4c 6a 61 76 61 2f 69 6f 2f 50 72 69 6e</span><br><span class="line">0000100 74 53 74 72 65 61 6d 3b 01 00 13 6a 61 76 61 2f</span><br><span class="line">0000110 69 6f 2f 50 72 69 6e 74 53 74 72 65 61 6d 01 00</span><br><span class="line">0000120 07 70 72 69 6e 74 6c 6e 01 00 15 28 4c 6a 61 76</span><br><span class="line">0000130 61 2f 6c 61 6e 67 2f 53 74 72 69 6e 67 3b 29 56</span><br><span class="line">0000140 00 20 00 05 00 06 00 00 00 00 00 02 00 00 00 07</span><br><span class="line">0000150 00 08 00 01 00 09 00 00 00 1d 00 01 00 01 00 00</span><br><span class="line">0000160 00 05 2a b7 00 01 b1 00 00 00 01 00 0a 00 00 00</span><br><span class="line">0000170 06 00 01 00 00 00 06 00 09 00 0b 00 0c 00 01 00</span><br><span class="line">0000180 09 00 00 00 25 00 02 00 01 00 00 00 09 b2 00 02</span><br><span class="line">0000190 12 03 b6 00 04 b1 00 00 00 01 00 0a 00 00 00 0a</span><br><span class="line">00001a0 00 02 00 00 00 08 00 08 00 09 00 01 00 0d 00 00</span><br><span class="line">00001b0 00 02 00 0e                                    </span><br><span class="line">00001b4</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">ClassFile &#123;</span><br><span class="line">    u4             magic;</span><br><span class="line">    u2             minor_version;</span><br><span class="line">    u2             major_version;</span><br><span class="line">    u2             constant_pool_count;</span><br><span class="line">    cp_info        constant_pool[constant_pool_count-<span class="number">1</span>];</span><br><span class="line">    u2             access_flags;</span><br><span class="line">    u2             this_class;</span><br><span class="line">    u2             super_class;</span><br><span class="line">    u2             interfaces_count;</span><br><span class="line">    u2             interfaces[interfaces_count];</span><br><span class="line">    u2             fields_count;</span><br><span class="line">    field_info     fields[fields_count];</span><br><span class="line">    u2             methods_count;</span><br><span class="line">    method_info    methods[methods_count];</span><br><span class="line">    u2             attributes_count;</span><br><span class="line">    attribute_info attributes[attributes_count];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p> u 代表字节数</p>
+</blockquote>
+<h4 id="magic-魔术码-cafe-babe"><a href="#magic-魔术码-cafe-babe" class="headerlink" title="magic 魔术码:cafe babe"></a>magic 魔术码:cafe babe</h4><p>魔术码magic，许多语言的字节码都有五花八门的魔术码,u4</p>
+<h4 id="版本号："><a href="#版本号：" class="headerlink" title="版本号："></a>版本号：</h4><ul>
+<li><p>minor_version: 小版本号 ,u2</p>
+</li>
+<li><p>major_version：主版本号, u2</p>
+<p>shell执行<code>echo $((0x34))得到版本号为</code>52</p>
+</li>
+</ul>
+<h4 id="常量池："><a href="#常量池：" class="headerlink" title="常量池："></a>常量池：</h4><ul>
+<li>Constant_pool_count: 常量数量 001d，shell执行`echo $((0x1d))得到29，u2</li>
+<li>Constant_pool[Constant_pool_count-1]:  常量池对象，常量数量-1，因为创造者将第0位空出来了，若指向0无法指向常量池中任何一个对象 （本文件中常量池对象为29-1=28）,长度不确定</li>
+</ul>
+<p>常量池支持的数据类型占空间是不同的:</p>
+<table>
+<thead>
+<tr>
+<th>Constant Type</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CONSTANT_Class</code></td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>CONSTANT_Utf8</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>CONSTANT_Integer</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>CONSTANT_Double</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td>…</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>数据未必是两部分比如 utf-8 ,它的数据就是三部分组成 ：</p>
+<ol>
+<li>tag=01 </li>
+<li>length：数据长度</li>
+<li>数据内容：具体的字符，比如’f’</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">CONSTANT_Utf8_info &#123;</span><br><span class="line">    u1 tag;  <span class="comment">//代表类型utf-8，</span></span><br><span class="line">    u2 length; <span class="comment">//数据长度</span></span><br><span class="line">    u1 bytes[length]; <span class="comment">//数据内容：具体的字符，比如&#x27;f&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">CONSTANT_Integer_info &#123;</span><br><span class="line">    u1 tag; <span class="comment">//数据类型</span></span><br><span class="line">    u4 bytes; <span class="comment">//具体数据</span></span><br><span class="line">&#125;</span><br><span class="line">_Class_info代表类，接口的引用，</span><br><span class="line">CONSTANT_Class_info &#123;</span><br><span class="line">    u1 tag; <span class="comment">//代表classinfo类型</span></span><br><span class="line">    u2 name_index; <span class="comment">//指向常量的位置，一定不为0（因为0是空的被预留了）</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>eg：utf8类型：</p>
+<p><img src="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210817183244039.png" alt="image-20210817183244039"></p>
+<h4 id="访问标志："><a href="#访问标志：" class="headerlink" title="访问标志："></a>访问标志：</h4><p>access_flags,2u</p>
+<table>
+<thead>
+<tr>
+<th>Flag Name</th>
+<th>Value</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ACC_PUBLIC</code></td>
+<td>0x0001</td>
+<td>Declared <code>public</code>; may be accessed from     outside its package.</td>
+</tr>
+<tr>
+<td><code>ACC_FINAL</code></td>
+<td>0x0010</td>
+<td>Declared <code>final</code>; no subclasses allowed.</td>
+</tr>
+<tr>
+<td><code>ACC_SUPER</code></td>
+<td>0x0020</td>
+<td>1.1之后才有的，在较早的版本中子类继承父类，孙类继承    子类，孙类的重写方法会越级继承父类的方法，这个访问标志就是为了解决这一个问题</td>
+</tr>
+<tr>
+<td><code>ACC_INTERFACE</code></td>
+<td>0x0200</td>
+<td>Is an interface, not a class.</td>
+</tr>
+<tr>
+<td><code>ACC_ABSTRACT</code></td>
+<td>0x0400</td>
+<td>Declared <code>abstract</code>; must not be instantiated.</td>
+</tr>
+<tr>
+<td><code>ACC_SYNTHETIC</code></td>
+<td>0x1000</td>
+<td>代表是由编译器生成的而不是源码生成的</td>
+</tr>
+<tr>
+<td><code>ACC_ANNOTATION</code></td>
+<td>0x2000</td>
+<td>Declared as an annotation type.</td>
+</tr>
+<tr>
+<td><code>ACC_ENUM</code></td>
+<td>0x4000</td>
+<td>Declared as an <code>enum</code> type.</td>
+</tr>
+</tbody></table>
+<h4 id="类名："><a href="#类名：" class="headerlink" title="类名："></a>类名：</h4><p>当前类名： this_class，u2<br>父类类名： super_class， u2;</p>
+<h4 id="接口："><a href="#接口：" class="headerlink" title="接口："></a>接口：</h4><p>接口可以实现多个，即可以实现一组接口</p>
+<ul>
+<li>接口数量： interfaces_count,u2</li>
+<li>interfaces[interfaces_count]：指向常量池中的引用（对应接口的接口名），u2</li>
+</ul>
+<h4 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h4><p>​    u2             fields_count;<br>​    field_info     fields[fields_count];</p>
+<h4 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h4><ul>
+<li>methods_count;     u2   </li>
+<li>method_info    methods[methods_count];     u2    </li>
+</ul>
+<h4 id="附加属性"><a href="#附加属性" class="headerlink" title="附加属性"></a>附加属性</h4><p>文件名之类的</p>
+<ul>
+<li>attributes_count，    u2            </li>
+<li>attribute_info attributes[attributes_count] ;u2</li>
+</ul>
+<h3 id="反编译字节码"><a href="#反编译字节码" class="headerlink" title="反编译字节码"></a>反编译字节码</h3><p>我们不需记住所有字节码的位置，执行<code>javap JVM.java</code>即可以反编译class，可以简单显示类的结构</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> javap Jvm.class</span></span><br><span class="line">Compiled from &quot;Jvm.java&quot;</span><br><span class="line">class com.hencoder.customviewdrawing.Jvm &#123;</span><br><span class="line">  // 编译器自动添加的构造方法</span><br><span class="line">  com.hencoder.customviewdrawing.Jvm();</span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行<code>javap JVM.java -c</code> 还可以看到具体每一步操作</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> javap -c Jvm.class</span></span><br><span class="line">Compiled from &quot;Jvm.java&quot;</span><br><span class="line">class com.hencoder.customviewdrawing.Jvm &#123;</span><br><span class="line">  com.hencoder.customviewdrawing.Jvm();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: ldc           #3                  // String Hello</span><br><span class="line">       5: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       8: return</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>执行<code>javap  -v JVM.class </code>会显示更多的信息（verbose啰嗦），这些信息都是从字节码得到的</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line">Classfile ./JVM.class</span><br><span class="line">  Last modified 2021-8-17; size 436 bytes</span><br><span class="line">  MD5 checksum b35d35363b5da415dcdd65f77d01f777</span><br><span class="line">  Compiled from &quot;Jvm.java&quot;</span><br><span class="line">class com.hencoder.customviewdrawing.Jvm</span><br><span class="line"><span class="meta">  #</span><span class="bash">版本号</span> </span><br><span class="line">  minor version: 0</span><br><span class="line">  major version: 52</span><br><span class="line"><span class="meta">  #</span><span class="bash"> access flag 访问标志</span></span><br><span class="line">  flags: ACC_SUPER</span><br><span class="line"><span class="meta"> #</span><span class="bash"> 常量池   001d 29-1因为0是没有值的</span></span><br><span class="line">Constant pool:</span><br><span class="line"><span class="meta">   #</span><span class="bash">1 = Methodref          <span class="comment">#6.#15         // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span></span></span><br><span class="line"><span class="meta">   #</span><span class="bash">2 = Fieldref           <span class="comment">#16.#17        // java/lang/System.out:Ljava/io/PrintStream;</span></span></span><br><span class="line"><span class="meta">   #</span><span class="bash">3 = String             <span class="comment">#18            // Hello</span></span></span><br><span class="line"><span class="meta">   #</span><span class="bash">4 = Methodref          <span class="comment">#19.#20        // java/io/PrintStream.println:(Ljava/lang/String;)V</span></span></span><br><span class="line"><span class="meta">   #</span><span class="bash">5 = Class              <span class="comment">#21            // com/hencoder/customviewdrawing/Jvm</span></span></span><br><span class="line"><span class="meta">   #</span><span class="bash">6 = Class              <span class="comment">#22            // java/lang/Object</span></span></span><br><span class="line"><span class="meta">   #</span><span class="bash">7 = Utf8               &lt;init&gt;</span></span><br><span class="line"><span class="meta">   #</span><span class="bash">8 = Utf8               ()V</span></span><br><span class="line"><span class="meta">   #</span><span class="bash">9 = Utf8               Code</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">10 = Utf8               LineNumberTable</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">11 = Utf8               main</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">12 = Utf8               ([Ljava/lang/String;)V</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">13 = Utf8               SourceFile</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">14 = Utf8               Jvm.java</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">15 = NameAndType        <span class="comment">#7:#8          // &quot;&lt;init&gt;&quot;:()V</span></span></span><br><span class="line"><span class="meta">  #</span><span class="bash">16 = Class              <span class="comment">#23            // java/lang/System</span></span></span><br><span class="line"><span class="meta">  #</span><span class="bash">17 = NameAndType        <span class="comment">#24:#25        // out:Ljava/io/PrintStream;</span></span></span><br><span class="line"><span class="meta">  #</span><span class="bash">18 = Utf8               Hello</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">19 = Class              <span class="comment">#26            // java/io/PrintStream</span></span></span><br><span class="line"><span class="meta">  #</span><span class="bash">20 = NameAndType        <span class="comment">#27:#28        // println:(Ljava/lang/String;)V</span></span></span><br><span class="line"><span class="meta">  #</span><span class="bash">21 = Utf8               com/hencoder/customviewdrawing/Jvm</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">22 = Utf8               java/lang/Object</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">23 = Utf8               java/lang/System</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">24 = Utf8               out</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">25 = Utf8               Ljava/io/PrintStream;</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">26 = Utf8               java/io/PrintStream</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">27 = Utf8               println</span></span><br><span class="line"><span class="meta">  #</span><span class="bash">28 = Utf8               (Ljava/lang/String;)V</span>  </span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 方法信息</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 自动生成的空参构造</span></span><br><span class="line">  com.hencoder.customviewdrawing.Jvm();</span><br><span class="line">    descriptor: ()V # 没有返回参数的 V表示 viod</span><br><span class="line">    flags: # 可见修饰符</span><br><span class="line">    Code: #方法的核心</span><br><span class="line">    # slot 空间大小单位，英文意思为插槽</span><br><span class="line">    # 数量不等同于空间大小，因为一些参数需要超过自身数量的空间（比如double需要2slot位）</span><br><span class="line">    </span><br><span class="line">    # stack 操作数栈，表示给多大的空间给这个方法操作，大小为1 slot</span><br><span class="line">    # locals 本地变量表 大小为1 slot  操作数算出的数据存储在本地变量表的空间中 </span><br><span class="line">    # args_size 传入参数数量，只要不是静态方法都会传入this作为默认参数，所以args_size = 1 </span><br><span class="line">    # args_size 在字节码中是没有记录的，是通过反编译推断出来的</span><br><span class="line">      stack=1, locals=1, args_size=1</span><br><span class="line">     </span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 6: 0</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    descriptor: ([Ljava/lang/String;)V</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">    # stack 操作栈2 slot，本地变量表1 slot，参数数量：默认1</span><br><span class="line">      stack=2, locals=1, args_size=1</span><br><span class="line">         # 方法的具体调用过程；</span><br><span class="line">         # 实际在字节码中  具体操作码只有一个字节大小，比如 getstatic=0xb2</span><br><span class="line">         0: getstatic     #2  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">         #  getstatic=0xb2 获取指定类的静态域, 并将其压入栈顶</span><br><span class="line">         # #2对应是常量池的中的#2，其实是字节码中的某个字节，它的静态域就是</span><br><span class="line">         # Field java/lang/System.out:Ljava/io/PrintStream；</span><br><span class="line">         # L 代表一个东西的引用，</span><br><span class="line">         # 其实就是获取成员变量（静态变量）的引用，压入程序的栈顶</span><br><span class="line">         </span><br><span class="line">         3: ldc           #3                  // String Hello</span><br><span class="line">         # ldc = 0x12 将int,float或String型常量值从常量池中推送至栈顶,</span><br><span class="line">         # #3对应 常量池中的 #3 ,数据为   String Hello</span><br><span class="line"></span><br><span class="line">         5: invokevirtual #4   // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">         # invokevirtua = 0xb6 调用实例方法，方法为实例方法非静态，也就是需要传this参数</span><br><span class="line">         # this 就是 PrintStream.println</span><br><span class="line">         # String Hello 的引用Ljava/lang/String;和this：PrintStream.println将会出操作栈，传递过去</span><br><span class="line"></span><br><span class="line">         8: return</span><br><span class="line">         # return = 0xb1 从当前方法返回void</span><br><span class="line">         </span><br><span class="line">         # 具体操作码前面的 0，1，2不是行号，是操作码在字节码中的偏移量，可以用于调试判断</span><br><span class="line"></span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 8: 0</span><br><span class="line">        line 9: 8</span><br><span class="line">&#125;</span><br><span class="line">SourceFile: &quot;Jvm.java&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>操作数栈，用来执行计算</p>
+<p><img src="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819100906212.png" alt="image-20210819100906212"></p>
+<h4 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h4><p>从Code信息中可以看到</p>
+<ul>
+<li><p>字节码上已经明确了<strong>操作数栈的大小</strong>,<strong>本地变量表的大小</strong>和传入<strong>参数数量</strong>    </p>
+<blockquote>
+<p> 操作数栈和本地变量表的大小的单位为 Slot , double 类型和 long 类型会 占用 2 个 Slot</p>
+</blockquote>
+</li>
+<li><p>每个<strong>非静态方法</strong>的<strong>传入参数都会有一个 this</strong>,存在本地变量表中的0号位置</p>
+</li>
+<li><p>在字节码中每个指令都用一个字节来表示</p>
+<p> <a target="_blank" rel="noopener" href="https://www.cnblogs.com/GarfieldEr007/p/9943528.html">JVM 虚拟机字节码指令表</a></p>
+</li>
+</ul>
+<h3 id="通过字节码我们能得到什么"><a href="#通过字节码我们能得到什么" class="headerlink" title="通过字节码我们能得到什么"></a>通过字节码我们能得到什么</h3><p>Java文件编程class字节文件得到的信息反而更多了，这是因为语法糖的存在隐藏了很多细节</p>
+<h4 id="从字节码看-Integer-的装箱拆箱"><a href="#从字节码看-Integer-的装箱拆箱" class="headerlink" title="从字节码看 Integer 的装箱拆箱"></a>从字节码看 Integer 的装箱拆箱</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Jvm</span> </span>&#123;</span><br><span class="line">    Integer integer = <span class="number">1</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">       ...</span><br></pre></td></tr></table></figure>
+<p>反编译可以看到是：它其实是在构造函数中调用的静态函数赋值</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">com.hencoder.customviewdrawing.Jvm();</span><br><span class="line">  descriptor: ()V</span><br><span class="line">  flags:</span><br><span class="line">  Code:</span><br><span class="line">    stack=2, locals=1, args_size=1</span><br><span class="line">      	...</span><br><span class="line">    </span><br><span class="line">       6: invokestatic  #2                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;</span><br><span class="line">       9: putfield      #3                  // Field integer:Ljava/lang/Integer;</span><br><span class="line">  ...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="从字节码看-操作"><a href="#从字节码看-操作" class="headerlink" title="从字节码看 ++ 操作"></a>从字节码看 ++ 操作</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span>  <span class="keyword">void</span> <span class="title">inc</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">int</span> a = ++i;</span><br><span class="line">    <span class="keyword">int</span> b = i++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Code:</span><br><span class="line">    # 操作数栈 1，本地变量表4:this（默认），i，a,b, 参数数量 默认1:this</span><br><span class="line">      stack=1, locals=4, args_size=1</span><br><span class="line">     		 # i = 1 的过程</span><br><span class="line">         0: iconst_1 #将int型1推送至栈顶 </span><br><span class="line">         1: istore_1 #将栈顶int型数值存入第二个本地变量  </span><br><span class="line">         # a = i++  result:a =2  ，先++,先将数据推入操作数栈，最后存入本地变量</span><br><span class="line">         2: iinc          1, 1</span><br><span class="line">         5: iload_1</span><br><span class="line">         6: istore_2</span><br><span class="line">         # b= ++i b=2 先将数据推入操作数栈， 在++，再存入本地变量</span><br><span class="line">         7: iload_1</span><br><span class="line">         8: iinc          1, 1</span><br><span class="line">        11: istore_3</span><br><span class="line">        12: return</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819101011107.png" alt="image-20210819101011107"></p>
+<h4 id="内部类"><a href="#内部类" class="headerlink" title="内部类"></a>内部类</h4><p>内部类会持有外部类的原因是在内部类中用一个成员变量记录了外部类对象 </p>
+<p>在 Kotlin 中，如果在内部类中没有使用到外部类，那么不会持有外部类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Jvm</span>  <span class="keyword">extends</span> <span class="title">Object</span></span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Inner</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">new</span> Inner();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用$查看内部类<code>javap -v Jvm\$Inner.class </code></p>
+<p>Java:Inner</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">final com.hencoder.customviewdrawing.Jvm this$0; # 外部Jvm类型的成员变量 this$0</span><br><span class="line">    descriptor: Lcom/hencoder/customviewdrawing/Jvm;</span><br><span class="line">    flags: ACC_FINAL, ACC_SYNTHETIC</span><br><span class="line"><span class="meta">#</span><span class="bash"> 构造函数传入外部Jvm类</span></span><br><span class="line">  com.hencoder.customviewdrawing.Jvm$Inner(com.hencoder.customviewdrawing.Jvm);</span><br><span class="line">    descriptor: (Lcom/hencoder/customviewdrawing/Jvm;)V</span><br><span class="line">    flags:</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=2, args_size=2</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: aload_1</span><br><span class="line">         # 存入了外部的Jvm变量	</span><br><span class="line">         2: putfield      #1                  // Field this$0:Lcom/hencoder/customviewdrawing/Jvm;</span><br><span class="line">         5: aload_0</span><br><span class="line">         6: invokespecial #2                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         9: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 8: 0</span><br></pre></td></tr></table></figure>
+<p>Outter.kt</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Outter</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> an = <span class="keyword">object</span> : Any() &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">hashCode</span><span class="params">()</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">         <span class="comment">// 不会持有外部引用</span></span><br><span class="line">         <span class="comment">//return super.hashCode()</span></span><br><span class="line">         <span class="comment">// 会持有引用</span></span><br><span class="line">         <span class="keyword">return</span> <span class="keyword">this</span><span class="symbol">@Outter</span>.hashCode()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="泛型"><a href="#泛型" class="headerlink" title="泛型"></a>泛型</h4><p>Java 的泛型擦除并不是将所有泛型信息全部都擦除了，会将类上和方法上声明的泛型信息保存在字节码中的 Signature 属性中，这也是反射能够获取泛型的原因。但是在方法中的泛型信息是完全擦除了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Jvm</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">(List&lt;String&gt; list)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">(List&lt;Object&gt; list)</span> </span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个类执行Javac是会报错的，因为类型信息被擦除了</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Jvm.java:8: 错误: 名称冲突: print(List&lt;Object&gt;)和print(List&lt;String&gt;)具有相同疑符</span><br><span class="line">    public void print(List&lt;Object&gt; list) &#123;&#125;</span><br><span class="line">                ^</span><br><span class="line">1 个错误</span><br></pre></td></tr></table></figure>
+<p>反编译.class 文件Signature 属性中保留了泛型信息，所以反射能回的泛型，</p>
+<p>不过方法中的泛型信息是完全删除了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ublic void print(java.util.List&lt;java.lang.String&gt;);</span><br><span class="line">    descriptor: (Ljava&#x2F;util&#x2F;List;)V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack&#x3D;0, locals&#x3D;2, args_size&#x3D;2</span><br><span class="line">         0: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 7: 0</span><br><span class="line">    Signature: #11                          &#x2F;&#x2F; (Ljava&#x2F;util&#x2F;List&lt;Ljava&#x2F;lang&#x2F;String;&gt;;)V</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="synchronized关键字"><a href="#synchronized关键字" class="headerlink" title="synchronized关键字"></a>synchronized关键字</h4><p> synchronized 会在方法调用前后通过 monitor 来进入和退出锁</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Jvm</span>  </span>&#123;</span><br><span class="line">    Object  lock = <span class="keyword">new</span> Object();</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">monitor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span>(lock) &#123;</span><br><span class="line">            fun();</span><br><span class="line">        &#125;</span><br><span class="line">     <span class="comment">// 这块也是语法糖，实际上应该是</span></span><br><span class="line">      <span class="keyword">try</span>&#123;</span><br><span class="line">        enter(lock)</span><br><span class="line">        fun()</span><br><span class="line">        exit(lock)</span><br><span class="line">      &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">        exit(lock)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">fun</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">fun1</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">synchronized</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">fun2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>反编译结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">void monitor();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags:</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=3, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: getfield      #3                  // Field lock:Ljava/lang/Object;</span><br><span class="line">         4: dup</span><br><span class="line">         5: astore_1</span><br><span class="line">         6: monitorenter # 进入监视</span><br><span class="line">         7: aload_0</span><br><span class="line">         8: invokevirtual #4                  // Method fun:()V 执行fun方法</span><br><span class="line">        11: aload_1</span><br><span class="line">        12: monitorexit # 退出监视</span><br><span class="line">        13: goto          21</span><br><span class="line">        16: astore_2</span><br><span class="line">        17: aload_1</span><br><span class="line">        18: monitorexit # 防止fun方法内部发生异常时无法退出</span><br><span class="line">        19: aload_2</span><br><span class="line">        20: athrow</span><br><span class="line">        21: return</span><br><span class="line"><span class="meta">   #</span><span class="bash"> 普通/静态方法 也可以锁，原理和锁代码块是一样的，只不过细节被JVM隐藏了</span>     </span><br><span class="line">   synchronized void fun1();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_SYNCHRONIZED</span><br><span class="line">    Code:</span><br><span class="line">      stack=0, locals=1, args_size=1</span><br><span class="line">         0: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 19: 0</span><br><span class="line"></span><br><span class="line">  static synchronized void fun2();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_STATIC, ACC_SYNCHRONIZED</span><br><span class="line">    Code:</span><br><span class="line">      stack=0, locals=0, args_size=0</span><br><span class="line">         0: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 22: 0      </span><br></pre></td></tr></table></figure>
+<h2 id="JVM运行时数据区"><a href="#JVM运行时数据区" class="headerlink" title="JVM运行时数据区"></a>JVM运行时数据区</h2><p><img src="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819164221930.png" alt="image-20210819164221930"></p>
+<p>JVM内存划分，是数据在内存上的划分，字节码的具体执行和它无关。</p>
+<p>class文件被jvm装载以后，经过jvm的内存空间调配，最终是由执行引擎完成class文件的执行。当然这个过程还有其他角色模块的协助，这些模块协同配合才能让一个java程序成功的运行。</p>
+<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><p>类加载器不属于运行时数据区，是外部的</p>
+<p>class文件通过类加载器加载到方法区中（一部分会进入运行时常量池）</p>
+<h3 id="被所有线程共享的"><a href="#被所有线程共享的" class="headerlink" title="被所有线程共享的"></a>被所有线程共享的</h3><ul>
+<li>堆 ： 对象存储在这里，GC回收也在此发生（占空间最大）,空间不足会抛出OOM</li>
+<li>方法区：存放类信息、常量、静态变量</li>
+<li>运行时常量池： 存在于方法区之中，我们可以直接在字节码中看到</li>
+</ul>
+<h3 id="每个线程私有的"><a href="#每个线程私有的" class="headerlink" title="每个线程私有的"></a>每个线程私有的</h3><ul>
+<li>虚拟机栈（Java栈）：它的生命周期与线程相同，一个线程对应一个java栈</li>
+<li>程序计数器（PC计数器）：字节码解释器工作时就是通过改变这个计数器的值来选取下一条需要执行的字节码指令，也就是反编译字节码中记录的操作码在字节码中的偏移量e g:<code>19: aload_2</code></li>
+<li>本地方法栈：类似Java栈，不过它是表示执行本地方法的，存放的方法调用本地方法接口，最终调用本地方法库，实现与操作系统、硬件交互的目的</li>
+</ul>
+<h4 id="虚拟机栈（Java栈）中的栈帧"><a href="#虚拟机栈（Java栈）中的栈帧" class="headerlink" title="虚拟机栈（Java栈）中的栈帧"></a>虚拟机栈（Java栈）中的栈帧</h4><p>每执行一个方法就会往栈中压入一个元素，这个元素叫“栈帧”，</p>
+<p>栈帧包括：</p>
+<ul>
+<li><p>操作数栈 </p>
+</li>
+<li><p>本地变量表 </p>
+</li>
+<li><p>动态连接：指向运行时常量池的引用</p>
+<ul>
+<li><p>常量池中有很多UTF8符号引用，运行时需要转换成直接引用</p>
+<p>Eg:<code> \#29 = Utf8        Ljava/io/PrintStream;</code></p>
+</li>
+</ul>
+</li>
+<li><p>返回地址：较早版本中用报错后用于返回，现在已经没用了</p>
+</li>
+</ul>
+<h3 id="从反编译看字节码运行时数据区"><a href="#从反编译看字节码运行时数据区" class="headerlink" title="从反编译看字节码运行时数据区"></a>从反编译看字节码运行时数据区</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Jvm</span>  </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Jvm jvm = <span class="keyword">new</span> Jvm();</span><br><span class="line">        jvm.greeting();</span><br><span class="line">    &#125;  </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">greeting</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.print(<span class="string">&quot;Hello Jvm&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="main静态方法执行前准备："><a href="#main静态方法执行前准备：" class="headerlink" title="main静态方法执行前准备："></a>main静态方法执行前准备：</h4><ol>
+<li>启动虚拟机：堆，方法区，运行时常量池都被创建</li>
+<li>创建线程支持:虚拟机栈，计数器，本地方法栈也会被创建</li>
+<li>需要JVM类加载出来，就需要通过类加载器加载（类加载器不属于运行时数据区，是外部的，将class文件加载到方法区<code>一部分进入运行时常量池</code>）</li>
+</ol>
+<h4 id="main方法的执行"><a href="#main方法的执行" class="headerlink" title="main方法的执行"></a>main方法的执行</h4><p>创建一个栈帧压入虚拟机栈</p>
+<p>栈帧包括</p>
+<ul>
+<li><p>操作数栈 大小stack = 2 slot</p>
+</li>
+<li><p>本地变量表 大小locals =2 slot</p>
+</li>
+<li><p>动态连接：指向运行时常量池的引用</p>
+<ul>
+<li><p>常量池中有很多UTF8符号引用，运行时需要转换成直接引用</p>
+<p>Eg:<code> \#29 = Utf8        Ljava/io/PrintStream;</code></p>
+</li>
+</ul>
+</li>
+<li><p>返回地址</p>
+</li>
+</ul>
+<p>接下来就可以执行指令：</p>
+<p><code>javap -v Jvm.class</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">public com.hencoder.customviewdrawing.Jvm();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">    # 在Main中会被初始化，并且创建栈帧压入虚拟机栈</span><br><span class="line">      stack=1, locals=1, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         # 调用初始化构造</span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         # 出栈</span><br><span class="line">         4: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 6: 0</span><br><span class="line"></span><br><span class="line">    public static void main(java.lang.String[]);</span><br><span class="line">    descriptor: ([Ljava/lang/String;)V</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">    # 操作数栈 大小2slot ，本地变量表大小2slot，参数数量（默认this）</span><br><span class="line">      stack=2, locals=2, args_size=1</span><br><span class="line">      #==================== 创建对象并赋值到局部对象 ====================</span><br><span class="line">      	 # 对应 Jvm jvm = new Jvm();</span><br><span class="line">      	 </span><br><span class="line">         # 创建对象，将引用压入栈帧中</span><br><span class="line">         # 执行后会在堆中创建一个对象，随后将对象的引用压入操作数栈</span><br><span class="line">         # 执行引擎（系统）会将计数器的值改成 3（字节码偏移量）</span><br><span class="line">         0: new           #2                  // class com/hencoder/customviewdrawing/Jvm</span><br><span class="line">         </span><br><span class="line">         # 赋值栈顶数值并将复制的值压入栈顶</span><br><span class="line">         3: dup</span><br><span class="line">         </span><br><span class="line">         # 类的初始化：调用超类构建方法，实例初始化方法，私有方法</span><br><span class="line">         # 这个方法会消耗掉一个类的引用，dup复制的引用就会被消耗掉（出栈）</span><br><span class="line">         # 因为调用了构造方法，会创造一个新的栈帧压入虚拟机栈</span><br><span class="line">         # JVM类调用初始化构造后调用了return 出栈，对象初始化完成</span><br><span class="line">         4: invokespecial #3                  // Method &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">        </span><br><span class="line">        # 将初始化变量传递到本地变量表1的位置</span><br><span class="line">         7: astore_1         </span><br><span class="line">      #==================== 创建对象并赋值到局部对象 ====================</span><br><span class="line">         # 赋值完成后，把对象的引用加载进操作数栈</span><br><span class="line">         8: aload_1</span><br><span class="line">         # 调用greeting方法，又会创建出栈帧</span><br><span class="line">         # 会调用pirnt方法形成新的栈帧</span><br><span class="line">         # print 执行完毕后栈帧出栈</span><br><span class="line">         9: invokevirtual #4                  // Method greeting:()V</span><br><span class="line">         # main方法执行完毕，栈帧出栈</span><br><span class="line">        12: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 8: 0</span><br><span class="line">        line 9: 8</span><br><span class="line">        line 10: 12</span><br><span class="line"></span><br><span class="line">  public void greeting();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=1, args_size=1</span><br><span class="line">         # 获得System.out 静态成员变量 </span><br><span class="line">         0: getstatic     #5                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">         # 调用print方法</span><br><span class="line">         3: ldc           #6                  // String Hello Jvm</span><br><span class="line">         5: invokevirtual #7                  // Method java/io/PrintStream.print:(Ljava/lang/String;)V</span><br><span class="line">         8: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 13: 0</span><br><span class="line">        line 14: 8</span><br></pre></td></tr></table></figure>
+<h3 id="对象在堆中的结构"><a href="#对象在堆中的结构" class="headerlink" title="对象在堆中的结构"></a>对象在堆中的结构</h3><p>分三部分组成</p>
+<ul>
+<li><p>对象头 ：</p>
+<ul>
+<li>MarkWord</li>
+<li>类型指针：指向方法区中类的信息 </li>
+<li>数组⻓度(对象是数组时才有这部分，其他类型只有两部分)</li>
+</ul>
+</li>
+<li><p>具体数据：一般占的空间最大</p>
+</li>
+<li><p>对⻬填充 ：保证整个对象都是8个字节的倍数</p>
+</li>
+</ul>
+<h4 id="MarkWord结构"><a href="#MarkWord结构" class="headerlink" title="MarkWord结构"></a>MarkWord结构</h4><p>MarkWord 的结构(32位虚拟机)</p>
+<p>32位虚拟机中markword的大小是32位 0,1 数据类似这样</p>
+<p><code>1011100100101100101101011 0101 1 01</code></p>
+<ul>
+<li><p>最后两位是01 ，那么分两种情况</p>
+<ol>
+<li><p>倒数第三位是0：说明是无锁状态，再倒数4位用来记录gc年龄，前面25位作为对象的HashCode</p>
+<p><code>hashcode:011100100101100101101011 gc年龄0101 无锁0 01</code></p>
+</li>
+<li><p>倒数第三位是1: 偏向锁状态</p>
+<p><code>记录进入哪个线程:0111001001011001011010 偏向锁的时间戳11 gc年龄0101 偏向锁1 01</code></p>
+<blockquote>
+<p> 什么是偏向锁：</p>
+<p>大多时候一段可能被多线程访问的所以需要同步的代码，大部分情况下都是同一个线程在操作，所以在虚拟机层面上就做了这样一个优化：</p>
+<p>直接在锁上面添加了目标线程的id，下一次在遇到进入锁的操作，进入的线程和记录的线程是相同的那么你跟不不必竞争这个锁直接就获取到这个锁了。</p>
+</blockquote>
+</li>
+<li><p>最后两位00：说明处于轻量级锁状态前面30位指向栈中锁的指针</p>
+<p>轻量级锁：如果程序很快就执行完，像重量级锁一样阻塞线程过于耗费资源，就有了我们轻量级锁，轻量级锁在获取锁失败的时候并不会让线程处于阻塞状态而是一直活跃，通过自旋再次尝试获得锁，若另一个线程执行完把锁释放了，我们就可以直接执行了。所以轻量级锁也叫自旋锁。自旋次数也是有限制的，达到一定次数的时候锁就会膨胀为重量级锁</p>
+</li>
+<li><p>最后两位10：说明是重量级锁的状态，前面30位都是重量锁的指针，每次线程进入的时候都需要竞争来获取锁。在线程竞争失败的时候，会让线程进入阻塞状态线程恢复的时候再次竞争获得锁</p>
+</li>
+<li><p>最后两位11: 代表对象被gc标记，对象可以回收了，即将回收的对象不能作为锁对象</p>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="锁相关"><a href="#锁相关" class="headerlink" title="锁相关"></a>锁相关</h4><p><strong>锁的升级（膨胀）：</strong></p>
+<p>锁只能升级不能降级，无锁 -&gt; 偏向锁 -&gt; 轻量级锁 -&gt; 重量级锁</p>
+<p>没有被偏向锁标记id的线程调用偏向锁，会处于等待状态，偏向锁升级轻量锁</p>
+<p>偏向锁自旋次数超过限制，升级为重量级锁</p>
+<p>无锁状态中的 hashcode 是懒加载的，一个对象一旦计算过 hashcode 就被不会成为偏向锁，而是直接升级成重量锁。 而一个偏向锁状态的对象，一旦计算过 hashcode (Object 默认 的或者是 System 类提供的)，那么会立即升级到重量级锁。 所以使用的时候我们会在对象内部专门建一个对象作为锁，这种情况下一定程度上能防止对象直接升级成重量级锁。</p>
+<p><img src="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819165217192.png" alt="image-20210819165217192"></p>
+<h2 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h2><p>主流的虚拟机实现都是堆区域回收（并没有明确说明方法区不能回收）。</p>
+<p>GC是通过判断GCRoot能否直接或间接引用来判断是否可以回收的。</p>
+<p><img src="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210820094705937.png" alt="image-20210820094705937"></p>
+<h3 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h3><ul>
+<li>标记-清除算法 (会产生空闲内存碎片 )遍历整个堆，标记出要回收的对象，然后回收所有标记对象，这样会产生很多不连续的内存片段。</li>
+<li>标记-整理算法(防止产生内存碎片) 将标记过回收的内存片段集中到一起，这样就没有不连续的内存片段了。</li>
+<li>复制算法(效率最高，但是内存利用率低)：把内存分成AB两块，只用A存储，存储满后将所有活着的对象复制到B，再将A全部清空掉。</li>
+</ul>
+<p>JVM通过将内存分成不同的区域结合各自算法的优点执行不同的垃圾回收算法</p>
+<blockquote>
+<p>JVM 中新生代使用复制算法，老年代使用标记整理算法</p>
+</blockquote>
+<h3 id="JVM-堆的结构划分"><a href="#JVM-堆的结构划分" class="headerlink" title="JVM 堆的结构划分"></a>JVM 堆的结构划分</h3><ul>
+<li>新生代<ul>
+<li>eden (80%) 伊甸园</li>
+<li>Survivor 区（幸存区）<ul>
+<li>from (10%) </li>
+<li>To (10%)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>老年代</li>
+<li>永久代（很多分类文章里不包含它）</li>
+</ul>
+<h3 id="回收过程"><a href="#回收过程" class="headerlink" title="回收过程"></a>回收过程</h3><ol>
+<li><p>对象会在新生代的 eden 区域中创建(大对象会直接进入老年代)</p>
+</li>
+<li><p>第一次 eden 区满了以后进行 minor GC 将存活对象 age + 1，然后放入 from 区域，将 Eden 区域内存清空。</p>
+</li>
+<li><p>以后每次 minor GC 都将 eden 和 from 中的存活对象 age + 1 ，然后放入 to 区域，然后将 to 区域和 from 区域互相调换（这样to区总是接受存活对象）</p>
+</li>
+<li><p>在 age 达到一定值时会移动到老年代，在 minor GC 时，存活对象大于 to 区域，那么会直接进入老年代 </p>
+</li>
+<li><p>老年代也满了之后会触发full gc（标记-整理算法GC老年代）</p>
+</li>
+</ol>
+<h3 id="关于跨代引用"><a href="#关于跨代引用" class="headerlink" title="关于跨代引用"></a>关于跨代引用</h3><p>为了防止不能确定新生代的对象是否被老年代的对象引用而需要进行 full GC（把老年代全扫一遍才能看出来有没有引用新生代的内存） 。</p>
+<p>通过 card table 将老年代分成若干个区域，所以在 minor GC 时只需要对表中 记录的老年代区 域进行扫描就可以了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/17/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B602-Xfermode/" rel="prev" title="自定义view绘制02-Xfermode">
+      <i class="fa fa-chevron-left"></i> 自定义view绘制02-Xfermode
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">Jvm原理解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81"><span class="nav-number">1.2.</span> <span class="nav-text">字节码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.1.</span> <span class="nav-text">字节码结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#magic-%E9%AD%94%E6%9C%AF%E7%A0%81-cafe-babe"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">magic 魔术码:cafe babe</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E5%8F%B7%EF%BC%9A"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">版本号：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E9%87%8F%E6%B1%A0%EF%BC%9A"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">常量池：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E6%A0%87%E5%BF%97%EF%BC%9A"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">访问标志：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B1%BB%E5%90%8D%EF%BC%9A"><span class="nav-number">1.2.1.5.</span> <span class="nav-text">类名：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%EF%BC%9A"><span class="nav-number">1.2.1.6.</span> <span class="nav-text">接口：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7"><span class="nav-number">1.2.1.7.</span> <span class="nav-text">属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.1.8.</span> <span class="nav-text">方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%84%E5%8A%A0%E5%B1%9E%E6%80%A7"><span class="nav-number">1.2.1.9.</span> <span class="nav-text">附加属性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E7%BC%96%E8%AF%91%E5%AD%97%E8%8A%82%E7%A0%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">反编译字节码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">总结：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%AD%97%E8%8A%82%E7%A0%81%E6%88%91%E4%BB%AC%E8%83%BD%E5%BE%97%E5%88%B0%E4%BB%80%E4%B9%88"><span class="nav-number">1.2.3.</span> <span class="nav-text">通过字节码我们能得到什么</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E5%AD%97%E8%8A%82%E7%A0%81%E7%9C%8B-Integer-%E7%9A%84%E8%A3%85%E7%AE%B1%E6%8B%86%E7%AE%B1"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">从字节码看 Integer 的装箱拆箱</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E5%AD%97%E8%8A%82%E7%A0%81%E7%9C%8B-%E6%93%8D%E4%BD%9C"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">从字节码看 ++ 操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E9%83%A8%E7%B1%BB"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">内部类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%9B%E5%9E%8B"><span class="nav-number">1.2.3.4.</span> <span class="nav-text">泛型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#synchronized%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">1.2.3.5.</span> <span class="nav-text">synchronized关键字</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA"><span class="nav-number">1.3.</span> <span class="nav-text">JVM运行时数据区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8"><span class="nav-number">1.3.1.</span> <span class="nav-text">类加载器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A2%AB%E6%89%80%E6%9C%89%E7%BA%BF%E7%A8%8B%E5%85%B1%E4%BA%AB%E7%9A%84"><span class="nav-number">1.3.2.</span> <span class="nav-text">被所有线程共享的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E4%B8%AA%E7%BA%BF%E7%A8%8B%E7%A7%81%E6%9C%89%E7%9A%84"><span class="nav-number">1.3.3.</span> <span class="nav-text">每个线程私有的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88%EF%BC%88Java%E6%A0%88%EF%BC%89%E4%B8%AD%E7%9A%84%E6%A0%88%E5%B8%A7"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">虚拟机栈（Java栈）中的栈帧</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E5%8F%8D%E7%BC%96%E8%AF%91%E7%9C%8B%E5%AD%97%E8%8A%82%E7%A0%81%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA"><span class="nav-number">1.3.4.</span> <span class="nav-text">从反编译看字节码运行时数据区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#main%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E6%89%A7%E8%A1%8C%E5%89%8D%E5%87%86%E5%A4%87%EF%BC%9A"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">main静态方法执行前准备：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#main%E6%96%B9%E6%B3%95%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">main方法的执行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%9C%A8%E5%A0%86%E4%B8%AD%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.5.</span> <span class="nav-text">对象在堆中的结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MarkWord%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.5.1.</span> <span class="nav-text">MarkWord结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%94%81%E7%9B%B8%E5%85%B3"><span class="nav-number">1.3.5.2.</span> <span class="nav-text">锁相关</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6"><span class="nav-number">1.4.</span> <span class="nav-text">垃圾回收</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95"><span class="nav-number">1.4.1.</span> <span class="nav-text">垃圾回收算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM-%E5%A0%86%E7%9A%84%E7%BB%93%E6%9E%84%E5%88%92%E5%88%86"><span class="nav-number">1.4.2.</span> <span class="nav-text">JVM 堆的结构划分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E6%94%B6%E8%BF%87%E7%A8%8B"><span class="nav-number">1.4.3.</span> <span class="nav-text">回收过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E8%B7%A8%E4%BB%A3%E5%BC%95%E7%94%A8"><span class="nav-number">1.4.4.</span> <span class="nav-text">关于跨代引用</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -168,6 +168,694 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/14/%E4%BB%8ERetrofit%E7%9A%84%E5%8E%9F%E7%90%86%E6%9D%A5%E7%9C%8BHTTP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/14/%E4%BB%8ERetrofit%E7%9A%84%E5%8E%9F%E7%90%86%E6%9D%A5%E7%9C%8BHTTP/" class="post-title-link" itemprop="url">从Retrofit的原理来看HTTP</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-14 17:36:46" itemprop="dateCreated datePublished" datetime="2021-07-14T17:36:46+08:00">2021-07-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-27 18:23:58" itemprop="dateModified" datetime="2021-07-27T18:23:58+08:00">2021-07-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/Retrofit/" itemprop="url" rel="index"><span itemprop="name">Retrofit</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="从Retrofit的原理来看HTTP"><a href="#从Retrofit的原理来看HTTP" class="headerlink" title="从Retrofit的原理来看HTTP"></a>从Retrofit的原理来看HTTP</h1><h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><ol>
+<li>创建一个interface作为WebService的请求集合，在里面用注解(Annotation)写入需要配置的请求方法</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">GitHubService</span> </span>&#123; <span class="meta">@GET(&quot;users/&#123;user&#125;/repos&quot;)</span></span><br><span class="line">	Call&lt;List&lt;Repo&gt;&gt; listRepos(<span class="meta">@Path(&quot;user&quot;)</span> String user);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>在正式代码里用 <code>Retrofit </code>创建出 interface 的实例</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Retrofit retrofit = <span class="keyword">new</span> Retrofit.Builder()</span><br><span class="line">    .baseUrl(<span class="string">&quot;https://api.github.com/&quot;</span>)</span><br><span class="line">    .build();</span><br><span class="line"></span><br><span class="line">GitHubService service = retrofit.create(GitHubService.class);</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>调用创建出的Service实例的对应方法，创建出相应的可以用来发起网络请求的 <code>Call</code> 对象</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Call&lt;List&lt;Repo&gt;&gt; repos = service.listRepos(<span class="string">&quot;octocat&quot;</span>);</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>使用 Call.execute() 或者 Call.enqueue() 来发起请求</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">repos.enqueue(callback);</span><br></pre></td></tr></table></figure>
+<p>Call.enqueue(),是异步的，方法执行的请求仍然是并行的，为了提升效率是不会排队执行的。 </p>
+<p>Call.execute() 是同步的。</p>
+<h2 id="Retrofit-源码结构总结"><a href="#Retrofit-源码结构总结" class="headerlink" title="Retrofit 源码结构总结"></a>Retrofit 源码结构总结</h2><ol>
+<li><p>通过 Retrofit.create(Class) 方法创建出 Service interface 的实例，从 而使得 Service 中配置的方法变得可用，这是 Retrofit 代码结构的核心;</p>
+</li>
+<li><p>Retrofit.create() 方法内部，使用的是<code>Proxy.newProxyInstance() </code>方法来创建 Service 实例。这个方法会为参数中的多个 interface (具体到 Retrofit 来说，是固定传入一个 interface)创建 一个对象，这个对象实现了所有 interface 的每个方法，并且每个方法的实现都 是雷同的:</p>
+<p>调用对象实例内部的一个<code>InvocationHandler</code>成员变量的<code>invoke()</code>方法，并把自己的方法信息传递进去。这样就在实质上实现了代理 </p>
+<p>逻辑:interface 中的方法全部由一个另外设定的 InvocationHandler 对象 来进行代理操作。并且，这些方法的具体实现是在运行时生成 interface 实例时 才确定的，而不是在编译时(虽然在编译时就已经可以通过代码逻辑推断出来)。这就是网上所说的「动态代理机制」的具体含义。</p>
+</li>
+<li><p>因此，<code>invoke()</code>方法中的逻辑，就是 Retrofit 创建 Service 实例的关键。这 个方法内有三行关键代码，共同组成了具体逻辑: <code>ServiceMethod</code> 的创建:</p>
+<ol>
+<li><p>```java<br>loadServiceMethod(method)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  </span><br><span class="line">   这行代码负责读取 interface 中原方法的信息(包括返回值类型、方法注解、参数类型、参数注解)，并将这些信息做初步分析。实际返回的是一个&#96;CallAdapted&#96; 。</span><br><span class="line"></span><br><span class="line">2. &#96;OkHttpCall &#96;的创建:</span><br><span class="line"></span><br><span class="line">   &#96;&#96;&#96;java</span><br><span class="line">   new OkHttpCall&lt;&gt;(requestFactory, args, callFactory, responseConverter)</span><br></pre></td></tr></table></figure></li>
+<li><p><code>adapt()</code>方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">callAdapter.adapt(call);</span><br></pre></td></tr></table></figure>
+<p>这个方法会使用一个 CallAdapter 对象来把 OkHttpCall 对象进行转换，生成一个新的对象。默认情况下，返回的是一个 ExecutorCallbackCall ，它的作用是把操 作切回主线程后再交给 Callback 。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="源码分析：Retrofit-create"><a href="#源码分析：Retrofit-create" class="headerlink" title="源码分析：Retrofit.create()"></a>源码分析：Retrofit.create()</h2><h3 id="loadServiceMethod"><a href="#loadServiceMethod" class="headerlink" title="loadServiceMethod"></a>loadServiceMethod</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">create</span><span class="params">(<span class="keyword">final</span> Class&lt;T&gt; service)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//验证 service 接口</span></span><br><span class="line">  validateServiceInterface(service);</span><br><span class="line">  <span class="comment">// 动态代理创建service实例</span></span><br><span class="line">  <span class="keyword">return</span> (T) Proxy.newProxyInstance(service.getClassLoader(), <span class="keyword">new</span> Class&lt;?&gt;[] &#123; service &#125;,</span><br><span class="line">      <span class="keyword">new</span> InvocationHandler() &#123;</span><br><span class="line">        ... invoke()..</span><br><span class="line">      &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="validateServiceInterface：-验证service-接口"><a href="#validateServiceInterface：-验证service-接口" class="headerlink" title="validateServiceInterface： 验证service 接口"></a>validateServiceInterface： 验证service 接口</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validateServiceInterface</span><span class="params">(Class&lt;?&gt; service)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//第一步 校验，service必须是接口不能是一个类</span></span><br><span class="line">  <span class="keyword">if</span> (!service.isInterface()) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;API declarations must be interfaces.&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">	<span class="comment">//第二步：校验 接口和接口的父类是否是泛型接口，如果是则会报错</span></span><br><span class="line">  <span class="comment">// 双向队列 check</span></span><br><span class="line">  Deque&lt;Class&lt;?&gt;&gt; check = <span class="keyword">new</span> ArrayDeque&lt;&gt;(<span class="number">1</span>); </span><br><span class="line">  <span class="comment">// 向check队列里加入一个service</span></span><br><span class="line">  check.add(service); </span><br><span class="line">  <span class="keyword">while</span> (!check.isEmpty()) &#123;</span><br><span class="line">    <span class="comment">//取出刚加入check队列的service，进行处理，当check中的service为空的时候结束校验</span></span><br><span class="line">    Class&lt;?&gt; candidate = check.removeFirst();</span><br><span class="line">    <span class="comment">// 看看service的TypeParameter是否是空，也就是是否包含泛型接口，若包含抛出异常</span></span><br><span class="line">    <span class="keyword">if</span> (candidate.getTypeParameters().length != <span class="number">0</span>) &#123;</span><br><span class="line">      StringBuilder message = <span class="keyword">new</span> StringBuilder(<span class="string">&quot;Type parameters are unsupported on &quot;</span>)</span><br><span class="line">          .append(candidate.getName());</span><br><span class="line">      <span class="keyword">if</span> (candidate != service) &#123;</span><br><span class="line">        message.append(<span class="string">&quot; which is an interface of &quot;</span>)</span><br><span class="line">            .append(service.getName());</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(message.toString());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//把这个service继承的接口也加入check队列里面</span></span><br><span class="line">    Collections.addAll(check, candidate.getInterfaces());</span><br><span class="line">  &#125;</span><br><span class="line">	<span class="comment">//第三步：判断是否进行激进验证</span></span><br><span class="line">  <span class="comment">//validateEagerly，是否提前对业务接口中的注解进行验证转换的标志位。</span></span><br><span class="line">  <span class="keyword">if</span> (validateEagerly) &#123;</span><br><span class="line">    Platform platform = Platform.get();</span><br><span class="line">    <span class="comment">// 对每个方法遍历</span></span><br><span class="line">    <span class="keyword">for</span> (Method method : service.getDeclaredMethods()) &#123;</span><br><span class="line">      <span class="comment">// 判断是否是默认方法/静态方法，如果是，则不验证</span></span><br><span class="line">      <span class="keyword">if</span> (!platform.isDefaultMethod(method) &amp;&amp; !Modifier.isStatic(method.getModifiers())) &#123;</span><br><span class="line">        <span class="comment">// 将方法加载，这样如果方法有报错就可以提前暴露，</span></span><br><span class="line">        <span class="comment">//但是由于使用了反射，在提前验证模式下会对所有接口使用，消耗性能较多</span></span><br><span class="line">        loadServiceMethod(method);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="核心：动态代理-Proxy-newProxyInstance"><a href="#核心：动态代理-Proxy-newProxyInstance" class="headerlink" title="核心：动态代理 Proxy.newProxyInstance"></a>核心：动态代理 Proxy.newProxyInstance</h4><p>代理：一个类生成的对象实现了接口，那么这个类就是代理这些接口的实现，这个对象就是这个实际的代理。</p>
+<p>动态代理：这个代理类是在运行时实现的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 参数1: service.getClassLoader() 为了生成类的classLoader，不重要，其他classLoader也能替代</span></span><br><span class="line"><span class="comment">* 参数2：new Class&lt;?&gt;[] &#123; service &#125;一个数组，提供给动态代理的service，在retrofit的实现中只有一个元素</span></span><br><span class="line"><span class="comment">* 参数3: 匿名类InvocationHandler，通过它创建service实例，核心是 invoke方法</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">(T) Proxy.newProxyInstance(service.getClassLoader(), <span class="keyword">new</span> Class&lt;?&gt;[] &#123; service &#125;,</span><br><span class="line">        <span class="keyword">new</span> InvocationHandler() &#123;</span><br><span class="line">          <span class="keyword">private</span> <span class="keyword">final</span> Platform platform = Platform.get();</span><br><span class="line">          <span class="keyword">private</span> <span class="keyword">final</span> Object[] emptyArgs = <span class="keyword">new</span> Object[<span class="number">0</span>];</span><br><span class="line">					</span><br><span class="line">          <span class="meta">@Override</span> <span class="keyword">public</span> <span class="meta">@Nullable</span> <span class="function">Object <span class="title">invoke</span><span class="params">(Object proxy, Method method,</span></span></span><br><span class="line"><span class="function"><span class="params">              <span class="meta">@Nullable</span> Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">            <span class="comment">// 如果方法不是接口里的方法，而是object里的方法，就不代理了直接调用</span></span><br><span class="line">            <span class="keyword">if</span> (method.getDeclaringClass() == Object.class) &#123;</span><br><span class="line">              <span class="keyword">return</span> method.invoke(<span class="keyword">this</span>, args);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 不代理Java8中的默认方法，就不代理了，直接调用</span></span><br><span class="line">            <span class="keyword">if</span> (platform.isDefaultMethod(method)) &#123;</span><br><span class="line">              <span class="keyword">return</span> platform.invokeDefaultMethod(method, service, proxy, args);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 返回ServiceMethod 并执行invoke 方法</span></span><br><span class="line">            <span class="keyword">return</span> loadServiceMethod(method).invoke(args != <span class="keyword">null</span> ? args : emptyArgs);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+<h4 id="loadServiceMethod-method"><a href="#loadServiceMethod-method" class="headerlink" title="loadServiceMethod(method)"></a>loadServiceMethod(method)</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 带缓存的加载</span></span><br><span class="line">ServiceMethod&lt;?&gt; loadServiceMethod(Method method) &#123;</span><br><span class="line">  <span class="comment">//从缓存中获取方法  ServiceMethod</span></span><br><span class="line">    ServiceMethod&lt;?&gt; result = serviceMethodCache.get(method);</span><br><span class="line">  <span class="comment">//若result 不为空，直接返回</span></span><br><span class="line">    <span class="keyword">if</span> (result != <span class="keyword">null</span>) <span class="keyword">return</span> result;</span><br><span class="line">  <span class="comment">//若result 为空就是没缓存，那就把它加载出来，再放入缓存（cache)里面，再返回</span></span><br><span class="line">    <span class="keyword">synchronized</span> (serviceMethodCache) &#123;</span><br><span class="line">      result = serviceMethodCache.get(method);</span><br><span class="line">      <span class="keyword">if</span> (result == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 加载：核心代码 加载ServiceMethod实例</span></span><br><span class="line">        result = ServiceMethod.parseAnnotations(<span class="keyword">this</span>, method);</span><br><span class="line">        serviceMethodCache.put(method, result);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="ServiceMethod"><a href="#ServiceMethod" class="headerlink" title="ServiceMethod"></a>ServiceMethod</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">ServiceMethod</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> &lt;T&gt; <span class="function">ServiceMethod&lt;T&gt; <span class="title">parseAnnotations</span><span class="params">(Retrofit retrofit, Method method)</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 传递 requestFactory ，用于创建 OkHttpCall</span></span><br><span class="line">    RequestFactory requestFactory = RequestFactory.parseAnnotations(retrofit, method);</span><br><span class="line"></span><br><span class="line">    Type returnType = method.getGenericReturnType();</span><br><span class="line">    <span class="keyword">if</span> (Utils.hasUnresolvableType(returnType)) &#123;</span><br><span class="line">      <span class="keyword">throw</span> methodError(method,</span><br><span class="line">          <span class="string">&quot;Method return type must not include a type variable or wildcard: %s&quot;</span>, returnType);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (returnType == <span class="keyword">void</span>.class) &#123;</span><br><span class="line">      <span class="keyword">throw</span> methodError(method, <span class="string">&quot;Service methods cannot return void.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  	<span class="comment">//核心 ，通过HttpServiceMethod生成HttpServiceMethod实例</span></span><br><span class="line">    <span class="comment">//HttpServiceMethod是ServiceMethod的子类</span></span><br><span class="line">    <span class="comment">// 最终返回的是HttpServiceMethod 类</span></span><br><span class="line">    <span class="keyword">return</span> HttpServiceMethod.parseAnnotations(retrofit, method, requestFactory);</span><br><span class="line">  &#125;</span><br><span class="line">	<span class="comment">// 抽象类，动态代理 方法中最终调用的就是这个方法的实例</span></span><br><span class="line">  <span class="keyword">abstract</span> <span class="meta">@Nullable</span> <span class="function">T <span class="title">invoke</span><span class="params">(Object[] args)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="HttpServiceMethod-核心方法：invoke"><a href="#HttpServiceMethod-核心方法：invoke" class="headerlink" title="HttpServiceMethod  核心方法：invoke"></a>HttpServiceMethod  核心方法：invoke</h4><p>包含了OkHttpCall的创建和adapt(适配过程)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpServiceMethod</span>&lt;<span class="title">ResponseT</span>, <span class="title">ReturnT</span>&gt; <span class="keyword">extends</span> <span class="title">ServiceMethod</span>&lt;<span class="title">ReturnT</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> &lt;ResponseT, ReturnT&gt; <span class="function">HttpServiceMethod&lt;ResponseT, ReturnT&gt; <span class="title">parseAnnotations</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">      Retrofit retrofit, Method method, RequestFactory requestFactory)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">     </span><br><span class="line">    <span class="keyword">if</span> (!isKotlinSuspendFunction) &#123;</span><br><span class="line">      <span class="comment">// 若不是Kotlin的挂起方法，则实例化CallAdapted</span></span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> CallAdapted&lt;&gt;(requestFactory, callFactory, responseConverter, callAdapter);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (continuationWantsResponse) &#123;</span><br><span class="line">      ...</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     ...</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">	<span class="comment">//CallAdapter CallAdapted 继承了HttpServiceMethod，实例化返回的就是它</span></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">CallAdapted</span>&lt;<span class="title">ResponseT</span>, <span class="title">ReturnT</span>&gt; <span class="keyword">extends</span> <span class="title">HttpServiceMethod</span>&lt;<span class="title">ResponseT</span>, <span class="title">ReturnT</span>&gt; </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// CallAdapted类的核心  CallAdapter</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> CallAdapter&lt;ResponseT, ReturnT&gt; callAdapter;</span><br><span class="line"></span><br><span class="line">    CallAdapted(RequestFactory requestFactory, okhttp3.Call.Factory callFactory,</span><br><span class="line">        Converter&lt;ResponseBody, ResponseT&gt; responseConverter,</span><br><span class="line">        CallAdapter&lt;ResponseT, ReturnT&gt; callAdapter) &#123;</span><br><span class="line">      <span class="keyword">super</span>(requestFactory, callFactory, responseConverter);</span><br><span class="line">      <span class="keyword">this</span>.callAdapter = callAdapter;</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">// adapt 方法的实例化，被invoke调用</span></span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">protected</span> ReturnT <span class="title">adapt</span><span class="params">(Call&lt;ResponseT&gt; call, Object[] args)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> callAdapter.adapt(call);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// Retrofi.create 调用的动态代理中，serviceMethod最终调用的就是invoke方法</span></span><br><span class="line">  <span class="comment">// 而LoadServicMethod 中实例化的就是这个类（HttpServiceMethod）的invoke方法</span></span><br><span class="line">  <span class="meta">@Override</span> <span class="keyword">final</span> <span class="meta">@Nullable</span> <span class="function">ReturnT <span class="title">invoke</span><span class="params">(Object[] args)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//实例化  OkHttpCall</span></span><br><span class="line">    Call&lt;ResponseT&gt; call = <span class="keyword">new</span> OkHttpCall&lt;&gt;(requestFactory, args, callFactory, responseConverter);</span><br><span class="line">    <span class="comment">//调用 adapt 方法（是个抽象方法）</span></span><br><span class="line">    <span class="keyword">return</span> adapt(call, args);</span><br><span class="line">  &#125;</span><br><span class="line">	<span class="comment">// adapt 抽象方法</span></span><br><span class="line">  <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="meta">@Nullable</span> <span class="function">ReturnT <span class="title">adapt</span><span class="params">(Call&lt;ResponseT&gt; call, Object[] args)</span></span>;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="OkHttpCall"><a href="#OkHttpCall" class="headerlink" title="OkHttpCall"></a>OkHttpCall</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 发送请求时调用的Call.enqueue() 就是OkHttpCall()实例的enqueue方法</span></span><br><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">OkHttpCall</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Call</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(<span class="keyword">final</span> Callback&lt;T&gt; callback)</span> </span>&#123;</span><br><span class="line">    Objects.requireNonNull(callback, <span class="string">&quot;callback == null&quot;</span>);</span><br><span class="line">    okhttp3.Call call;</span><br><span class="line">    Throwable failure;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (executed) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Already executed.&quot;</span>);</span><br><span class="line">      executed = <span class="keyword">true</span>;</span><br><span class="line">      call = rawCall;</span><br><span class="line">      failure = creationFailure;</span><br><span class="line">      <span class="keyword">if</span> (call == <span class="keyword">null</span> &amp;&amp; failure == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="comment">//创建 okhttp3.Call call对象</span></span><br><span class="line">          call = rawCall = createRawCall();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">          throwIfFatal(t);</span><br><span class="line">          failure = creationFailure = t;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">//执行 okhttp3.call 对象的enqueu方法，发起网络请求</span></span><br><span class="line">    call.enqueue(<span class="keyword">new</span> okhttp3.Callback() &#123;</span><br><span class="line">      <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span><span class="params">(okhttp3.Call call, okhttp3.Response rawResponse)</span> </span>&#123;</span><br><span class="line">        Response&lt;T&gt; response;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="comment">//解析网络请求： okhttp拿到较底层的数据流后解析成response对象</span></span><br><span class="line">          response = parseResponse(rawResponse);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">          throwIfFatal(e);</span><br><span class="line">          callFailure(e);</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="comment">// 回调给调用它的 Call</span></span><br><span class="line">          callback.onResponse(OkHttpCall.<span class="keyword">this</span>, response);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">          throwIfFatal(t);</span><br><span class="line">          t.printStackTrace(); <span class="comment">// TODO this is not great</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(okhttp3.Call call, IOException e)</span> </span>&#123;</span><br><span class="line">        callFailure(e);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">callFailure</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          callback.onFailure(OkHttpCall.<span class="keyword">this</span>, e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">          throwIfFatal(t);</span><br><span class="line">          t.printStackTrace(); <span class="comment">// TODO this is not great</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">  <span class="comment">//实例化 okhttp3.Call，也就是创建请求</span></span><br><span class="line">  <span class="keyword">private</span> okhttp3.<span class="function">Call <span class="title">createRawCall</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    okhttp3.Call call = callFactory.newCall(requestFactory.create(args));</span><br><span class="line">    <span class="keyword">if</span> (call == <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">&quot;Call.Factory returned null.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> call;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//解析 response的方法，</span></span><br><span class="line">  <span class="function">Response&lt;T&gt; <span class="title">parseResponse</span><span class="params">(okhttp3.Response rawResponse)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    ...  <span class="comment">// 创建 okhttp.response 的解析方法</span></span><br><span class="line">     T body = responseConverter.convert(catchingBody) ....</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="创建OkHttpCall的过程"><a href="#创建OkHttpCall的过程" class="headerlink" title="创建OkHttpCall的过程"></a>创建OkHttpCall的过程</h4><p>在<code>OkhttpCall</code>中，我们调用<code>createRawCall()</code>方法创建了<code>OkhttpCall</code>，但是它其实是通过<code>requestFactory</code>创建的</p>
+<p>追根溯源我们会发现 其实在<code>HttpServiceMethod</code>中<code>CallAdapted</code>创建的过程中传递了requestFactory是,而这个参数是在<code>ServiceMethod</code>的<code>parseAnnotations()</code>中传递的</p>
+<p>RequestFactory  会分析注解中配置等请求方法，是否含有body等配置再记录，分析出完整的拼装方案 。</p>
+<p>最终使用RequestFactory .create() 方法创建出一个 okhttp3.Request解析方案</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">RequestFactory</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line"> <span class="function">RequestFactory <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> okhttp3.<span class="function">Request <span class="title">create</span><span class="params">(Object[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">parseMethodAnnotation</span><span class="params">(Annotation annotation)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> DELETE) &#123;</span><br><span class="line">        parseHttpMethodAndPath(<span class="string">&quot;DELETE&quot;</span>, ((DELETE) annotation).value(), <span class="keyword">false</span>);</span><br><span class="line">      </span><br><span class="line">        ....</span><br><span class="line">   &#125;       </span><br><span class="line"> &#125;</span><br><span class="line">   <span class="comment">//创建 okhttp3.Request 请求</span></span><br><span class="line">  okhttp3.<span class="function">Request <span class="title">create</span><span class="params">(Object[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;...&#125;     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Response 解析方案是也是在Retrofit的Build方法中调用addConverterFactory方法配置的，Retrofit的Build中维护一个converterFactories，可以在创建Retrofit对象时配置Response解析方案 eg：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">           .baseUrl(<span class="string">&quot;https://api.github.com/&quot;</span>)</span><br><span class="line">           .addConverterFactory(GsonConverterFactory.create()) <span class="comment">// 增加Gson 解析方案</span></span><br><span class="line">           .build()</span><br></pre></td></tr></table></figure>
+<h3 id="adapt-适配过程"><a href="#adapt-适配过程" class="headerlink" title="adapt 适配过程"></a>adapt 适配过程</h3><h4 id="ExecutorCallbackCall"><a href="#ExecutorCallbackCall" class="headerlink" title="ExecutorCallbackCall"></a>ExecutorCallbackCall</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">DefaultCallAdapterFactory</span> <span class="keyword">extends</span> <span class="title">CallAdapter</span>.<span class="title">Factory</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="meta">@Nullable</span> Executor callbackExecutor;</span><br><span class="line">  ...</span><br><span class="line">  <span class="meta">@Override</span> <span class="keyword">public</span> <span class="meta">@Nullable</span> CallAdapter&lt;?, ?&gt; get(</span><br><span class="line">      Type returnType, Annotation[] annotations, Retrofit retrofit) &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> CallAdapter&lt;Object, Call&lt;?&gt;&gt;() &#123;</span><br><span class="line">      <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> Type <span class="title">responseType</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> responseType;</span><br><span class="line">      &#125;</span><br><span class="line">		<span class="comment">//所以执行adapt方法，返回的是被 ExecutorCallbackCall包裹的 okhttpcall</span></span><br><span class="line">      <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> Call&lt;Object&gt; <span class="title">adapt</span><span class="params">(Call&lt;Object&gt; call)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> executor == <span class="keyword">null</span></span><br><span class="line">            ? call</span><br><span class="line">            : <span class="keyword">new</span> ExecutorCallbackCall&lt;&gt;(executor, call);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ExecutorCallbackCall</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Call</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Executor callbackExecutor;</span><br><span class="line">    <span class="keyword">final</span> Call&lt;T&gt; delegate;</span><br><span class="line">    <span class="comment">// invoke   中调用的，delegate 就是okhttpcall</span></span><br><span class="line">   ExecutorCallbackCall(Executor callbackExecutor, Call&lt;T&gt; delegate) &#123;</span><br><span class="line">      <span class="keyword">this</span>.callbackExecutor = callbackExecutor;</span><br><span class="line">      <span class="keyword">this</span>.delegate = delegate;</span><br><span class="line">    &#125;      </span><br><span class="line">    <span class="comment">// call back 参数是 Mainactvity中 call.enqueue 中传递的参数  </span></span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(<span class="keyword">final</span> Callback&lt;T&gt; callback)</span> </span>&#123;</span><br><span class="line">      Objects.requireNonNull(callback, <span class="string">&quot;callback == null&quot;</span>);</span><br><span class="line">			<span class="comment">// 切到主线程，回调网络请求Response</span></span><br><span class="line">      delegate.enqueue(<span class="keyword">new</span> Callback&lt;T&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span><span class="params">(Call&lt;T&gt; call, <span class="keyword">final</span> Response&lt;T&gt; response)</span> </span>&#123;</span><br><span class="line">          callbackExecutor.execute(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (delegate.isCanceled()) &#123;</span><br><span class="line">              callback.onFailure(ExecutorCallbackCall.<span class="keyword">this</span>, <span class="keyword">new</span> IOException(<span class="string">&quot;Canceled&quot;</span>));</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              callback.onResponse(ExecutorCallbackCall.<span class="keyword">this</span>, response);</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Call&lt;T&gt; call, <span class="keyword">final</span> Throwable t)</span> </span>&#123;</span><br><span class="line">          callbackExecutor.execute(() -&gt; callback.onFailure(ExecutorCallbackCall.<span class="keyword">this</span>, t));</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+
+<p>我们知道，在<code>loadServiceMethod()</code>中返回的实例是<code>CallAdapted</code>，一个继承了<code>HttpServicemethod</code>的实例，</p>
+<p><code>adapt</code>方法调用的<code>callAdapter</code>类，来自<code>callFactory</code>，追根溯源，我们发现<code>callFactory</code>的初始化来自<code>Retrofit Builder</code>中的参数，由<code>Platform（平台管理类</code>）配置，默认情况使用<code>DefaultCallAdapterFactory</code>是一个<code>Executor</code> </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">final</span> Platform platform;</span><br><span class="line">  <span class="comment">//CallAdapterFactory配置类</span></span><br><span class="line">  <span class="keyword">private</span> <span class="meta">@Nullable</span> okhttp3.Call.Factory callFactory;</span><br><span class="line">  <span class="keyword">private</span> <span class="meta">@Nullable</span> HttpUrl baseUrl;</span><br><span class="line">  <span class="comment">// converterFactories 配置类</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">final</span> List&lt;Converter.Factory&gt; converterFactories = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">final</span> List&lt;CallAdapter.Factory&gt; callAdapterFactories = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  Builder(Platform platform) &#123;</span><br><span class="line">    <span class="keyword">this</span>.platform = platform;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">Builder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(Platform.get());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  Builder(Retrofit retrofit) &#123;</span><br><span class="line">    platform = Platform.get();</span><br><span class="line">    callFactory = retrofit.callFactory;</span><br><span class="line">    baseUrl = retrofit.baseUrl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果没有配置converterFactories，则会使用默认的</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>,</span><br><span class="line">        size = retrofit.converterFactories.size() - platform.defaultConverterFactoriesSize();</span><br><span class="line">        i &lt; size; i++) &#123;</span><br><span class="line">      converterFactories.add(retrofit.converterFactories.get(i));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 若没有配置CallAdapterFactory，会使用默认的</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>,</span><br><span class="line">        size = retrofit.callAdapterFactories.size() - platform.defaultCallAdapterFactoriesSize();</span><br><span class="line">        i &lt; size; i++) &#123;</span><br><span class="line">      callAdapterFactories.add(retrofit.callAdapterFactories.get(i));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    callbackExecutor = retrofit.callbackExecutor;</span><br><span class="line">    validateEagerly = retrofit.validateEagerly;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="增加RxJava的支持"><a href="#增加RxJava的支持" class="headerlink" title="增加RxJava的支持"></a>增加RxJava的支持</h4><p>给作为WebService的接口集合增加RxJava操作方法</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> <span class="class"><span class="keyword">interface</span> <span class="title">GitHubService</span> : <span class="type">Serializable &#123;</span></span></span><br><span class="line">    ...</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;users/&#123;user&#125;/repos&quot;</span>)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">listReposRx</span><span class="params">(<span class="meta">@Path(<span class="meta-string">&quot;user&quot;</span>)</span> user: <span class="type">String</span>?)</span></span>: Single&lt;List&lt;Repo&gt;&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用时，让Retrofit开启RxJava支持</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">            .baseUrl(<span class="string">&quot;https://api.github.com/&quot;</span>)</span><br><span class="line">            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())<span class="comment">// 增加RxJavaA支持</span></span><br><span class="line">            .addConverterFactory(GsonConverterFactory.create()) <span class="comment">// 增加Gson 解析</span></span><br><span class="line">            .build()</span><br><span class="line"><span class="keyword">val</span> service: GitHubService = retrofit.create(GitHubService::<span class="keyword">class</span>.java)</span><br><span class="line"><span class="keyword">val</span> reposRx = service.listReposRx(<span class="string">&quot;octocat&quot;</span>)</span><br><span class="line">reposRx.subscribe()</span><br></pre></td></tr></table></figure>
+<p>在Retrofit 调用build方法的时候，<code>RxCallAdapterFactories</code>会先于<code>DefaultCallAdapterFactory</code>加入到<code>CallAdapterFactories</code>队列之中</p>
+<p>在Http调用<code>createCallAdapter()</code>创建<code>Calladapter</code>时会调用<code>Retrofit</code>的<code>nextCallAdapter()</code>方法，然后遍历</p>
+<p><code>callAdapterFactories</code>根据所需的参数返回adapter，因为我们增加了<code>RxCallAdapterFactories</code>，当出现RxJava相关的参数时候会返回对应的 RxJava2CallAdapter</p>
+<p>RxJava2CallAdapterFactory:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">RxJava2CallAdapterFactory</span><span class="params">(<span class="meta">@Nullable</span> Scheduler scheduler, <span class="keyword">boolean</span> isAsync)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.scheduler = scheduler;</span><br><span class="line">  <span class="keyword">this</span>.isAsync = isAsync;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 返回支持RxJava的calladapter</span></span><br><span class="line"><span class="meta">@Override</span> <span class="keyword">public</span> <span class="meta">@Nullable</span> CallAdapter&lt;?, ?&gt; get(</span><br><span class="line">    Type returnType, Annotation[] annotations, Retrofit retrofit) &#123;</span><br><span class="line">  Class&lt;?&gt; rawType = getRawType(returnType);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (rawType == Completable.class) &#123;</span><br><span class="line">    <span class="comment">// Completable is not parameterized (which is what the rest of this method deals with) so it</span></span><br><span class="line">    <span class="comment">// can only be created with a single configuration.</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> RxJava2CallAdapter(Void.class, scheduler, isAsync, <span class="keyword">false</span>, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>,</span><br><span class="line">        <span class="keyword">false</span>, <span class="keyword">true</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">boolean</span> isFlowable = rawType == Flowable.class;</span><br><span class="line">  <span class="keyword">boolean</span> isSingle = rawType == Single.class;</span><br><span class="line">  <span class="keyword">boolean</span> isMaybe = rawType == Maybe.class;</span><br><span class="line">  <span class="keyword">if</span> (rawType != Observable.class &amp;&amp; !isFlowable &amp;&amp; !isSingle &amp;&amp; !isMaybe) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">boolean</span> isResult = <span class="keyword">false</span>;</span><br><span class="line">  <span class="keyword">boolean</span> isBody = <span class="keyword">false</span>;</span><br><span class="line">  Type responseType;</span><br><span class="line">  <span class="keyword">if</span> (!(returnType <span class="keyword">instanceof</span> ParameterizedType)) &#123;</span><br><span class="line">    String name = isFlowable ? <span class="string">&quot;Flowable&quot;</span></span><br><span class="line">        : isSingle ? <span class="string">&quot;Single&quot;</span></span><br><span class="line">        : isMaybe ? <span class="string">&quot;Maybe&quot;</span> : <span class="string">&quot;Observable&quot;</span>;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(name + <span class="string">&quot; return type must be parameterized&quot;</span></span><br><span class="line">        + <span class="string">&quot; as &quot;</span> + name + <span class="string">&quot;&lt;Foo&gt; or &quot;</span> + name + <span class="string">&quot;&lt;? extends Foo&gt;&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  Type observableType = getParameterUpperBound(<span class="number">0</span>, (ParameterizedType) returnType);</span><br><span class="line">  Class&lt;?&gt; rawObservableType = getRawType(observableType);</span><br><span class="line">  <span class="keyword">if</span> (rawObservableType == Response.class) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!(observableType <span class="keyword">instanceof</span> ParameterizedType)) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Response must be parameterized&quot;</span></span><br><span class="line">          + <span class="string">&quot; as Response&lt;Foo&gt; or Response&lt;? extends Foo&gt;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    responseType = getParameterUpperBound(<span class="number">0</span>, (ParameterizedType) observableType);</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (rawObservableType == Result.class) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!(observableType <span class="keyword">instanceof</span> ParameterizedType)) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Result must be parameterized&quot;</span></span><br><span class="line">          + <span class="string">&quot; as Result&lt;Foo&gt; or Result&lt;? extends Foo&gt;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    responseType = getParameterUpperBound(<span class="number">0</span>, (ParameterizedType) observableType);</span><br><span class="line">    isResult = <span class="keyword">true</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    responseType = observableType;</span><br><span class="line">    isBody = <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> RxJava2CallAdapter(responseType, scheduler, isAsync, isResult, isBody, isFlowable,</span><br><span class="line">      isSingle, isMaybe, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/13/Kotlin%E8%BF%9B%E9%98%B6-hencoder/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/13/Kotlin%E8%BF%9B%E9%98%B6-hencoder/" class="post-title-link" itemprop="url">Kotlin进阶-hencoder</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-13 15:20:20" itemprop="dateCreated datePublished" datetime="2021-07-13T15:20:20+08:00">2021-07-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-16 10:05:30" itemprop="dateModified" datetime="2021-08-16T10:05:30+08:00">2021-08-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kotlin/" itemprop="url" rel="index"><span itemprop="name">Kotlin</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="构造器"><a href="#构造器" class="headerlink" title="构造器"></a>构造器</h2><h3 id="次级构造"><a href="#次级构造" class="headerlink" title="次级构造"></a>次级构造</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CodeView</span> : <span class="type">TextView &#123; </span></span></span><br><span class="line">	<span class="keyword">constructor</span>(context: Context): <span class="keyword">super</span>(context)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="主构造器"><a href="#主构造器" class="headerlink" title="主构造器"></a>主构造器</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> <span class="keyword">constructor</span></span>() &#123;</span><br><span class="line">    <span class="keyword">var</span> username: String? = <span class="literal">null</span></span><br><span class="line">		<span class="comment">// 主构造器如果没有被调用过就会报错，这里的 ：this（）就是调用了无参的主构造器，类似super（）</span></span><br><span class="line">    <span class="keyword">constructor</span>(username: String?): <span class="keyword">this</span>()&#123;</span><br><span class="line">        <span class="keyword">this</span>.username = username </span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CodeView</span> <span class="keyword">constructor</span></span>(context: Context) : TextView(context)</span><br><span class="line"><span class="comment">// 如果没有被「可⻅性修饰符」「注解」标注，那么 `constructor` 可 以省略</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CodeView</span> </span>(context: Context) : TextView(context)</span><br></pre></td></tr></table></figure>
+<p>成员变量初始化可以直接访问到主构造参数</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CodeView</span> <span class="keyword">constructor</span></span>(context: Context) : TextView(context)&#123;</span><br><span class="line">	<span class="keyword">val</span> color = context.getColor(R.color.white)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="init-代码块"><a href="#init-代码块" class="headerlink" title="init 代码块"></a>init 代码块</h3><p>主构造不能包含任何的代码，初始化代码可以放到 init 代码块中</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CodeView</span> <span class="keyword">constructor</span></span>(context: Context) : TextView(context) &#123;</span><br><span class="line">	<span class="keyword">init</span> &#123; </span><br><span class="line">  <span class="comment">// init 中可以访问主构造参数</span></span><br><span class="line">    paint.color = getContext().getColor(R.color.colorAccent)</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在初始化的时候，初始化块会按照它们在「文件中出现的顺序」执行。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CodeView</span> <span class="keyword">constructor</span></span>(context: Context) : TextView(context) &#123;</span><br><span class="line"><span class="keyword">init</span> &#123; <span class="comment">// ...&#125;</span></span><br><span class="line"><span class="keyword">val</span> paint = Paint() <span class="comment">// 会在 init&#123;&#125; 之后运行 ,所以如果init用到了这个变量，要将它放在init前面，否则会报错</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="构造属性"><a href="#构造属性" class="headerlink" title="构造属性"></a>构造属性</h3><p>在主构造参数前面加上 <code>var/val </code>使构造参数同时成为成员变量</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> <span class="keyword">constructor</span></span>(<span class="keyword">var</span> username: String?, <span class="keyword">var</span> password: String?, <span class="keyword">var</span> code:String?)</span><br></pre></td></tr></table></figure>
+<p>成员变量初始化可以直接访问到主构造参数，但是在方法中如果构造属性没有定义成<code>varj.val</code>在类的方法中是无法访问到构造参数的。</p>
+<h2 id="data-class"><a href="#data-class" class="headerlink" title="data class"></a>data class</h2><p>一些常见的功能交给编译器，通过语法糖实现：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> <span class="keyword">constructor</span></span>(<span class="keyword">var</span> username: String?, <span class="keyword">var</span> password: String?, <span class="keyword">var</span> code: String?) &#123;</span><br><span class="line">    <span class="comment">//this(null,null,null) 调用一下主构造器</span></span><br><span class="line">    <span class="keyword">constructor</span>(): <span class="keyword">this</span>(<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>数据类同时会生生成</p>
+<ul>
+<li> toString()</li>
+<li>hashCode()</li>
+<li>equals()</li>
+<li>copy() (浅拷⻉) </li>
+<li>componentN() …</li>
+</ul>
+<h3 id="解构"><a href="#解构" class="headerlink" title="解构"></a>解构</h3><p>Android Studio 点击 Tool  -〉Kotlin -〉Show Kotlin Byte Code 可以看到Kotlin对应的Java代码</p>
+<p>可以把一个对象「解构」成很多变量，Kotlin会把解析的变量对应到构造属性上去</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Response</span></span>(<span class="keyword">var</span> code: <span class="built_in">Int</span> , <span class="keyword">var</span> message: String ,<span class="keyword">var</span> body: User)</span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">execute</span><span class="params">()</span></span>: Response &#123;</span><br><span class="line">    println(<span class="string">&quot;正在请求网络...&quot;</span>)</span><br><span class="line">    println(<span class="string">&quot;网络请求成功！&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> code = <span class="number">200</span></span><br><span class="line">    <span class="keyword">var</span> message = <span class="string">&quot;OK&quot;</span></span><br><span class="line">    <span class="keyword">val</span> user = User()</span><br><span class="line">    <span class="keyword">return</span> Response(code,message,user)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">//Java中取值的方法 </span></span><br><span class="line">	<span class="keyword">val</span> response = execute()</span><br><span class="line">  <span class="keyword">val</span> code = response.code</span><br><span class="line">  <span class="keyword">val</span> message = response.code</span><br><span class="line">  <span class="keyword">val</span> user = response.body</span><br><span class="line">	<span class="comment">//kotlin的解构取值方法</span></span><br><span class="line">	<span class="keyword">val</span> (code, message, body) = response </span><br><span class="line">	<span class="comment">//等同于</span></span><br><span class="line">	<span class="keyword">val</span> code = response.component1() </span><br><span class="line">	<span class="keyword">val</span> message = response.component2() </span><br><span class="line">	<span class="keyword">val</span> body = response.component3()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用data class 则拥有component1，component2.. 的解构能力，若不使用component1，component2等解构值需要手写补充</p>
+<h2 id="相等性"><a href="#相等性" class="headerlink" title="相等性"></a>相等性</h2><ul>
+<li><code>==</code> 结构相等 (调用 equals() 比较 )</li>
+<li><code>===</code> 引用(地址值)相等</li>
+</ul>
+<h2 id="Elvis-操作符"><a href="#Elvis-操作符" class="headerlink" title="Elvis 操作符"></a>Elvis 操作符</h2><p>可以通过<code>?:</code>的操作来简化<code> if null</code> 的操作</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// lesson.date 为空时使用默认值</span></span><br><span class="line"><span class="keyword">val</span> date = lesson.date?: <span class="string">&quot;日期待定&quot;</span></span><br><span class="line"><span class="comment">// lesson.state 为空时提前返回函数 </span></span><br><span class="line"><span class="keyword">val</span> state = lesson.state?: <span class="keyword">return</span></span><br><span class="line"><span class="comment">// lesson.content 为空时抛出异常</span></span><br><span class="line"><span class="keyword">val</span> content = lesson.content ?: <span class="keyword">throw</span> IllegalArgumentException(<span class="string">&quot;content expected&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (user.username?.length ?:<span class="number">0</span> &lt;<span class="number">4</span>)</span><br><span class="line"><span class="comment">//等同于</span></span><br><span class="line"><span class="keyword">if</span> (user.username != <span class="literal">null</span> &amp;&amp; user.username!!.length &lt; <span class="number">4</span>)</span><br><span class="line"><span class="comment">// 因为若username =null 则. length = null 得到默认值0 ，小于4</span></span><br><span class="line"><span class="comment">// 若username ！=null 则第二个？的默认赋值会被忽略</span></span><br></pre></td></tr></table></figure>
+<h2 id="when-操作符"><a href="#when-操作符" class="headerlink" title="when 操作符"></a><strong>when</strong> 操作符</h2><p><code>when</code> 表达式可以接受返回值，多个分支相同的处理方式可以放在一起，用逗号分隔</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">val</span> colorRes = <span class="keyword">when</span> (lesson.state) &#123; </span><br><span class="line">   <span class="comment">//多条件相同结果，可以摆在一起用, 分割</span></span><br><span class="line">  Lesson.State.PLAYBACK, <span class="literal">null</span> -&gt; R.color.playback </span><br><span class="line">  Lesson.State.LIVE -&gt; R.color.live 	</span><br><span class="line">  Lesson.State.WAIT -&gt; R.color.wait</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>when </code>表达式可以用来取代 <code>if-else-if </code>链。如果不提供参数，所有的分支条件都是布尔表达式</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> colorRes = <span class="keyword">when</span> &#123;</span><br><span class="line">	(lesson.state == Lesson.State.PLAYBACK) -&gt;R.color.playback</span><br><span class="line">	(lesson.state == <span class="literal">null</span>) -&gt; R.color.playback </span><br><span class="line">	(lesson.state == Lesson.State.LIVE) -&gt; R.color.live </span><br><span class="line">	(lesson.state == Lesson.State.WAIT) -&gt; R.color.wait </span><br><span class="line">	<span class="keyword">else</span> -&gt; R.color.playback</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="operator"><a href="#operator" class="headerlink" title="operator"></a>operator</h2><p>通过 <code>operator </code>修饰「特定函数名」的函数，例如<code> plus</code> 、<code> get</code> ，可以达到重载运算符的效果</p>
+<table>
+<thead>
+<tr>
+<th align="left">表达式</th>
+<th align="left">翻译为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">a + b</td>
+<td align="left">a.plus(b)</td>
+</tr>
+<tr>
+<td align="left">a - b</td>
+<td align="left">a.minus(b)</td>
+</tr>
+<tr>
+<td align="left">a * b</td>
+<td align="left">a.times(b)</td>
+</tr>
+<tr>
+<td align="left">a / b</td>
+<td align="left">a.div(b)</td>
+</tr>
+</tbody></table>
+<p>比如 </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> holder.onBind(list[position])</span><br><span class="line"><span class="comment">// arraylist 可以像数组一样获得元素，是因为[]使用了operator操作符</span></span><br><span class="line"><span class="comment">// public operator fun get(index: Int): E</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="lambda"><a href="#lambda" class="headerlink" title="lambda"></a>lambda</h2><p>如果函数的最后一个参数是 <code>lambda</code> ，那么 <code>lambda</code> 表达式可以放在圆括号之外:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lessons.forEach()&#123; </span><br><span class="line">	lesson : Lesson -&gt;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果你的函数传入参数只有一个 <code>lambda</code> 的话，那么小括号可以省略的:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lessons.forEach &#123; </span><br><span class="line"> lesson : Lesson -&gt;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果 <code>lambda </code>表达式只有一个参数，那么可以省略，通过隐式的<code>it</code>来访问</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lessons.forEach &#123; <span class="comment">// it</span></span><br><span class="line">   <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><p>通过标准函数 repeat() :</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">repeat(<span class="number">100</span>) &#123;</span><br><span class="line">  <span class="comment">// 其实有两个参数，第二个是lambda，由于只有一个参数，所以可以挪到外面，打印结果为0到99</span></span><br><span class="line">  println(it)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过区间:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">0.</span><span class="number">.99</span>) &#123; &#125;</span><br><span class="line"><span class="comment">// until 不包括右边界，所以适合遍历数组(自带-1)</span></span><br><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">0</span> until array.size) &#123; &#125;</span><br><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">0</span> until <span class="number">100</span>) &#123; &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="infix-函数"><a href="#infix-函数" class="headerlink" title="infix 函数"></a>infix 函数</h2><p>必须是成员函数或扩展函数</p>
+<p>必须只能接受一个参数，并且不能有默认值</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// until() 函数的源码</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">infix</span> <span class="function"><span class="keyword">fun</span> <span class="built_in">Int</span>.<span class="title">until</span><span class="params">(to: <span class="type">Int</span>)</span></span>: IntRange &#123;</span><br><span class="line">	<span class="keyword">if</span> (to &lt;= <span class="built_in">Int</span>.MIN_VALUE) <span class="keyword">return</span> IntRange.EMPTY</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">this</span> .. (to - <span class="number">1</span>).toInt() </span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 使用这个函数就能省略.和（）所以0 until 100 其实等同于 0.util(100)</span></span><br></pre></td></tr></table></figure>
+<h2 id="嵌套函数"><a href="#嵌套函数" class="headerlink" title="嵌套函数"></a>嵌套函数</h2><p>Kotlin 中可以在函数中继续声明函数,会消耗性能，除非真的需要提升可读性，否则不建议这样做。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">innerFunc</span><span class="params">()</span></span>&#123;&#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>内部函数可以访问外部函数的参数</li>
+<li>每次调用时，会产生一个函数对象</li>
+<li>声明函数要在调用之前，嵌套函数不会提升</li>
+</ul>
+<h2 id="注解使用处目标"><a href="#注解使用处目标" class="headerlink" title="注解使用处目标"></a>注解使用处目标</h2><p>当某个元素可能会包含多种内容(例如构造属性，成员属性)，使用注解时可以通过 「注解使用处目标」，让注解对目标发生作用，例如 <code>@file: </code>、 <code>@get: </code>、<code>@set: </code>等。</p>
+<ul>
+<li><code> @file:</code> 作用于整个kt文件，Java调用里面的方法不用增加<code>Kt</code>大写<code>@file:JvmName(&quot;KotlinUtils&quot;)</code></li>
+<li><code>@get:</code>作用于<code>get</code>方法</li>
+<li><code>@set:</code>作用于<code>set</code>方法</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BaseApplication</span> : <span class="type">Application</span></span>() &#123;</span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span><span class="comment">//修改成真正的静态类</span></span><br><span class="line">        <span class="meta">@get:JvmName</span>(<span class="string">&quot;currentApplication&quot;</span>)<span class="comment">//作用于get方法，Java调用时直接会调用currentApplication方法就等于调用get方法，不需要使用BaseApplication.Companion.getCurrentApplication()</span></span><br><span class="line">        <span class="keyword">lateinit</span> <span class="keyword">var</span> currentApplication: Context</span><br><span class="line">            <span class="keyword">private</span> <span class="keyword">set</span><span class="comment">//增加private 关键字，防止set被其他类调用</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate()</span><br><span class="line">        currentApplication = <span class="keyword">this</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h3 id="函数简化"><a href="#函数简化" class="headerlink" title="函数简化"></a>函数简化</h3><p>类型推断简化函数声明：可以通过符号<code> =</code> 简化原本直接 <code>return </code>的函数</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">get</span><span class="params">(key :<span class="type">String</span>)</span></span> = SP.getString(key,<span class="literal">null</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="函数参数默认值"><a href="#函数参数默认值" class="headerlink" title="函数参数默认值"></a>函数参数默认值</h3><p>可以通过函数参数默认值来代替 Java 的函数重载</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用 @JvmOverloads 对 Java 暴露重载函数 </span></span><br><span class="line"><span class="meta">@JvmOverloads</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">toast</span><span class="params">(text: <span class="type">CharSequence</span>, duration: <span class="type">Int</span> = Toast.LENGTH_SHORT)</span></span> &#123;</span><br><span class="line">	Toast.makeText(<span class="keyword">this</span>, text, duration).show() </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于第二个参数有默认值，调用的时候可以传单参数（第一个参数），也可以传双参数</p>
+<p>由于Java中无法读取到Kotlin默认参数值的方法重载，所以要加上<code>@JvmOverloads</code>注解</p>
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><h4 id="扩展函数"><a href="#扩展函数" class="headerlink" title="扩展函数"></a>扩展函数</h4><p>可以为任何类添加上一个函数，从而代替工具类</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="built_in">Float</span>.<span class="title">dp2px</span><span class="params">()</span></span>: <span class="built_in">Float</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, <span class="keyword">this</span>, displayMetrics)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>扩展函数和成员函数相同时，成员函数优先被调用 </p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> Activity.<span class="title">setContentView</span><span class="params">(id: <span class="type">Int</span>)</span></span> &#123;&#125; <span class="comment">//这个扩展函数无法替换原有的成员函数</span></span><br></pre></td></tr></table></figure>
+<p>扩展函数是静态解析的，在编译时就确定了调用函数(没有多态)</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> Activity.<span class="title">log</span><span class="params">(text: <span class="type">String</span>)</span></span> &#123; Log.e(<span class="string">&quot;Activity&quot;</span>,text)&#125;</span><br><span class="line"><span class="function"><span class="keyword">fun</span> Context.<span class="title">log</span><span class="params">(text: <span class="type">String</span>)</span></span> &#123; Log.e(<span class="string">&quot;Context&quot;</span>,text) &#125;</span><br><span class="line"><span class="comment">//在activity中调用</span></span><br><span class="line">log(<span class="string">&quot;toast&quot;</span>)</span><br><span class="line">(<span class="keyword">this</span> <span class="keyword">as</span> Context).log(<span class="string">&quot;toast&quot;</span>)</span><br><span class="line"><span class="comment">//输出为 </span></span><br><span class="line">Activity：toast </span><br><span class="line">Context： toast</span><br><span class="line"><span class="comment">//扩展函数是静态解析的，在编译时就确定了，不会互相覆盖</span></span><br></pre></td></tr></table></figure>
+<h4 id="扩展成员属性-简化函数-："><a href="#扩展成员属性-简化函数-：" class="headerlink" title="扩展成员属性(简化函数)："></a>扩展成员属性(简化函数)：</h4><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//activity 中增加成员属性</span></span><br><span class="line"><span class="keyword">val</span> ViewGroup.firstChild: View</span><br><span class="line">	<span class="keyword">get</span>() = getChildAt(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//onCreate 中调用</span></span><br><span class="line">(window.decorView <span class="keyword">as</span> ViewGroup).firstChild</span><br></pre></td></tr></table></figure>
+<h3 id="函数类型"><a href="#函数类型" class="headerlink" title="函数类型"></a>函数类型</h3><p>函数类型由「传入参数类型」和「返回值类型」组成，用「<code>-&gt;</code>」连接，传入参数需 要用「<code>()</code>」，如果返回值为 <code>Unit </code>不能省略 </p>
+<p>函数类型实际是一个接口，我们传递 函数的时候可以通过「 <code>::函数名</code> 」,或者「匿名函数」或者使用 「 <code>lambda</code> 」</p>
+<p>如果传输的是接口而非函数类型，Kotlin已经做了优化，可以用lambda形式传递，也可以用object的形式传递。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">View</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 函数类型 是由 函数参数（接收类型）箭头-&gt; 返回值组成的</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">setOnClickListener</span><span class="params">(listener: (<span class="type">View</span>) -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> view = View()</span><br><span class="line">    <span class="comment">// 函数是可以传递的</span></span><br><span class="line">    <span class="comment">//::函数名 传递函数</span></span><br><span class="line">    view.setOnClickListener(::onClick)</span><br><span class="line">    <span class="comment">//匿名函数 传递</span></span><br><span class="line">    view.setOnClickListener(<span class="function"><span class="title">fun</span>  <span class="params">(view: <span class="type">View</span>)</span></span> &#123;</span><br><span class="line">        println(<span class="string">&quot;被点击了&quot;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">//lambda 传递</span></span><br><span class="line">    view.setOnClickListener &#123;</span><br><span class="line">        println(<span class="string">&quot;被点击了&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">onClick</span><span class="params">(view: <span class="type">View</span>)</span></span> &#123;</span><br><span class="line">    println(<span class="string">&quot;被点击了&quot;</span>)</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<p>Java 中调用：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kotlin 中的函数类型其实本质还是一个接口</span></span><br><span class="line">      new View().setOnClickListener(new Function1&lt;View, <span class="built_in">Unit</span>&gt;() &#123;</span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="keyword">public</span> <span class="built_in">Unit</span> invoke(View view) &#123;</span><br><span class="line">              <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      <span class="comment">//lambda</span></span><br><span class="line">      new View().setOnClickListener(view -&gt; &#123;</span><br><span class="line">          System.<span class="keyword">out</span>.println(<span class="string">&quot;ok&quot;</span>);</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">      &#125;);</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="内联函数"><a href="#内联函数" class="headerlink" title="内联函数"></a>内联函数</h3><p>内联函数配合「函数类型」，可以减少「函数类型」生成的对象,减少函数的调用栈， 非函数类型使用内联函数对性能的提升很小。</p>
+<p>使用<code> inline</code> 关键字声明的函数是「内联函数」，在「编译时」会将「内联函数」中的函数体直接插入到调用处。</p>
+<p>所以在写内联函数的时候需要注意，尽量将内联函数中的代码行数减少!</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    log(<span class="string">&quot;inline log&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//当函数没有inline时（普通函数）调用栈 main 入栈-&gt;log入栈-&gt;Log.e-&gt;log 出栈-&gt;main出栈 减少了调用栈</span></span><br><span class="line"><span class="comment">//当函数为inline 内联时调用栈： main 入栈-&gt;Log.e-&gt; main出栈 减少了调用栈</span></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">log</span> <span class="params">(text: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    Log.e(<span class="string">&quot;Tag&quot;</span>,text)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="部分禁用用内联"><a href="#部分禁用用内联" class="headerlink" title="部分禁用用内联"></a>部分禁用用内联</h4><p>noinline 可以禁止部分参数参与内联编译</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">foo</span><span class="params">(inlined: () -&gt; <span class="type">Unit</span>, <span class="keyword">noinline</span> notInlined: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">//......</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="具体化的类型参数"><a href="#具体化的类型参数" class="headerlink" title="具体化的类型参数"></a>具体化的类型参数</h3><p>因为内联函数的存在，我们可以通过配合<code> inline + reified (具像化)</code>达到「真泛型」的 效果</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> RETROFIT = Retrofit.Builder()</span><br><span class="line">	.baseUrl(<span class="string">&quot;https://api.hencoder.com/&quot;</span>) </span><br><span class="line">	.build()</span><br><span class="line"></span><br><span class="line"><span class="comment">// niline 内联</span></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T&gt;</span> <span class="title">create</span><span class="params">()</span></span>: T &#123; </span><br><span class="line">  <span class="keyword">return</span> RETROFIT.create(T::<span class="keyword">class</span>.java)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">val</span> api = create&lt;API&gt;()</span><br><span class="line"><span class="comment">// 普通调用</span></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T&gt;</span> <span class="title">create</span><span class="params">(clazz:<span class="type">Class</span>&lt;<span class="type">T</span>&gt;)</span></span>: T &#123; </span><br><span class="line">  <span class="keyword">return</span> RETROFIT.create(T::<span class="keyword">class</span>.java)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">val</span> api = create&lt;API::<span class="keyword">class</span>.java&gt;()</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="Kotlin标准函数"><a href="#Kotlin标准函数" class="headerlink" title="Kotlin标准函数"></a>Kotlin标准函数</h3><p>内置标准函数，也叫做作用域函数，通过他们我们可以将逻辑统一的代码放到同一块作用于，提高代码的可读性。</p>
+<p>使用时可以通过简单的规则作出一些判断:</p>
+<ul>
+<li>返回自身 -&gt; 从<code> apply</code> 和 <code>also </code>中选<ul>
+<li>作用域中使用 <code>this</code> 作为参数 —-&gt; 选择 <code>apply</code></li>
+<li>作用域中使用<code>it</code>作为参数 —-&gt; 选择 <code>also</code></li>
+</ul>
+</li>
+<li>不需要返回自身 -&gt; 从 <code>run </code>和 <code>let </code>中选择<ul>
+<li>作用域中使用<code> this</code> 作为参数 —-&gt; 选择<code> run</code></li>
+<li>作用域中使用<code>it</code>作为参数 —-&gt; 选择<code> let</code></li>
+</ul>
+</li>
+</ul>
+<p><code>apply </code>适合对一个对象做附加操作的时候， 例如初始化属性,这样可以避免在init 中做初始化：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> paint = Paint().apply &#123;</span><br><span class="line">     isAntiAlias = <span class="literal">true</span></span><br><span class="line">     style = Paint.Style.STROKE</span><br><span class="line">     color = getContext().getColor(R.color.colorAccent)</span><br><span class="line">     <span class="keyword">this</span>.strokeWidth = <span class="number">6f</span>.dp2px() <span class="comment">// this 指代本 paint</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p><code> let</code> 适合配合空判断的时候 (最好是成员变量，而不是局部变量，局部变量更适合用 if )</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">lesson.state?.let &#123;</span><br><span class="line">               setText(R.id.tv_state, it.stateName())</span><br><span class="line">               <span class="keyword">val</span> colorRes = <span class="keyword">when</span> (it) &#123;</span><br><span class="line">                   Lesson.State.PLAYBACK, <span class="literal">null</span> -&gt; R.color.playback</span><br><span class="line">                   Lesson.State.LIVE -&gt; R.color.live</span><br><span class="line">                   Lesson.State.WAIT -&gt; R.color.wait</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">val</span> backgroundColor = itemView.context.getColor(colorRes)</span><br><span class="line">               getView&lt;View&gt;(R.id.tv_state)!!.setBackgroundColor(backgroundColor)</span><br><span class="line">           &#125;</span><br></pre></td></tr></table></figure>
+<p><code>run</code>适合初始化view的时候，例如recyclerview，它不需要返回自身，且用<code>this</code>指代自身</p>
+<p><code>with</code>适合对同一个对象进行多次操作的时候</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> result = with(user, &#123;</span><br><span class="line">        println(<span class="string">&quot;my name is <span class="variable">$name</span>, I am <span class="variable">$age</span> years old, my phone number is <span class="variable">$phoneNum</span>&quot;</span>)</span><br><span class="line">        <span class="number">1000</span></span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="抽象属性"><a href="#抽象属性" class="headerlink" title="抽象属性"></a>抽象属性</h2><p>在 Kotlin 中，我们可以声明抽象属性，子类对抽象属性重写的时候需要重写对应的 <code>setter/getter</code></p>
+<p>BaseVew:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 虚拟属性</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseView</span> &lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">   <span class="keyword">val</span> presenter: T</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Activity</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LessonActivity</span> : <span class="type">AppCompatActivity</span></span>(), BaseView&lt;LessonPresenter?&gt;,</span><br><span class="line">    Toolbar.OnMenuItemClickListener &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> lessonPresenter = LessonPresenter(<span class="keyword">this</span>)</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">val</span> presenter: LessonPresenter?</span><br><span class="line">        <span class="keyword">get</span>() = lessonPresenter</span><br><span class="line">        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="委托"><a href="#委托" class="headerlink" title="委托"></a>委托</h3><h4 id="属性委托"><a href="#属性委托" class="headerlink" title="属性委托"></a>属性委托</h4><p>有些常⻅的属性操作，我们可以通过委托的方式，让它只实现一次，例如:</p>
+<ul>
+<li><code>lazy</code> 延迟属性:值只在第一次访问的时候计算 </li>
+<li><code>observable</code> 可观察属性:属性发生改变时的通知 </li>
+<li><code>map</code> 集合:将属性存在一个 map 中</li>
+</ul>
+<p>对于一个只读属性(即 <code>val </code>声明的)，委托对象必须提供一个名为 <code>getValue() </code>的 函数</p>
+<p>对于一个可变属性(即 <code>var </code>声明的)，委托对象同时提供<code>setValue()</code>、<code>getValue()</code>函数</p>
+<p>属性委托需要<code>by</code> 关键字实现</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这样做，presenter就会只被创建一次，且是在调用 时创建   </span></span><br><span class="line"><span class="keyword">override</span> <span class="keyword">val</span> presenter: LessonPresenter <span class="keyword">by</span> lazy &#123;  LessonPresenter(<span class="keyword">this</span>) &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="类委托"><a href="#类委托" class="headerlink" title="类委托"></a>类委托</h3><p>可以通过类委托的模式来减少继承（将需要委托执行的方法委托给一个实体类）</p>
+<p>类委托的编译器会优先使用自身重写的函数，而不是委托对象的函数</p>
+<p>属性的get /set 方法委托类</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">var</span> token: String <span class="keyword">by</span> Saver(<span class="string">&quot;token&quot;</span>)</span><br><span class="line"><span class="comment">//        set(value) &#123;</span></span><br><span class="line"><span class="comment">//            CacheUtils.save(&quot;token&quot;,value)</span></span><br><span class="line"><span class="comment">//        &#125;</span></span><br><span class="line"><span class="comment">//        get() &#123;</span></span><br><span class="line"><span class="comment">//            return CacheUtils.get(&quot;token&quot;)!!</span></span><br><span class="line"><span class="comment">//        &#125;</span></span><br><span class="line"><span class="comment">//	 get set 方法被委托给了Saver方法</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Saver</span></span>(<span class="keyword">var</span> token: String) &#123;</span><br><span class="line">        <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">getValue</span><span class="params">(lessonActivity: <span class="type">LessonActivity</span>, property: <span class="type">KProperty</span>&lt;*&gt;)</span></span>: String &#123;</span><br><span class="line">            <span class="keyword">return</span> CacheUtils.<span class="keyword">get</span>(<span class="string">&quot;token&quot;</span>)!!</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">setValue</span><span class="params">(lessonActivity: <span class="type">LessonActivity</span>, property: <span class="type">KProperty</span>&lt;*&gt;, s: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">            CacheUtils.save(<span class="string">&quot;token&quot;</span>,token)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Base</span> </span>&#123; </span><br><span class="line">  	<span class="function"><span class="keyword">fun</span> <span class="title">print</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BaseImpl</span></span>(<span class="keyword">val</span> x: <span class="built_in">Int</span>) : Base &#123; </span><br><span class="line">	<span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">print</span><span class="params">()</span></span> &#123;</span><br><span class="line">		print(x) </span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Derived 的 print 实现会通过构造参数中的 b 对象来完成。 </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Derived</span></span>(b: Base) : Base <span class="keyword">by</span> b</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/09/%E5%90%8E%E7%9B%BEJS-8-JS%E5%87%BD%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/09/%E5%90%8E%E7%9B%BEJS-8-JS%E5%87%BD%E6%95%B0/" class="post-title-link" itemprop="url">后盾JS-8:JS函数</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-09 08:51:28 / 修改时间：17:35:09" itemprop="dateCreated datePublished" datetime="2021-07-09T08:51:28+08:00">2021-07-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Javascript/" itemprop="url" rel="index"><span itemprop="name">Javascript</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Javascript"><a href="#Javascript" class="headerlink" title="Javascript"></a>Javascript</h1><p>函数是将复用的代码块封装起来的模块，在JS中函数还有其他语言所不具有的特性，接下来我们会详细掌握使用技巧。</p>
+<h2 id="声明定义"><a href="#声明定义" class="headerlink" title="声明定义"></a>声明定义</h2><p>在JS中函数也是对象函数是<code>Function</code>类的创建的实例，下面的例子可以方便理解函数是对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> func = <span class="keyword">new</span> <span class="built_in">Function</span>(<span class="string">&quot;title&quot;</span>, <span class="string">&quot;console.log(title)&quot;</span>);</span><br><span class="line">func(<span class="string">&#x27;后盾人&#x27;</span>);</span><br></pre></td></tr></table></figure>
+<p>这里可以str可以直接调用切割函数是因为函数本身就是对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> str = <span class="keyword">new</span> <span class="built_in">String</span>(<span class="string">&quot;hdcms.com&quot;</span>);</span><br><span class="line"><span class="built_in">console</span>.log(str);</span><br><span class="line"><span class="keyword">let</span> start = <span class="string">&quot;houdunren.com&quot;</span>;</span><br><span class="line"><span class="built_in">console</span>.log(str.substr(<span class="number">0</span>,<span class="number">1</span>));</span><br></pre></td></tr></table></figure>
+<p>标准语法是使用函数声明来定义函数,<code>&#123;&#125;</code>后面不需要跟<code>；</code>，但是若是赋值语句则需要加<code>；</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 标准语法定义，末尾不需要加;</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">func</span>(<span class="params">num</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> ++num;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(hd(<span class="number">3</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">//赋值给变量，末尾需要；</span></span><br><span class="line"><span class="keyword">let</span> cms = <span class="function"><span class="keyword">function</span>(<span class="params">title</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(title);</span><br><span class="line">&#125;;</span><br><span class="line">cms(<span class="string">&quot;后盾人&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+
+<p>对象字面量属性函数简写</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> user = &#123;</span><br><span class="line">  name: <span class="literal">null</span>,</span><br><span class="line">  getName: <span class="function"><span class="keyword">function</span> (<span class="params">name</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">this</span>.name;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">//简写</span></span><br><span class="line">  setName (name) &#123;</span><br><span class="line">    <span class="built_in">this</span>.name = name;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">user.setName(<span class="string">&#x27;Joe&#x27;</span>);</span><br><span class="line"><span class="built_in">console</span>.log(user.getName())</span><br></pre></td></tr></table></figure>
+<h3 id="全局函数定义"><a href="#全局函数定义" class="headerlink" title="全局函数定义"></a>全局函数定义</h3><p>全局函数会声明在window对象中，这不正确建议使用后面章节的模块处理</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(<span class="built_in">window</span>.screenX); <span class="comment">//2200</span></span><br></pre></td></tr></table></figure>
+<p>当我们定义了 <code>screenX</code> 函数后就覆盖了window.screenX方法</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">screenX</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">&quot;后盾人&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(screenX()); <span class="comment">//后盾人</span></span><br></pre></td></tr></table></figure>
+<p>使用<code>let/const</code>时不会压入window</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> hd = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&quot;后盾人&quot;</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="built_in">window</span>.hd(); <span class="comment">//window.hd is not a function</span></span><br></pre></td></tr></table></figure>
+<h2 id="匿名函数和函数提升"><a href="#匿名函数和函数提升" class="headerlink" title="匿名函数和函数提升"></a>匿名函数和函数提升</h2><h3 id="函数提升"><a href="#函数提升" class="headerlink" title="函数提升"></a>函数提升</h3><p>数也会提升到前面，优先级行于<code>var</code>变量提高</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(hd()); <span class="comment">//后盾人</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hd</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">&#x27;后盾人&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>变量函数定义不会被提升</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(hd()); <span class="comment">//后盾人</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hd</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">&#x27;后盾人&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> hd = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">&#x27;hdcms.com&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(hd()); <span class="comment">//hdcms.com</span></span><br></pre></td></tr></table></figure>
+<h3 id="匿名函数"><a href="#匿名函数" class="headerlink" title="匿名函数"></a>匿名函数</h3><p>函数是对象所以可以通过赋值来指向到函数对象的指针，当然指针也可以传递给其他变量，注意后面要以<code>;</code>结束。下面使用函数表达式将 <code>匿名函数</code> 赋值给变量</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> hd = <span class="function"><span class="keyword">function</span>(<span class="params">num</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> ++num;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(hd <span class="keyword">instanceof</span> <span class="built_in">Object</span>); <span class="comment">//true</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> cms = hd;</span><br><span class="line"><span class="built_in">console</span>.log(cms(<span class="number">3</span>));</span><br></pre></td></tr></table></figure>
+<p>标准声明的函数优先级更高，解析器会优先提取函数并放在代码树顶端，所以标准声明函数位置不限制，所以下面的代码可以正常执行。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(hd(<span class="number">3</span>));</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hd</span>(<span class="params">num</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> ++num;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>标准声明优先级高于赋值声明</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(hd(<span class="number">3</span>)); <span class="comment">//4</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hd</span>(<span class="params">num</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> ++num;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> hd = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">&quot;hd&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>程序中使用匿名函数的情况非常普遍</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">sum</span>(<span class="params">...args</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> args.reduce(<span class="function">(<span class="params">a, b</span>) =&gt;</span> a + b);<span class="comment">//不用写函数名，因为也不会复用</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(sum(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>));</span><br></pre></td></tr></table></figure>
+<h2 id="立即执行和作用域解决冲突"><a href="#立即执行和作用域解决冲突" class="headerlink" title="立即执行和作用域解决冲突"></a>立即执行和作用域解决冲突</h2><p>立即执行函数指函数定义时立即执行</p>
+<ul>
+<li>可以用来定义私有作用域防止污染全局作用域</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&quot;use strict&quot;</span>;</span><br><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> web = <span class="string">&#x27;houdunren&#x27;</span>;</span><br><span class="line">&#125;)();</span><br><span class="line"><span class="built_in">console</span>.log(web); <span class="comment">//web is not defined</span></span><br></pre></td></tr></table></figure>
+<p>使用 <code>let/const</code> 有块作用域特性，所以使用以下方式也可以产生私有作用域</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="keyword">let</span> web = <span class="string">&#x27;houdunren&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(web);</span><br></pre></td></tr></table></figure>
+<h3 id="解决冲突"><a href="#解决冲突" class="headerlink" title="解决冲突"></a>解决冲突</h3><p>我们定义两个js文件4.1.js ，4.2.js，这两个文件拥有相同的方法，</p>
+<p>4.2.js：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hd</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&quot;4.2-hd&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">show</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">   <span class="built_in">console</span>.log(<span class="string">&quot;4.2-hshowd&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在代码中引用</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;4.1.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;4.2.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>直接引用4.1的方法永远无法调用，因为4.1的方法被4.2的同名方法覆盖了</p>
+<p>我们可以用立即执行函数产生的私有作用域来解决冲突</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params"><span class="built_in">window</span></span>) </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">hd</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">&quot;4.2-hd&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">show</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">&quot;4.2-hshowd&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">window</span>.js2 = &#123; hd, show &#125;;</span><br><span class="line">&#125;)(<span class="built_in">window</span>);</span><br></pre></td></tr></table></figure>
+<p>也可以利用<code>let/const</code> 有块作用域的特性，产生私有作用域来解决</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">hd</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">&quot;4.2-hd&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">show</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">&quot;4.2-hshowd&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">window</span>.js2 = &#123; hd, show &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/08/Kotlin%E5%9F%BA%E7%A1%80-hencoder/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/08/Kotlin%E5%9F%BA%E7%A1%80-hencoder/" class="post-title-link" itemprop="url">Kotlin基础-hencoder</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-08 17:29:31" itemprop="dateCreated datePublished" datetime="2021-07-08T17:29:31+08:00">2021-07-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-20 10:23:37" itemprop="dateModified" datetime="2021-08-20T10:23:37+08:00">2021-08-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kotlin/" itemprop="url" rel="index"><span itemprop="name">Kotlin</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Kotlin基础-hencoder"><a href="#Kotlin基础-hencoder" class="headerlink" title="Kotlin基础-hencoder"></a>Kotlin基础-hencoder</h1><h2 id="函数声明"><a href="#函数声明" class="headerlink" title="函数声明"></a>函数声明</h2><p>声明函数要用用 fun 关键字，就像声明类要用 class 关键字一样 「函数参数」的「参数类型」是在「参数名」的右边 函数的「返回值」在「函数参数」右边使用 : 分隔，没有返回值时可以省略</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//声明没有返回值的函数:</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123; <span class="comment">//..</span></span><br><span class="line">&#125;</span><br><span class="line">声明有返回值的参数:</span><br><span class="line"><span class="comment">//fun sum(x: Int, y: Int): Int &#123; **return** x + y</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="变量声明"><a href="#变量声明" class="headerlink" title="变量声明"></a>变量声明</h2><p>声明变量需要通过关键字， var 声明可读可写变量， val 声明只读变量 「类型」在「变量量名」的右边，用 : 分割，同时如果满足「类型推断」，类型可以省略<br>创建对象直接调用构造器，不需要 new 关键字</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//声明可读可写变量:</span></span><br><span class="line"><span class="keyword">var</span> age: <span class="built_in">Int</span> = <span class="number">18</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//声明只读变量: </span></span><br><span class="line"><span class="keyword">val</span> name: String = <span class="string">&quot;Hello, Kotlin!&quot;</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">//声明对象:</span></span><br><span class="line"><span class="keyword">val</span> user: User = User()</span><br></pre></td></tr></table></figure>
+<h2 id="继承类-实现接口"><a href="#继承类-实现接口" class="headerlink" title="继承类/实现接口"></a>继承类/实现接口</h2><p>继承类和实现接口都是用的 : ，如果类中没有构造器 ( constructor )，需要在父类类名后面加上 <code>() </code>:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">BaseActivity</span></span>(), View.OnClickListener</span><br></pre></td></tr></table></figure>
+<p>若主动写了构造器，继承时父类类名后面不需要加<code>()</code></p>
+<h2 id="空安全设计"><a href="#空安全设计" class="headerlink" title="空安全设计"></a>空安全设计</h2><p>Kotlin 中的类型分为「可空类型」和「不可空类型」:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">不可空类型</span><br><span class="line"><span class="keyword">val</span> editText : EditText </span><br><span class="line">可空类型</span><br><span class="line"><span class="keyword">val</span> editText : EditText?</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="平台类型"><a href="#平台类型" class="headerlink" title="平台类型"></a>平台类型</h3><p>在类型后面面加上一个感叹号的类型是「平台类型」 即非Kotlin的其他平台类型如Java的类</p>
+<p>Java 中可以通过注解减少这种平台类型的产生<br>  @Nullable 表示可空类型<br>  @NotNull @NonNul l 表示不可空类型</p>
+<p>这种注解只会有警告，约束性和Kotlin相比不够高。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 平台类型，系统自动补充！是可以为空的，为空时报错</span></span><br><span class="line"><span class="keyword">val</span> btn_login = findViewById&lt;Button&gt;(R.id.btn_login)</span><br><span class="line"><span class="comment">//有Nullable注解，系统自动解析为空安全类型</span></span><br><span class="line"><span class="keyword">val</span> btn = getDelegate().findViewById&lt;Button&gt;(R.id.btn_login);</span><br></pre></td></tr></table></figure>
+<h3 id="调用符"><a href="#调用符" class="headerlink" title="调用符"></a>调用符</h3><p><code>!!</code> 强行调用符 </p>
+<p>?. 安全调用符</p>
+<h2 id="非空断言"><a href="#非空断言" class="headerlink" title="非空断言"></a>非空断言</h2><p>可空类型强制类型转换成不可空类型可以通过在变量后面加上<code> !!</code> ，来达到类型转 换。</p>
+<h2 id="lateinit-关键字"><a href="#lateinit-关键字" class="headerlink" title="lateinit 关键字"></a>lateinit 关键字</h2><ul>
+<li>lateinit 只能修饰 var 可读可写变量（val 有初始值且不能被改变）</li>
+<li> lateinit 关键字声明的变量的类型必须是「不可空类型」</li>
+<li>lateinit 声明的变量不能有「初始值」</li>
+<li>lateinit 声明的变量不能是「基本数据类型」</li>
+<li>在构造器中初始化的属性不需要 lateinit 关键字</li>
+</ul>
+<h2 id="类型判断"><a href="#类型判断" class="headerlink" title="类型判断"></a>类型判断</h2><ul>
+<li>is 判断属于某类型</li>
+<li>!is 判断不属于某类型</li>
+<li>as 类型强转，失败时抛出类型强转失败异常</li>
+<li>as? 类型强转，但失败时不会抛出异常而是返回 null</li>
+</ul>
+<h2 id="获取-Class对象"><a href="#获取-Class对象" class="headerlink" title="获取 Class对象"></a>获取 Class对象</h2><p>使用 类名::class 获取的是 Kotlin 的类型是 KClass</p>
+<p>使用 类名::class.java 获取的是 Java 的类型</p>
+<h2 id="setter-getter"><a href="#setter-getter" class="headerlink" title="setter/getter"></a>setter/getter</h2><p>在 Kotlin 声明属性的时候(没有使用 <code>private</code> 修饰)，会自动生成一个私有属性和 一对公开的 <code>setter/getter</code> 函数。</p>
+<p>在写<code> setter/getter</code> 的时候使用 <code>field </code>来代替内部的私有属性(防止递归栈溢出)。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;  </span><br><span class="line">	<span class="keyword">var</span> code: String? = <span class="literal">null</span></span><br><span class="line">  <span class="comment">//默认效果</span></span><br><span class="line">        <span class="keyword">set</span>(value) &#123;</span><br><span class="line">            field = value</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">get</span>() &#123;</span><br><span class="line">            <span class="keyword">return</span> field</span><br><span class="line">        &#125;</span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>为什么 EditText.getText() 的时候可以简化，但是 EditText.setText() 的时候不能和 TextView.setText() 一样简化?</p>
+<p>因为 EditText.getText() 获得的类型是 Editable ，对应的如果 EditText.setText() 传入的参数也是 Editable 就可以简化了。</p>
+</blockquote>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> newEditable = Editable.Factory.getInstance().newEditable(<span class="string">&quot;Kotlin&quot;</span>) </span><br><span class="line">et_username.text = newEditable</span><br></pre></td></tr></table></figure>
+<h2 id="构造器"><a href="#构造器" class="headerlink" title="构造器"></a>构造器</h2><p>使用 <code>constructor</code> 关键字声明构造器</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123; </span><br><span class="line">	<span class="keyword">constructor</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我们在构造器主动调用了了父类构造，那么在继承类的时候就不能在类的后面加上小括号</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>(context: Context) : <span class="keyword">this</span>(context, <span class="literal">null</span>) </span><br><span class="line"><span class="comment">// 主动调用用了父类的构造器</span></span><br><span class="line"><span class="keyword">constructor</span>(context: Context, attr: AttributeSet?) : <span class="keyword">super</span>(context, attr)</span><br></pre></td></tr></table></figure>
+<h2 id="JvmField-生成属性"><a href="#JvmField-生成属性" class="headerlink" title="@JvmField 生成属性"></a>@JvmField 生成属性</h2><p>通过 @JvmField 注解可以让编译器只生成一个 public 的成员属性，不生成对应的 setter/getter 函数</p>
+<h2 id="Any-和-Unit"><a href="#Any-和-Unit" class="headerlink" title="Any 和 Unit"></a>Any 和 Unit</h2><ul>
+<li><code>Any</code> Kotlin 的顶层父类是 <code>Any</code> ，对应 Java 当中的 <code>Object </code>，但是比 <code>Object</code> 少了<code>wait()/notify()</code>等函数</li>
+<li><code>Unit</code> Kotlin 中的 <code>Unit</code> 对应 Java 中的<code> void</code></li>
+</ul>
+<h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><p>使用<code> arrayof()</code> 来创建数组，但是对于基本类型会有装箱拆箱过程，消耗性能，所以基本数据类型使用对应的 <code>intArrayOf() </code>等</p>
+<h2 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h2><p>Java 中的基本数据类型<code>int</code>,<code>float</code>,<code>double</code>对应Kotlin的不可空包装类型<code>Int</code>，<code>Float</code>,<code>Double</code></p>
+<p>Java中的包装类型<code>Int</code>,<code>Float</code>，<code>Double</code>,对应Kotlin的可空类型<code>Int？</code>，<code>Float？</code>,<code>Double？</code></p>
+<h2 id="Kotlin中生成Java静态函数-属性"><a href="#Kotlin中生成Java静态函数-属性" class="headerlink" title="Kotlin中生成Java静态函数/属性"></a>Kotlin中生成Java静态函数/属性</h2><h3 id="静态函数和属性"><a href="#静态函数和属性" class="headerlink" title="静态函数和属性"></a>静态函数和属性</h3><ul>
+<li>顶层函数</li>
+<li><code>object</code></li>
+<li><code>companion object</code></li>
+</ul>
+<p>其中，「顶层函数」直接在文件中定义函数和属性，会直接生成静态的，在 Java 中 通过「文件名Kt」来 访问，同时可以通过<code>@file:JvmName</code>注解来修改这个「类名」。</p>
+<p>Utils.kt</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span>  displayMetrics: DisplayMetrics = Resources.getSystem().getDisplayMetrics()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">dp2px</span><span class="params">(dp: <span class="type">Float</span>)</span></span>: <span class="built_in">Float</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Java中调用<code>UtilsKt.dp2px(21)</code></li>
+<li>Kotlin中调用<code>Utils.dp2px(21)</code></li>
+</ul>
+<blockquote>
+<p>需要注意，这种顶层函数不要声明在<code> module</code> 内最顶层的包中，至少要在一个 包中例如<code> com</code> 。不然不能方便使用。</p>
+<p>你也可以在文件头部增加注解<code>@file:JvmName(&quot;KotlinUtils&quot;)</code> 这样Java中调用时就变成了<code>KotlinUtils.dp2px(21)</code>注意，这个注解要加在包名前面</p>
+</blockquote>
+<p><code>object </code>和 <code>companion object</code> 都是生成单例例对象，然后通过单例对象访问 函数和属性的。    </p>
+<p>Object:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">object</span> CacheUtils &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> context = BaseApplication.currentApplication()</span><br><span class="line">		<span class="function"><span class="keyword">fun</span> <span class="title">save</span><span class="params">(key: <span class="type">String</span>?, value: <span class="type">String</span>?)</span></span> &#123;</span><br><span class="line">    	SP.edit().putString(key, value).apply()</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用：Java中：<code> CacheUtils.INSTANCE.save(&quot;123&quot;)</code>,Kotlin中<code>CacheUtils.save(&quot;123&quot;)</code></p>
+<p>伴生对象compainion：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BaseApplication</span>: <span class="type">Application</span></span>() &#123;</span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> currentApplication:Context</span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">currentApplication</span><span class="params">()</span></span>:Context &#123;</span><br><span class="line">            <span class="keyword">return</span> currentApplication</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate()</span><br><span class="line">        currentApplication = <span class="keyword">this</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Java调用<code>BaseApplication.Compainion.currentApplication();</code></p>
+<p>Kotlin调用<code>BaseApplication.currentApplication()</code></p>
+<h3 id="JvmStatic"><a href="#JvmStatic" class="headerlink" title="@JvmStatic"></a>@JvmStatic</h3><p>通过这个注解将 <code>object</code> 和 <code>companion object </code>的内部函数和属性，真正生成为静态的。</p>
+<h2 id="单例模式-匿名内部类"><a href="#单例模式-匿名内部类" class="headerlink" title="单例模式**/**匿名内部类"></a>单例模式**/**匿名内部类</h2><p>通过 object 关键字实现</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 单例</span></span><br><span class="line"><span class="keyword">object</span> Singleton &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 匿名内部类</span></span><br><span class="line"><span class="keyword">object</span> : OnClickListener &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h2><h3 id="字符串模版"><a href="#字符串模版" class="headerlink" title="字符串模版"></a>字符串模版</h3><p>通过 <code>$&#123;&#125; </code>的形式来作为字符串模版</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> number = <span class="number">100</span></span><br><span class="line"><span class="keyword">val</span> text = <span class="string">&quot;向你转账<span class="subst">$&#123;number&#125;</span>元。&quot;</span> <span class="comment">// 如果只是单一的变量，可以省略掉 &#123;&#125; val text2 = &quot;向你转账$number元。&quot;</span></span><br></pre></td></tr></table></figure>
+<h2 id="多行字符串"><a href="#多行字符串" class="headerlink" title="多行字符串"></a>多行字符串</h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> s = <span class="string">&quot;&quot;&quot; 我是第一行</span></span><br><span class="line"><span class="string">我是第二行 我是第三行</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span>.trimIndent()</span><br></pre></td></tr></table></figure>
+<h2 id="区间"><a href="#区间" class="headerlink" title="区间"></a>区间</h2><p><code>200..299</code> 表示<code> 200 -&gt; 299</code> 的区间(包括 <code>299</code> )</p>
+<h2 id="when-关键字"><a href="#when-关键字" class="headerlink" title="when 关键字"></a><strong>when</strong> 关键字</h2><p>Java 当中的<code>switch</code>的高级版，分支条件上可以支持表达式,<code>in</code> =<code> Java switch中的case</code>，如果只有一行需要执行，则不需要<code>&#123;&#125;</code></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">call.enqueue(<span class="keyword">object</span> : Callback &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onFailure</span><span class="params">(call: <span class="type">Call</span>, e: <span class="type">IOException</span>)</span></span> &#123;</span><br><span class="line">                entityCallback.onFailure(<span class="string">&quot;网络异常&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onResponse</span><span class="params">(call: <span class="type">Call</span>, response: <span class="type">Response</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">when</span> (response.code()) &#123;</span><br><span class="line">                    <span class="keyword">in</span> <span class="number">200.</span><span class="number">.299</span> -&gt; entityCallback.onSuccess(convert&lt;Any&gt;(response.body()!!.string(), type) <span class="keyword">as</span> T)</span><br><span class="line">                    <span class="keyword">in</span> <span class="number">400.</span><span class="number">.499</span> -&gt; entityCallback.onFailure(<span class="string">&quot;客户端错误&quot;</span>)</span><br><span class="line">                    <span class="keyword">in</span> <span class="number">501.</span><span class="number">.599</span> -&gt; entityCallback.onFailure(<span class="string">&quot;服务器错误&quot;</span>)</span><br><span class="line">                    <span class="keyword">else</span> -&gt; entityCallback.onFailure(<span class="string">&quot;未知错误&quot;</span>)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="受检异常"><a href="#受检异常" class="headerlink" title="受检异常"></a>受检异常</h2><p>Kotlin 不需要使用 try-catch 强制捕获异常</p>
+<h2 id="声明接口-抽象类-枚举-注解"><a href="#声明接口-抽象类-枚举-注解" class="headerlink" title="声明接口**/抽象类/枚举/**注解"></a>声明接口**/<strong>抽象类</strong>/<strong>枚举</strong>/**注解</h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 声明抽象类 </span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> </span></span><br><span class="line"><span class="comment">// 声明接口 </span></span><br><span class="line"><span class="class"><span class="keyword">interface</span></span></span><br><span class="line"><span class="comment">// 声明注解 </span></span><br><span class="line"><span class="keyword">annotation</span> <span class="class"><span class="keyword">class</span> </span></span><br><span class="line"><span class="comment">// 声明枚举</span></span><br><span class="line">enmu <span class="class"><span class="keyword">class</span></span></span><br></pre></td></tr></table></figure>
+<h2 id="编译期常量"><a href="#编译期常量" class="headerlink" title="编译期常量"></a>编译期常量</h2><p>在静态变量上加上 <code>const</code> 关键字变成编译期常量,switch和注解中使用</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LessonPresenter</span> </span>&#123;</span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">         <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> LESSON_PATH = <span class="string">&quot;lessons&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>相当于</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LessonPresenter</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LESSON_PATH = <span class="string">&quot;lessons&quot;</span>;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+
+
+<h2 id="标签"><a href="#标签" class="headerlink" title="标签"></a>标签</h2><p>在 Java 中通过 「<code>类名.this</code> 例如 <code>Outer.this</code> 」 获取目标类引用 </p>
+<p>在Kotlin中通过「<code>this@类名</code> 例如<code>this@Outer</code>」获取目标类引用</p>
+<h2 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h2><p>Java中可以用List的类型接收ArrayList，Kotlin不行，因为Kotlin的List不能修改，所以初始化集合要用</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//可修改的</span></span><br><span class="line">arrayListOf&lt;&gt;()</span><br><span class="line">mutableListOf&lt;&gt;()</span><br><span class="line">mutableMapOf&lt;&gt;()</span><br><span class="line"><span class="comment">//不可修改的</span></span><br><span class="line">mapOf&lt;&gt;()</span><br><span class="line">listOf&lt;&gt;()</span><br></pre></td></tr></table></figure>
+<h2 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h2><p>记得让 IDE 来帮助生成 for 循环     <code>for(item in items)</code></p>
+<h2 id="内部类"><a href="#内部类" class="headerlink" title="内部类"></a>内部类</h2><p>在 Kotlin 当中，内部类默认是静态内部类 </p>
+<p>通过 <code>inner</code> 关键字声明为嵌套内部类</p>
+<h2 id="可⻅性修饰符"><a href="#可⻅性修饰符" class="headerlink" title="可⻅性修饰符"></a>可⻅性修饰符</h2><p>默认的可⻅性修饰符是 <code>public</code> </p>
+<p>新增的可⻅性修饰符 <code>internal</code> 表示当前模块可⻅在Java中想做到只能加@hide注解</p>
+<h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><p>注释中可以在任意地方使用 [] 来引用目标，代替 Java 中的    <code> @param</code> <code>@link </code>等。</p>
+<h2 id="open-final"><a href="#open-final" class="headerlink" title="open/final"></a>open/final</h2><p>Kotlin 中的类和函数，默认是被<code> final</code> 修饰的 (<code>abstract</code>和 <code>override</code>) 例外 ，想继承方法的话需要关键字(<code>open</code>,<code>abstract</code>和<code>override</code>)</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/05/HTTPS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1241,335 +1929,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">重新利用hexo和github page 建立了一个blog</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-30 08:35:31" itemprop="dateCreated datePublished" datetime="2021-04-30T08:35:31+08:00">2021-04-30</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/hexo/" itemprop="url" rel="index"><span itemprop="name">hexo</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Hexo-GitHub-Pages-Typora-构建博客-1-Hexo-的安装"><a href="#Hexo-GitHub-Pages-Typora-构建博客-1-Hexo-的安装" class="headerlink" title="Hexo + GitHub Pages + Typora 构建博客 (1) Hexo 的安装"></a>Hexo + GitHub Pages + Typora 构建博客 (1) Hexo 的安装</h2><p>最近在学一些网络知识，但是使用市面上支持 <a target="_blank" rel="noopener" href="https://www.runoob.com/markdown/md-tutorial.html">Markdown </a>的 笔记工具（如简书，有道云笔记，印象笔记）的产品，时常遇到两类问题：</p>
-<ol>
-<li><p>功能过于复杂（有道，印象），很多功能我用不上，且打开有些卡顿</p>
-</li>
-<li><p>没有在线存储文件或者图片的能力（Typora）</p>
-</li>
-<li><p>在线打开操作不够方便，体验不够好（简书，掘金）</p>
-</li>
-<li><p>需要付费</p>
-</li>
-</ol>
-<p>因此我准备构建一套的博客工具，方案采用</p>
-<p> Hexo+Git Page +Typora，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">A[简易博客系统] --&gt; B(Hexo 生成静态网页)</span><br><span class="line">A --&gt; C(Github Page Mini服务器)</span><br><span class="line">A --&gt; D(Typora Mini客户端 编辑文本)</span><br><span class="line">E[简易博客系统]</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/29/%E8%87%AA%E5%AE%9A%E4%B9%89View%E3%80%901%E3%80%91%E5%9B%BE%E5%BD%A2%E7%9A%84%E4%BD%8D%E7%BD%AE%E5%92%8C%E5%B0%BA%E5%AF%B8%E6%B5%8B%E9%87%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/29/%E8%87%AA%E5%AE%9A%E4%B9%89View%E3%80%901%E3%80%91%E5%9B%BE%E5%BD%A2%E7%9A%84%E4%BD%8D%E7%BD%AE%E5%92%8C%E5%B0%BA%E5%AF%B8%E6%B5%8B%E9%87%8F/" class="post-title-link" itemprop="url">自定义View【1】图形的位置和尺寸测量</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-29 14:03:13" itemprop="dateCreated datePublished" datetime="2021-04-29T14:03:13+08:00">2021-04-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-05-06 23:18:03" itemprop="dateModified" datetime="2021-05-06T23:18:03+08:00">2021-05-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/%E8%87%AA%E5%AE%9A%E4%B9%89View/" itemprop="url" rel="index"><span itemprop="name">自定义View</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="自定义View【1】图形的位置和尺寸测量"><a href="#自定义View【1】图形的位置和尺寸测量" class="headerlink" title="自定义View【1】图形的位置和尺寸测量"></a>自定义View【1】图形的位置和尺寸测量</h1><ol>
-<li>调试图片问题</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/" class="post-title-link" itemprop="url">Kotlin方法与Lambda表达式</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-25 18:41:00" itemprop="dateCreated datePublished" datetime="2021-04-25T18:41:00+08:00">2021-04-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-07-18 00:05:22" itemprop="dateModified" datetime="2021-07-18T00:05:22+08:00">2021-07-18</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Kotlin/" itemprop="url" rel="index"><span itemprop="name">Kotlin</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Kotlin方法与Lambda表达式"><a href="#Kotlin方法与Lambda表达式" class="headerlink" title="Kotlin方法与Lambda表达式"></a>Kotlin方法与Lambda表达式</h1>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/12/adb%E7%9B%B8%E5%85%B3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/12/adb%E7%9B%B8%E5%85%B3/" class="post-title-link" itemprop="url">adb相关</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-12 19:17:49" itemprop="dateCreated datePublished" datetime="2021-04-12T19:17:49+08:00">2021-04-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-04-30 08:35:31" itemprop="dateModified" datetime="2021-04-30T08:35:31+08:00">2021-04-30</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/adb/" itemprop="url" rel="index"><span itemprop="name">adb</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="adb相关问题"><a href="#adb相关问题" class="headerlink" title="adb相关问题"></a>adb相关问题</h1>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/12/adb%E7%9B%B8%E5%85%B3/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1641,20 +2000,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-count">39</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-count">38</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-count">38</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
