@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="范围裁切和几何变换Canvas 的范围裁切 clipRect： 切成矩形 12345&#x2F;&#x2F;裁切 左上角   canvas.clipRect(BITMAP_PADDING, BITMAP_PADDING,       BITMAP_PADDING+ BITMAP_SIZE&#x2F;2       ,BITMAP_PADDING+ BITMAP_SIZE&#x2F;2)   canvas.drawBitmap(bitma">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自定义view绘制04:范围裁切和几何变换">
+<meta property="og:url" content="http://example.com/2021/08/24/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B604-%E8%8C%83%E5%9B%B4%E8%A3%81%E5%88%87%E5%92%8C%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="范围裁切和几何变换Canvas 的范围裁切 clipRect： 切成矩形 12345&#x2F;&#x2F;裁切 左上角   canvas.clipRect(BITMAP_PADDING, BITMAP_PADDING,       BITMAP_PADDING+ BITMAP_SIZE&#x2F;2       ,BITMAP_PADDING+ BITMAP_SIZE&#x2F;2)   canvas.drawBitmap(bitma">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824113648691.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824152046675.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824152852451.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824153154902.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824153223669.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824153516440.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824154045317.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824154554418.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824161105237.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824161604856.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824162040886.png">
+<meta property="article:published_time" content="2021-08-24T03:11:05.000Z">
+<meta property="article:modified_time" content="2021-08-24T08:42:10.005Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="自定义View">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824113648691.png">
+
+<link rel="canonical" href="http://example.com/2021/08/24/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B604-%E8%8C%83%E5%9B%B4%E8%A3%81%E5%88%87%E5%92%8C%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>自定义view绘制04:范围裁切和几何变换 | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/24/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B604-%E8%8C%83%E5%9B%B4%E8%A3%81%E5%88%87%E5%92%8C%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          自定义view绘制04:范围裁切和几何变换
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-08-24 11:11:05 / 修改时间：16:42:10" itemprop="dateCreated datePublished" datetime="2021-08-24T11:11:05+08:00">2021-08-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/%E8%87%AA%E5%AE%9A%E4%B9%89View/" itemprop="url" rel="index"><span itemprop="name">自定义View</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="范围裁切和几何变换"><a href="#范围裁切和几何变换" class="headerlink" title="范围裁切和几何变换"></a>范围裁切和几何变换</h1><h2 id="Canvas-的范围裁切"><a href="#Canvas-的范围裁切" class="headerlink" title="Canvas 的范围裁切"></a>Canvas 的范围裁切</h2><ul>
+<li><p>clipRect： 切成矩形</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//裁切 左上角</span></span><br><span class="line">   canvas.clipRect(BITMAP_PADDING, BITMAP_PADDING,</span><br><span class="line">       BITMAP_PADDING+ BITMAP_SIZE/<span class="number">2</span></span><br><span class="line">       ,BITMAP_PADDING+ BITMAP_SIZE/<span class="number">2</span>)</span><br><span class="line">   canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING,paint)</span><br></pre></td></tr></table></figure>
+<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824113648691.png" alt="image-20210824113648691"></p>
+</li>
+<li><p>clipPath() ：切封闭图形</p>
+<p> clipPath() 切出来的圆为什么没有抗锯⻮效果?因为「强行切边」，而xfermode会对边缘进行一些模糊处理</p>
+</li>
+<li><p>clipOutRect() / clipOutPath() 反向版本，切的位置是不要的，其余位置留下</p>
+</li>
+</ul>
+<p>Eg:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> BITMAP_SIZE = <span class="number">200.</span>dp</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> BITMAP_PADDING = <span class="number">100.</span>dp</span><br><span class="line"><span class="meta">@RequiresApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CameraView</span></span>(context: Context?, attrs: AttributeSet?) : View(context, attrs) &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint(Paint.ANTI_ALIAS_FLAG)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> bitmap = getAvatar(BITMAP_SIZE.toInt())</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> cliped = Path().apply &#123;</span><br><span class="line">        addOval(BITMAP_PADDING, BITMAP_PADDING,</span><br><span class="line">            BITMAP_PADDING+ BITMAP_SIZE</span><br><span class="line">            ,BITMAP_PADDING+ BITMAP_SIZE,Path.Direction.CCW)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line">        <span class="comment">//范围裁切</span></span><br><span class="line">        <span class="comment">// clipRect：裁切 左上角</span></span><br><span class="line"><span class="comment">//        canvas.clipRect(BITMAP_PADDING, BITMAP_PADDING,</span></span><br><span class="line"><span class="comment">//            BITMAP_PADDING+ BITMAP_SIZE/2</span></span><br><span class="line"><span class="comment">//            ,BITMAP_PADDING+ BITMAP_SIZE/2)</span></span><br><span class="line"><span class="comment">//        canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING,paint)</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// clipPath：裁切 Path 圆形</span></span><br><span class="line">        canvas.clipPath(cliped)</span><br><span class="line">        canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING,paint)</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">getAvatar</span><span class="params">(width: <span class="type">Int</span>)</span></span>: Bitmap &#123;</span><br><span class="line">        <span class="keyword">val</span> options = BitmapFactory.Options()</span><br><span class="line">        options.inJustDecodeBounds = <span class="literal">true</span></span><br><span class="line">        BitmapFactory.decodeResource(resources, R.drawable.avatar_rengwuxian, options)</span><br><span class="line">        options.inJustDecodeBounds = <span class="literal">false</span></span><br><span class="line">        options.inDensity = options.outWidth</span><br><span class="line">        options.inTargetDensity = width</span><br><span class="line">        <span class="keyword">return</span> BitmapFactory.decodeResource(resources, R.drawable.avatar_rengwuxian, options)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Canvas-的几何变换"><a href="#Canvas-的几何变换" class="headerlink" title="Canvas 的几何变换"></a>Canvas 的几何变换</h2><ul>
+<li><p>translate(x, y)平移</p>
+</li>
+<li><p>rotate(degree) 旋转</p>
+</li>
+<li><p>scale(x, y) 缩放</p>
+</li>
+<li><p>skew(x, y) 错切（斜切）方形切棱形等操作</p>
+</li>
+</ul>
+<p><strong>重点:</strong></p>
+<p>Canvas 的几何变换方法参照的是 View 的坐标系，而绘制方法 (drawXxx())参照的是 Canvas 自己的坐标系。</p>
+<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824152046675.png" alt="image-20210824152046675" style="zoom:50%;">
+
+<h3 id="关于多重变换"><a href="#关于多重变换" class="headerlink" title="关于多重变换"></a>关于多重变换</h3><p>Canvas 的变换方法多次调用的时候，由于 Canvas 的坐标系会整体被变换，因此当 平移、旋转、放缩、错切等变换多重存在的时候，Canvas 的变换参数会非常难以计 算，因此可以改用倒序的理解方式:</p>
+<blockquote>
+<p>将 Canvas 的变换理解为 Canvas 的坐标系不变，每次变换是只对内部的绘制内 容进行变换，同时把 Canvas 的变换顺序看作是倒序的(即写在下面的变换先 执行)，可以更加方便进行多重变换的参数计算。</p>
+</blockquote>
+<h2 id="Matrix的几何变换"><a href="#Matrix的几何变换" class="headerlink" title="Matrix的几何变换"></a>Matrix的几何变换</h2><ul>
+<li>reTranslate(x, y) / postTranslate(x, y)</li>
+<li>preRotate(degree) / postRotate(degree) </li>
+<li>preScale(x, y) / postScale(x, y)</li>
+<li>preSkew(x, y) / postSkew(x, y)</li>
+</ul>
+<p>其中 preXxx() 效果和 Canvas 的准同名方法相同， postXxx() 效果和 Canvas 的准同名方法顺序相反。</p>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>如果多次绘制时重复使用 Matrix，在使用之前需要用 Matrix.reset() 来把 Matrix 重置。</p>
+<h2 id="使用Camera做三维旋转"><a href="#使用Camera做三维旋转" class="headerlink" title="使用Camera做三维旋转"></a>使用Camera做三维旋转</h2><ul>
+<li>rotate() / rotateX() / rotateY() / rotateZ() </li>
+<li>translate()</li>
+<li>setLocation()</li>
+</ul>
+<p>其中，一般只用 rotateX() 和 rorateY() 来做沿 x 轴或 y 轴的旋转，以及使 用 setLocation() 来调整放缩的视觉幅度。</p>
+<p>对 Camera 变换之后，要用 Camera.applyToCanvas(Canvas) 来应用到 Canvas。</p>
+<p>三维坐标轴</p>
+<p>x： 右为正向 ，y：上为正向，z：向屏幕里面为正向</p>
+<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824152852451.png" alt="image-20210824152852451" style="zoom:33%;">
+
+<p>camera存在于空间中，面对沿x轴旋转的图片会呈现出T形</p>
+<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824153154902.png" alt="image-20210824153154902" style="zoom:33%;">
+
+<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824153223669.png" alt="image-20210824153223669" style="zoom:33%;">
+
+<p>camera的轴心无法移动，我们可以移动画布，旋转后再移动回原位置</p>
+<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824153516440.png" alt="image-20210824153516440" style="zoom:33%;">
+
+
+
+<p>Eg：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// camera</span></span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">val</span> camera = Camera()</span><br><span class="line"></span><br><span class="line">   <span class="keyword">init</span> &#123;</span><br><span class="line">       <span class="comment">// 没指定轴心，默认为0，0</span></span><br><span class="line">       camera.rotateX(<span class="number">30f</span>)</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>)</span></span> &#123;</span><br><span class="line">       <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line">       <span class="comment">// Camera</span></span><br><span class="line">       <span class="comment">//对 Camera 变换之后，要用 Camera.applyToCanvas(Canvas) 来应用到 Canvas。</span></span><br><span class="line">       <span class="comment">//camera的轴心无法移动，我们可以移动画布，旋转后再移动回原位置（书写顺序要倒过来）</span></span><br><span class="line">       canvas . translate (BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>,</span><br><span class="line">           BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">       camera.applyToCanvas(canvas)</span><br><span class="line"></span><br><span class="line">       canvas.translate(</span><br><span class="line">           -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>),</span><br><span class="line">           -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>))</span><br><span class="line"></span><br><span class="line">       canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING, paint)</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824154045317.png" alt="image-20210824154045317" style="zoom:50%;">
+
+<h3 id="setLocation"><a href="#setLocation" class="headerlink" title="setLocation"></a>setLocation</h3><p>这个方法一般前两个参数都填（x,y） 0，第三个参数为负值(z)。由于这个值的单位是硬编码写 死的，因此像素密度越高的手机，相当于 Camera 距离 View 越近，所以最好把这个 值写成与机器的 density  成正比的一个负值，例如 -6 * density。</p>
+<p>Camera距离太近投影看起来就很大：</p>
+<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824154554418.png" alt="image-20210824154554418" style="zoom:50%;">
+
+
+
+
+
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 上半部分</span></span><br><span class="line">canvas.save()</span><br><span class="line">canvas.translate (BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>,</span><br><span class="line">    BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">canvas.clipRect(- BITMAP_SIZE, - BITMAP_SIZE/<span class="number">2</span>, BITMAP_SIZE/<span class="number">2</span>, <span class="number">0f</span>)</span><br><span class="line">canvas.translate(</span><br><span class="line">    -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>),</span><br><span class="line">    -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>))</span><br><span class="line">canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING, paint)</span><br><span class="line">canvas.restore()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 下半部分</span></span><br><span class="line">canvas.translate (BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>,</span><br><span class="line">    BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">camera.applyToCanvas(canvas)</span><br><span class="line">canvas.clipRect(- BITMAP_SIZE, <span class="number">0f</span>, BITMAP_SIZE/<span class="number">2</span>, BITMAP_SIZE/<span class="number">2</span>)</span><br><span class="line">canvas.translate(</span><br><span class="line">    -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>),</span><br><span class="line">    -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>))</span><br><span class="line">canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING, paint)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824161105237.png" alt="image-20210824161105237"></p>
+<p>斜切：转动canvas在裁切即可</p>
+<p>旋转后需要扩大裁切范围，否则会裁切到原本的图片，裁切范围扩大两倍</p>
+<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824161604856.png" alt="image-20210824161604856" style="zoom:50%;">
+
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.hencoder.customviewdrawing.clipandcamera</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.content.Context</span><br><span class="line"><span class="keyword">import</span> android.graphics.*</span><br><span class="line"><span class="keyword">import</span> android.os.Build</span><br><span class="line"><span class="keyword">import</span> android.util.AttributeSet</span><br><span class="line"><span class="keyword">import</span> android.view.View</span><br><span class="line"><span class="keyword">import</span> androidx.<span class="keyword">annotation</span>.RequiresApi</span><br><span class="line"><span class="keyword">import</span> com.hencoder.customviewdrawing.R</span><br><span class="line"><span class="keyword">import</span> com.hencoder.customviewdrawing.view.dp</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by amazingZZ on 8/24/21</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> BITMAP_SIZE = <span class="number">200.</span>dp</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> BITMAP_PADDING = <span class="number">100.</span>dp</span><br><span class="line"></span><br><span class="line"><span class="meta">@RequiresApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CameraView</span></span>(context: Context?, attrs: AttributeSet?) : View(context, attrs) &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint(Paint.ANTI_ALIAS_FLAG)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> bitmap = getAvatar(BITMAP_SIZE.toInt())</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> cliped = Path().apply &#123;</span><br><span class="line">        addOval(</span><br><span class="line">            BITMAP_PADDING, BITMAP_PADDING,</span><br><span class="line">            BITMAP_PADDING + BITMAP_SIZE</span><br><span class="line">            , BITMAP_PADDING + BITMAP_SIZE, Path.Direction.CCW</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// camera</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> camera = Camera()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span> &#123;</span><br><span class="line">        <span class="comment">// 没指定轴心，默认为0，0</span></span><br><span class="line">        camera.rotateX(<span class="number">30f</span>)</span><br><span class="line">        <span class="comment">// 移动摄像机，单位不是像素是英寸（因为这个方法不是谷歌提供的，1英寸大概72像素）</span></span><br><span class="line">        camera.setLocation(<span class="number">0f</span>, <span class="number">0f</span>, -<span class="number">6</span> * resources.displayMetrics.density)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line">        <span class="comment">//范围裁切</span></span><br><span class="line">        <span class="comment">// clipRect：裁切 左上角</span></span><br><span class="line"><span class="comment">//        canvas.clipRect(BITMAP_PADDING, BITMAP_PADDING,</span></span><br><span class="line"><span class="comment">//            BITMAP_PADDING+ BITMAP_SIZE/2</span></span><br><span class="line"><span class="comment">//            ,BITMAP_PADDING+ BITMAP_SIZE/2)</span></span><br><span class="line"><span class="comment">//        canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING,paint)</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// clipPath：裁切 Path 圆形</span></span><br><span class="line"><span class="comment">//        canvas.clipPath(cliped)</span></span><br><span class="line"><span class="comment">//        canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING,paint)</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Camera</span></span><br><span class="line">        <span class="comment">//对 Camera 变换之后，要用 Camera.applyToCanvas(Canvas) 来应用到 Canvas。</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//camera的轴心无法移动，我们可以移动画布，旋转后再移动回原位置（书写顺序要倒过来）</span></span><br><span class="line">        <span class="comment">// 上半部分</span></span><br><span class="line">        canvas.save()</span><br><span class="line">        canvas.translate (BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>,</span><br><span class="line">            BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>)</span><br><span class="line">        canvas.rotate(-<span class="number">30f</span>)</span><br><span class="line"></span><br><span class="line">        canvas.clipRect(- BITMAP_SIZE, - BITMAP_SIZE, BITMAP_SIZE, <span class="number">0f</span>)</span><br><span class="line">        canvas.rotate(<span class="number">30f</span>)</span><br><span class="line"></span><br><span class="line">        canvas.translate(</span><br><span class="line">            -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>),</span><br><span class="line">            -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>))</span><br><span class="line">        canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING, paint)</span><br><span class="line">        canvas.restore()</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 下半部分</span></span><br><span class="line">        canvas.translate (BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>,</span><br><span class="line">            BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>)</span><br><span class="line">        canvas.rotate(-<span class="number">30f</span>)</span><br><span class="line"></span><br><span class="line">        camera.applyToCanvas(canvas)</span><br><span class="line">        canvas.clipRect(- BITMAP_SIZE, <span class="number">0f</span>, BITMAP_SIZE, BITMAP_SIZE)</span><br><span class="line">        canvas.rotate(<span class="number">30f</span>)</span><br><span class="line"></span><br><span class="line">        canvas.translate(</span><br><span class="line">            -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>),</span><br><span class="line">            -(BITMAP_PADDING + BITMAP_SIZE / <span class="number">2</span>))</span><br><span class="line">        canvas.drawBitmap(bitmap, BITMAP_PADDING, BITMAP_PADDING, paint)</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">getAvatar</span><span class="params">(width: <span class="type">Int</span>)</span></span>: Bitmap &#123;</span><br><span class="line">        <span class="keyword">val</span> options = BitmapFactory.Options()</span><br><span class="line">        options.inJustDecodeBounds = <span class="literal">true</span></span><br><span class="line">        BitmapFactory.decodeResource(resources, R.drawable.avatar_rengwuxian, options)</span><br><span class="line">        options.inJustDecodeBounds = <span class="literal">false</span></span><br><span class="line">        options.inDensity = options.outWidth</span><br><span class="line">        options.inTargetDensity = width</span><br><span class="line">        <span class="keyword">return</span> BitmapFactory.decodeResource(resources, R.drawable.avatar_rengwuxian, options)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824162040886.png" alt="image-20210824162040886"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E8%87%AA%E5%AE%9A%E4%B9%89View/" rel="tag"># 自定义View</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/20/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B603-%E6%96%87%E5%AD%97%E7%9A%84%E6%B5%8B%E9%87%8F/" rel="prev" title="自定义view绘制03:文字的测量">
+      <i class="fa fa-chevron-left"></i> 自定义view绘制03:文字的测量
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/24/%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1/" rel="next" title="线程间通信">
+      线程间通信 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%8C%83%E5%9B%B4%E8%A3%81%E5%88%87%E5%92%8C%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2"><span class="nav-number">1.</span> <span class="nav-text">范围裁切和几何变换</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Canvas-%E7%9A%84%E8%8C%83%E5%9B%B4%E8%A3%81%E5%88%87"><span class="nav-number">1.1.</span> <span class="nav-text">Canvas 的范围裁切</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Canvas-%E7%9A%84%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2"><span class="nav-number">1.2.</span> <span class="nav-text">Canvas 的几何变换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E5%A4%9A%E9%87%8D%E5%8F%98%E6%8D%A2"><span class="nav-number">1.2.1.</span> <span class="nav-text">关于多重变换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Matrix%E7%9A%84%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2"><span class="nav-number">1.3.</span> <span class="nav-text">Matrix的几何变换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-number">1.3.1.</span> <span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Camera%E5%81%9A%E4%B8%89%E7%BB%B4%E6%97%8B%E8%BD%AC"><span class="nav-number">1.4.</span> <span class="nav-text">使用Camera做三维旋转</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#setLocation"><span class="nav-number">1.4.1.</span> <span class="nav-text">setLocation</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
