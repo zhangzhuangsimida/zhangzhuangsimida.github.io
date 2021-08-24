@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="文字测量">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自定义view绘制03:文字的测量">
+<meta property="og:url" content="http://example.com/2021/08/20/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B603-%E6%96%87%E5%AD%97%E7%9A%84%E6%B5%8B%E9%87%8F/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="文字测量">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210821092551204.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824110143478.png">
+<meta property="article:published_time" content="2021-08-20T07:14:12.000Z">
+<meta property="article:modified_time" content="2021-08-24T03:05:51.741Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="自定义view">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210821092551204.png">
+
+<link rel="canonical" href="http://example.com/2021/08/20/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B603-%E6%96%87%E5%AD%97%E7%9A%84%E6%B5%8B%E9%87%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>自定义view绘制03:文字的测量 | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/20/%E8%87%AA%E5%AE%9A%E4%B9%89view%E7%BB%98%E5%88%B603-%E6%96%87%E5%AD%97%E7%9A%84%E6%B5%8B%E9%87%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          自定义view绘制03:文字的测量
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-20 15:14:12" itemprop="dateCreated datePublished" datetime="2021-08-20T15:14:12+08:00">2021-08-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-24 11:05:51" itemprop="dateModified" datetime="2021-08-24T11:05:51+08:00">2021-08-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/%E8%87%AA%E5%AE%9A%E4%B9%89view/" itemprop="url" rel="index"><span itemprop="name">自定义view</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="文字测量"><a href="#文字测量" class="headerlink" title="文字测量"></a>文字测量</h1><a id="more"></a>
+
+<p>绘制文字:drawText()</p>
+<p>为什么文字很难居中：因为文字的绘制起点是它的左上角</p>
+<p>文字的对齐点要横向纵向分开说</p>
+<p>横向对齐点：不固定，根据配置来（居左/右/中都不一样<code> Paint.Align.CENTER/RIGHT/LEFT</code>）</p>
+<p>纵向：<u>baseLinep</u>，也就是文字下面视觉上的<u>对齐线（下划线）</u></p>
+<h2 id="文字测量难点之一：居中的纵向测量"><a href="#文字测量难点之一：居中的纵向测量" class="headerlink" title="文字测量难点之一：居中的纵向测量"></a>文字测量难点之一：居中的纵向测量</h2><p>横向 ：<code>textAlign = Paint.Align.CENTER</code></p>
+<p>但是baseline的存在让文字纵向会稍显上移，修正方法：</p>
+<p><strong>方式一:</strong></p>
+<p><code>Paint.getTextBounds() </code>（获得文字左上右下的边界值是多少)之后，纵坐标减去一个中心点到baseline的偏移 <code>(bounds.top + bounds.bottom) / 2</code>即可，</p>
+<p>这种方法适合静态文字，因为因为有些文字比如字母p是会超过baseline的，这种方式在动态文字中使用可能导致图像跳动</p>
+<p><strong>方式二:</strong></p>
+<p><code>Paint.getFontMetrics() </code>之后，使用<code> (fontMetrics.ascend + fontMetrics.descend) / 2</code></p>
+<p>指定一个不变的上下基准线来坐居中，更适合动态的文字使用，因为有些文字会超过baseline</p>
+<p>除了baseline ，文字还有几种基准线，大多数汉字主体都在ascent和descent之间，所以我妈可以用这两个值获得纵坐标偏移量</p>
+<p>我们只要计算字体的大小就可以了与数输入的文字内容,</p>
+<p>这种方法适合动态文字，因为文字的显示稍微偏下</p>
+<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210821092551204.png" alt="image-20210821092551204"></p>
+<p>Eg:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.hencoder.customviewdrawing.text</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.content.Context</span><br><span class="line"><span class="keyword">import</span> android.graphics.*</span><br><span class="line"><span class="keyword">import</span> android.os.Build</span><br><span class="line"><span class="keyword">import</span> android.util.AttributeSet</span><br><span class="line"><span class="keyword">import</span> android.view.View</span><br><span class="line"><span class="keyword">import</span> androidx.<span class="keyword">annotation</span>.RequiresApi</span><br><span class="line"><span class="keyword">import</span> androidx.core.content.res.ResourcesCompat</span><br><span class="line"><span class="keyword">import</span> com.hencoder.customviewdrawing.R</span><br><span class="line"><span class="keyword">import</span> com.hencoder.customviewdrawing.view.dp</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> CIRCLE_COLOR = Color.parseColor(<span class="string">&quot;#90A4AE&quot;</span>)</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> HIGHLIGHT_COLOR = Color.parseColor(<span class="string">&quot;#FF4081&quot;</span>)</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> RING_WIDTH = <span class="number">20.</span>dp</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> RADIUS = <span class="number">150.</span>dp</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> bounds = Rect()</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> fontMetrics = Paint.FontMetrics()</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SportView</span></span>(context: Context, attrs: AttributeSet?) :</span><br><span class="line">  View(context, attrs) &#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint(Paint.ANTI_ALIAS_FLAG).apply &#123;</span><br><span class="line">    textSize = <span class="number">100.</span>dp</span><br><span class="line">    typeface = ResourcesCompat.getFont(context, R.font.font)</span><br><span class="line">    <span class="comment">// 不是真的BoldFont而是把细的字体描粗了</span></span><br><span class="line">    isFakeBoldText</span><br><span class="line">    <span class="comment">//居中绘制</span></span><br><span class="line">    textAlign = Paint.Align.CENTER</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="meta">@RequiresApi(Build.VERSION_CODES.LOLLIPOP)</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 绘制环</span></span><br><span class="line">    paint.style = Paint.Style.STROKE</span><br><span class="line">    paint.color = CIRCLE_COLOR</span><br><span class="line">    paint.strokeWidth = RING_WIDTH</span><br><span class="line">    canvas.drawCircle(width / <span class="number">2f</span>, height / <span class="number">2f</span>, RADIUS, paint)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 绘制进度条</span></span><br><span class="line">    paint.color = HIGHLIGHT_COLOR</span><br><span class="line">    <span class="comment">// 绘制线的头部是圆形还是方形可以设置</span></span><br><span class="line">    paint.strokeCap = Paint.Cap.ROUND</span><br><span class="line">    canvas.drawArc(width / <span class="number">2f</span> - RADIUS, height / <span class="number">2f</span> - RADIUS, width / <span class="number">2f</span> + RADIUS, height / <span class="number">2f</span> + RADIUS, -<span class="number">90f</span>, <span class="number">225f</span>, <span class="literal">false</span>, paint)</span><br><span class="line">    paint.style = Paint.Style.FILL</span><br><span class="line"></span><br><span class="line">    <span class="comment">//绘制文字 居中（纵向）</span></span><br><span class="line">    paint.textSize = <span class="number">100.</span>dp</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 居中方法1 适合静态文字</span></span><br><span class="line"><span class="comment">//    paint.getTextBounds(&quot;abab&quot;,0,&quot;abab&quot;.length,bounds )</span></span><br><span class="line"><span class="comment">//    canvas.drawText(&quot;abab&quot;,width/2f,height/2f- (bounds.top  + bounds.bottom)/2f,paint)</span></span><br><span class="line">    <span class="comment">// 居中方法2 适合动态文字</span></span><br><span class="line">    paint.getFontMetrics(fontMetrics)</span><br><span class="line">    canvas.drawText(<span class="string">&quot;apap&quot;</span>,width/<span class="number">2f</span>,height/<span class="number">2f</span>- (fontMetrics.ascent+ fontMetrics.descent)/<span class="number">2f</span>,paint)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 绘制文字 对齐：</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 顶对齐</span></span><br><span class="line">    paint.textSize = <span class="number">15.</span>dp</span><br><span class="line">    paint.textAlign = Paint.Align.LEFT</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 推荐使用fontMetrics.top计算 文字小时视觉效果好,</span></span><br><span class="line">    <span class="comment">// bounds.top 贴的过于紧密，fontMetrics.ascent线是固定的可能造成裁切</span></span><br><span class="line"><span class="comment">//    paint.getFontMetrics(fontMetrics)</span></span><br><span class="line"><span class="comment">//    canvas.drawText(&quot;abab&quot;,0f, fontMetrics.top,paint)</span></span><br><span class="line"></span><br><span class="line">    paint.getTextBounds(<span class="string">&quot;abab&quot;</span>,<span class="number">0</span>,<span class="string">&quot;abab&quot;</span>.length,bounds)</span><br><span class="line">    canvas.drawText(<span class="string">&quot;abab&quot;</span>,-bounds.left.toFloat(),-bounds.top.toFloat(),paint)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 左对齐</span></span><br><span class="line">    <span class="comment">// 字不会完全贴在左/右，因为文字有自带的空隙</span></span><br><span class="line">    <span class="comment">// 若上下两行文字相差很大就会很明显</span></span><br><span class="line">    <span class="comment">// 但是受限与系统字体等因素仍可能有缝隙</span></span><br><span class="line">    paint.textSize = <span class="number">150.</span>dp</span><br><span class="line">    paint.textAlign = Paint.Align.LEFT</span><br><span class="line">    paint.getTextBounds(<span class="string">&quot;abab&quot;</span>,<span class="number">0</span>,<span class="string">&quot;abab&quot;</span>.length,bounds)</span><br><span class="line">    canvas.drawText(<span class="string">&quot;abab&quot;</span>,-bounds.left.toFloat(),-bounds.top.toFloat(),paint)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="文字测量难点之二：对齐"><a href="#文字测量难点之二：对齐" class="headerlink" title="文字测量难点之二：对齐"></a>文字测量难点之二：对齐</h2><p>顶对齐</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">paint.getFontMetrics(fontMetrics)</span><br><span class="line">paint.getTextBounds(<span class="string">&quot;abab&quot;</span>,<span class="number">0</span>,<span class="string">&quot;abab&quot;</span>.length,bounds)</span><br><span class="line"><span class="comment">// 推荐使用fontMetrics.top计算 文字小时视觉效果好,bounds.top 贴的过于紧密，fontMetrics.ascent线是固定的可能造成裁切</span></span><br><span class="line">canvas.drawText(<span class="string">&quot;abab&quot;</span>,<span class="number">0f</span>,-fontMetrics.top,paint)</span><br></pre></td></tr></table></figure>
+<p>左对齐</p>
+<p>字不会完全贴在左/右，因为文字有自带的空隙，若上下两行文字相差很大就会很明显，</p>
+<p>需要用用 getTextBounds() 之后的 left 来计算</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 左对齐</span></span><br><span class="line"><span class="comment">// 字不会完全贴在左/右，因为文字有自带的空隙</span></span><br><span class="line"><span class="comment">// 若上下两行文字相差很大就会很明显</span></span><br><span class="line"><span class="comment">// 但是受限与系统字体等因素仍可能有缝隙</span></span><br><span class="line">paint.textSize = <span class="number">150.</span>dp</span><br><span class="line">paint.textAlign = Paint.Align.LEFT</span><br><span class="line">paint.getTextBounds(<span class="string">&quot;abab&quot;</span>,<span class="number">0</span>,<span class="string">&quot;abab&quot;</span>.length,bounds)</span><br><span class="line">canvas.drawText(<span class="string">&quot;abab&quot;</span>,-bounds.left.toFloat(),-bounds.top.toFloat(),paint)</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="文字测量难点之三-换行"><a href="#文字测量难点之三-换行" class="headerlink" title="文字测量难点之三:换行"></a>文字测量难点之三:换行</h2><p>图文混排换行</p>
+<p>用 breakText() 来计算</p>
+<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210824110143478.png" alt="image-20210824110143478"></p>
+<p>Eg:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.hencoder.customviewdrawing.text</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.content.Context</span><br><span class="line"><span class="keyword">import</span> android.graphics.Bitmap</span><br><span class="line"><span class="keyword">import</span> android.graphics.BitmapFactory</span><br><span class="line"><span class="keyword">import</span> android.graphics.Canvas</span><br><span class="line"><span class="keyword">import</span> android.graphics.Paint</span><br><span class="line"><span class="keyword">import</span> android.text.Layout</span><br><span class="line"><span class="keyword">import</span> android.text.StaticLayout</span><br><span class="line"><span class="keyword">import</span> android.text.TextPaint</span><br><span class="line"><span class="keyword">import</span> android.util.AttributeSet</span><br><span class="line"><span class="keyword">import</span> android.view.View</span><br><span class="line"><span class="keyword">import</span> com.hencoder.customviewdrawing.R</span><br><span class="line"><span class="keyword">import</span> com.hencoder.customviewdrawing.view.dp</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by amazingZZ on 8/23/21</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> IMAGE_SIZE = <span class="number">150.</span>dp</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> IMAGE_PADDING = <span class="number">50.</span>dp</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MultilineTextView</span></span>(context: Context?, attrs: AttributeSet?) : View(context, attrs) &#123;</span><br><span class="line">    <span class="comment">// Lorem ipsum 无版权无意义文字</span></span><br><span class="line">    <span class="keyword">val</span> text =</span><br><span class="line">        <span class="string">&quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tristique urna tincidunt maximus viverra. Maecenas commodo pellentesque dolor ultrices porttitor. Vestibulum in arcu rhoncus, maximus ligula vel, consequat sem. Maecenas a quam libero. Praesent hendrerit ex lacus, ac feugiat nibh interdum et. Vestibulum in gravida neque. Morbi maximus scelerisque odio, vel pellentesque purus ultrices quis. Praesent eu turpis et metus venenatis maximus blandit sed magna. Sed imperdiet est semper urna laoreet congue. Praesent mattis magna sed est accumsan posuere. Morbi lobortis fermentum fringilla. Fusce sed ex tempus, venenatis odio ac, tempor metus.&quot;</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> bitmap = getAvatar(IMAGE_SIZE.toInt())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply &#123;</span><br><span class="line">        textSize = <span class="number">16.</span>dp</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint(Paint.ANTI_ALIAS_FLAG).apply &#123;</span><br><span class="line">        textSize = <span class="number">16.</span>dp</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span>  <span class="keyword">val</span> fontMetrics = Paint.FontMetrics()</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line">        <span class="comment">//args  文字， 文字画笔，宽度（有宽度才能换行），对齐方式，文字间距额外比例，文字间的间距额外值，是否需要额外行间距</span></span><br><span class="line"><span class="comment">//        val staticLayout =</span></span><br><span class="line"><span class="comment">//            StaticLayout(text, textPaint, width, Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false)</span></span><br><span class="line"><span class="comment">//        staticLayout.draw(canvas)</span></span><br><span class="line"></span><br><span class="line">        canvas.drawBitmap(bitmap, width - IMAGE_SIZE, IMAGE_PADDING, paint)</span><br><span class="line">        paint.getFontMetrics(fontMetrics)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 可见宽度</span></span><br><span class="line">        <span class="keyword">val</span> measuredWidth = floatArrayOf(<span class="number">0f</span>)</span><br><span class="line">        <span class="comment">//开始的字节</span></span><br><span class="line">        <span class="keyword">var</span> start = <span class="number">0</span></span><br><span class="line">        <span class="comment">//切掉的文字index</span></span><br><span class="line">        <span class="keyword">var</span> count: <span class="built_in">Int</span></span><br><span class="line">        <span class="keyword">var</span> verticalOffset = - fontMetrics.top</span><br><span class="line">        <span class="keyword">var</span> maxWidth: <span class="built_in">Float</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (start&lt; text.length)&#123;</span><br><span class="line">            maxWidth = <span class="keyword">if</span> (verticalOffset+fontMetrics.bottom&lt; IMAGE_PADDING||</span><br><span class="line">                verticalOffset+fontMetrics.top&gt; IMAGE_PADDING+ IMAGE_SIZE )&#123;</span><br><span class="line">                width.toFloat()</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                width.toFloat() - IMAGE_SIZE</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 换行 args ：文字，起始index，end index,是否是向前测量的， 宽度，测量文字实际显示宽度（边缘可能放不下一个字符）</span></span><br><span class="line">            <span class="comment">// 返回值：count:切掉掉文字index</span></span><br><span class="line">            count =  paint.breakText(text,start,text.length,<span class="literal">true</span>,maxWidth,measuredWidth)</span><br><span class="line">            canvas.drawText(text, start, start + count, <span class="number">0f</span>, verticalOffset, paint)</span><br><span class="line">            start += count</span><br><span class="line">            verticalOffset += paint.fontSpacing</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getAvatar</span><span class="params">(width: <span class="type">Int</span>)</span></span>: Bitmap &#123;</span><br><span class="line">        <span class="keyword">val</span> options = BitmapFactory.Options()</span><br><span class="line">        options.inJustDecodeBounds = <span class="literal">true</span></span><br><span class="line">        BitmapFactory.decodeResource(resources, R.drawable.avatar_rengwuxian, options)</span><br><span class="line">        options.inJustDecodeBounds = <span class="literal">false</span></span><br><span class="line">        options.inDensity = options.outWidth</span><br><span class="line">        options.inTargetDensity = width</span><br><span class="line">        <span class="keyword">return</span> BitmapFactory.decodeResource(resources, R.drawable.avatar_rengwuxian, options)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E8%87%AA%E5%AE%9A%E4%B9%89view/" rel="tag"># 自定义view</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/" rel="prev" title="Jvm原理解析">
+      <i class="fa fa-chevron-left"></i> Jvm原理解析
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%87%E5%AD%97%E6%B5%8B%E9%87%8F"><span class="nav-number">1.</span> <span class="nav-text">文字测量</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E5%AD%97%E6%B5%8B%E9%87%8F%E9%9A%BE%E7%82%B9%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%B1%85%E4%B8%AD%E7%9A%84%E7%BA%B5%E5%90%91%E6%B5%8B%E9%87%8F"><span class="nav-number">1.1.</span> <span class="nav-text">文字测量难点之一：居中的纵向测量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E5%AD%97%E6%B5%8B%E9%87%8F%E9%9A%BE%E7%82%B9%E4%B9%8B%E4%BA%8C%EF%BC%9A%E5%AF%B9%E9%BD%90"><span class="nav-number">1.2.</span> <span class="nav-text">文字测量难点之二：对齐</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E5%AD%97%E6%B5%8B%E9%87%8F%E9%9A%BE%E7%82%B9%E4%B9%8B%E4%B8%89-%E6%8D%A2%E8%A1%8C"><span class="nav-number">1.3.</span> <span class="nav-text">文字测量难点之三:换行</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">38</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
