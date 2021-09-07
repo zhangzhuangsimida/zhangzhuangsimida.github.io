@@ -168,6 +168,185 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/05/HTTPS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/05/HTTPS/" class="post-title-link" itemprop="url">HTTPS</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-05 17:36:33" itemprop="dateCreated datePublished" datetime="2021-07-05T17:36:33+08:00">2021-07-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-16 01:51:26" itemprop="dateModified" datetime="2021-07-16T01:51:26+08:00">2021-07-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/https/" itemprop="url" rel="index"><span itemprop="name">https</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>HTTP over SSL 的简称，即工作在 SSL (或 TLS)上的 HTTP。说白了就是加密通信 的 HTTP。</p>
+<p>HTTPS本是网景为了安全开发的协议，SSL和HTTP本是共生的，SSL后来独立出来演变成了TLS</p>
+<p>TSL定义：Http之下的一个安全层，其实就是http把数据交给TCP之前，先交给TLS加密，再交给IP层传输</p>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p>在客户端和服务器之间用非对称加密协商出一套对称密钥，每次发送信息之前将内容加密，收到之后解密，达到内容的加密传输</p>
+<h3 id="为什么不直接用非对称加密"><a href="#为什么不直接用非对称加密" class="headerlink" title="为什么不直接用非对称加密?"></a>为什么不直接用非对称加密?</h3><p>非对称加密由于使用了复杂了数学原理，因此计算相当复杂，如果完全使用非对称加密来加密通信内容，会严重影响网络通信的性能</p>
+<h2 id="HTTPS链接"><a href="#HTTPS链接" class="headerlink" title="HTTPS链接"></a>HTTPS链接</h2><p>HTTP不是稳定链接，稳定的是TCP，HTTPS主要用于加密传输数据。</p>
+<h3 id="HTTPS-连接建立的过程"><a href="#HTTPS-连接建立的过程" class="headerlink" title="HTTPS 连接建立的过程"></a>HTTPS 连接建立的过程</h3><p>简单：</p>
+<ol>
+<li>客户端请求TLS连接 say hello<ol>
+<li>ClientHello</li>
+<li>ServerHello</li>
+</ol>
+</li>
+<li>服务器发回证书</li>
+<li>客户端验证服务器证书</li>
+<li>客户端信任服务器后，和服务器协商对称密钥（使用非对称加密）</li>
+<li>使用对称加密开始通信</li>
+</ol>
+<p>详细：</p>
+<ol>
+<li><p>ClientHello</p>
+<p><img src="/2021/07/05/HTTPS/image-20210706183554191.png" alt="image-20210706183554191"></p>
+<p>客户端向服务端发送一个字节数据，这个数据被称为ClientHello，是客户端对服务器第一次打招呼的意思</p>
+<p>除此之外还包含：</p>
+<p><strong>可选的TLS版本的集合</strong>，因为客户端可能包含好几个版本，给服务器一个选择。</p>
+<p><strong>可选的加密套件集合</strong>：</p>
+<ul>
+<li>可选的对称加密算法</li>
+<li>可选的非对称加密算法</li>
+<li>可选的hash算法</li>
+</ul>
+<p><strong>客户端的随机数</strong>，同时客户端也会本地保存一份随机数。</p>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-07_17-38-17.jpg" alt="Xnip2021-07-07_17-38-17"></p>
+</li>
+<li><p>ServerHello</p>
+<p><img src="/2021/07/05/HTTPS/image-20210707174217872.png" alt="image-20210707174217872"></p>
+<p>服务端返回一个自己的 Server Hello数据，表示响应客户端请求。1字节数据后面会紧跟着：</p>
+<ul>
+<li>服务端选好的TLS版本，加密套件</li>
+<li>服务端随机数（服务端也会保存一份）</li>
+</ul>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-07_17-47-04.jpg" alt="Xnip2021-07-07_17-47-04"></p>
+</li>
+<li><p>服务端发送证书到客户端</p>
+<p>服务端发送证书给给客户端 ，其中数据包括：</p>
+<ol>
+<li>服务器证书 （内容包含服务器主机名，证书名等，但最重要的数据是服务端公钥）</li>
+<li>服务器证书的签名</li>
+<li>证书签发机构的证书（包含签发机构的名字，地区等，最重要的是用于验证这个<code>服务端公钥签名</code>的公钥，也就是服务器服务器公钥的公钥）</li>
+<li>证书签发机构的证书的签名</li>
+<li>根证书的相关信息（证书签发机构的签发机构的公钥）</li>
+</ol>
+<p>根证书：系统中默认可以无条件信任的证书，比如Mac中的钥匙串。</p>
+<p>服务器证书的最大作用证书中的服务器公钥对数据非对称加密信息，和服务端协商一个对称加密密钥。</p>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-07_19-35-05.jpg" alt="Xnip2021-07-07_19-35-05"></p>
+</li>
+<li><p>客户端验证证书是否可信：（大量使用数字签名（非对称加密）技术）</p>
+<p>为了保证服务器证书（也就是服务器公钥）的可信，我们需要一个公钥来验证服务器证书的签名是否正确，这个用来验证服务器证书签名的公钥就是 证书签发机构的证书。</p>
+<p>但是证书签发机构可能也会被篡改，所以需要一个公钥来验证签发机构的证书的签名，这个用于验证签发机构的签名的公钥就是 根证书。</p>
+<p>因为系统里已经内置了根证书，所以我们只需要读取服务端发送的根证书相关的信息即可。</p>
+<p>除此之外，我们还需要验证服务器证书中的Host是否是我们想要的。</p>
+<p><strong>若黑客只更换Host不修改其他信息，是否能通过验证</strong></p>
+<p>不能，因为签名是对整个服务器证书的全部数据做的，只改Host hash值也会改变。</p>
+</li>
+<li><p>Pre-masterSecret</p>
+<p><img src="/2021/07/05/HTTPS/image-20210708145309372.png" alt="image-20210708145309372"></p>
+<ol>
+<li><p>客户端再次发送一次随机数，不过这次是通过服务端公钥加密过的。</p>
+</li>
+<li><p>接下来，客户端和服务端会结合之前发送的随机数计算出Master Secret</p>
+</li>
+<li><p>Master Secret会生成一些密钥（6个），可以实现对称加密通信</p>
+<ul>
+<li>客户端加密密钥</li>
+<li>服务端加密密钥</li>
+<li>客户端 MAC secret</li>
+<li>服务端 MAC secret</li>
+</ul>
+</li>
+</ol>
+<p><strong>Pre-masterSecret一个随机数就可以计算MasterSecret，为什么要结合之前发的两个个随机数？</strong></p>
+<p>虽然之前发送的随机数没有被加密，但是可以用它们防止重放攻击（Replay attack）如果你将今天的请求信息都保存下来在第二天发送，服务器会返回不同的随机数让你本地存储的信息失效。</p>
+<p><strong>为什么生成两个加密密钥？</strong></p>
+<p>因为客户端和服务端通信的时候各自使用不同的密钥。为了防止恶意将客户端发送的信息再发回来，由于密钥不同就根本无法解析，也就不会把这种重复发送的消息当作服务端发回来的。</p>
+<p><strong>MAC secret</strong></p>
+<p>是HMAC hash-based message authenticate code 带密钥的hash算法。不仅能验证数据的指纹，还能验证身份，且不能被公众验证身份。</p>
+<p><img src="/2021/07/05/HTTPS/image-20210708160808284.png" alt="image-20210708160808284"></p>
+</li>
+<li><p>客户端通知:将使用加密通信 </p>
+<p><img src="/2021/07/05/HTTPS/Xnip2021-07-08_16-05-31.jpg" alt="Xnip2021-07-08_16-05-31"></p>
+</li>
+<li><p>客户端发送:Finished</p>
+<p>将前面五步的内容结合，用客户端加密密钥加密，再做一个HMAC ，再由服务器验证</p>
+<p><img src="/2021/07/05/HTTPS/image-20210708161110520.png" alt="image-20210708161110520"></p>
+</li>
+<li><p>服务器通知:将使用加密通信 </p>
+<p><img src="/2021/07/05/HTTPS/image-20210708161150472.png" alt="image-20210708161150472"></p>
+</li>
+<li><p>服务器发送:Finished</p>
+<p>将前面五步的内容结合，用服务端密钥加密在做一个HMAC，再由客户端验证，内容会比客户端Finished发送的多一点。</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1386,91 +1565,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/06/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8B%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/06/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8B%EF%BC%89/" class="post-title-link" itemprop="url">排序（下）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-06 15:48:43" itemprop="dateCreated datePublished" datetime="2021-04-06T15:48:43+08:00">2021-04-06</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-25 17:27:32" itemprop="dateModified" datetime="2021-06-25T17:27:32+08:00">2021-06-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">排序</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="排序（下）归并-快速，用快排思想在O-n-内查找第K大元素"><a href="#排序（下）归并-快速，用快排思想在O-n-内查找第K大元素" class="headerlink" title="排序（下）归并 快速，用快排思想在O(n)内查找第K大元素"></a>排序（下）归并 快速，用快排思想在O(n)内查找第K大元素</h1>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/06/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8B%EF%BC%89/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1542,7 +1636,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">45</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
