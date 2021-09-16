@@ -168,6 +168,189 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/08/Kotlin%E5%9F%BA%E7%A1%80-hencoder/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/08/Kotlin%E5%9F%BA%E7%A1%80-hencoder/" class="post-title-link" itemprop="url">Kotlin基础-hencoder</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-08 17:29:31" itemprop="dateCreated datePublished" datetime="2021-07-08T17:29:31+08:00">2021-07-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-20 10:23:37" itemprop="dateModified" datetime="2021-08-20T10:23:37+08:00">2021-08-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kotlin/" itemprop="url" rel="index"><span itemprop="name">Kotlin</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Kotlin基础-hencoder"><a href="#Kotlin基础-hencoder" class="headerlink" title="Kotlin基础-hencoder"></a>Kotlin基础-hencoder</h1><h2 id="函数声明"><a href="#函数声明" class="headerlink" title="函数声明"></a>函数声明</h2><p>声明函数要用用 fun 关键字，就像声明类要用 class 关键字一样 「函数参数」的「参数类型」是在「参数名」的右边 函数的「返回值」在「函数参数」右边使用 : 分隔，没有返回值时可以省略</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//声明没有返回值的函数:</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123; <span class="comment">//..</span></span><br><span class="line">&#125;</span><br><span class="line">声明有返回值的参数:</span><br><span class="line"><span class="comment">//fun sum(x: Int, y: Int): Int &#123; **return** x + y</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="变量声明"><a href="#变量声明" class="headerlink" title="变量声明"></a>变量声明</h2><p>声明变量需要通过关键字， var 声明可读可写变量， val 声明只读变量 「类型」在「变量量名」的右边，用 : 分割，同时如果满足「类型推断」，类型可以省略<br>创建对象直接调用构造器，不需要 new 关键字</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//声明可读可写变量:</span></span><br><span class="line"><span class="keyword">var</span> age: <span class="built_in">Int</span> = <span class="number">18</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//声明只读变量: </span></span><br><span class="line"><span class="keyword">val</span> name: String = <span class="string">&quot;Hello, Kotlin!&quot;</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">//声明对象:</span></span><br><span class="line"><span class="keyword">val</span> user: User = User()</span><br></pre></td></tr></table></figure>
+<h2 id="继承类-实现接口"><a href="#继承类-实现接口" class="headerlink" title="继承类/实现接口"></a>继承类/实现接口</h2><p>继承类和实现接口都是用的 : ，如果类中没有构造器 ( constructor )，需要在父类类名后面加上 <code>() </code>:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">BaseActivity</span></span>(), View.OnClickListener</span><br></pre></td></tr></table></figure>
+<p>若主动写了构造器，继承时父类类名后面不需要加<code>()</code></p>
+<h2 id="空安全设计"><a href="#空安全设计" class="headerlink" title="空安全设计"></a>空安全设计</h2><p>Kotlin 中的类型分为「可空类型」和「不可空类型」:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">不可空类型</span><br><span class="line"><span class="keyword">val</span> editText : EditText </span><br><span class="line">可空类型</span><br><span class="line"><span class="keyword">val</span> editText : EditText?</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="平台类型"><a href="#平台类型" class="headerlink" title="平台类型"></a>平台类型</h3><p>在类型后面面加上一个感叹号的类型是「平台类型」 即非Kotlin的其他平台类型如Java的类</p>
+<p>Java 中可以通过注解减少这种平台类型的产生<br>  @Nullable 表示可空类型<br>  @NotNull @NonNul l 表示不可空类型</p>
+<p>这种注解只会有警告，约束性和Kotlin相比不够高。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 平台类型，系统自动补充！是可以为空的，为空时报错</span></span><br><span class="line"><span class="keyword">val</span> btn_login = findViewById&lt;Button&gt;(R.id.btn_login)</span><br><span class="line"><span class="comment">//有Nullable注解，系统自动解析为空安全类型</span></span><br><span class="line"><span class="keyword">val</span> btn = getDelegate().findViewById&lt;Button&gt;(R.id.btn_login);</span><br></pre></td></tr></table></figure>
+<h3 id="调用符"><a href="#调用符" class="headerlink" title="调用符"></a>调用符</h3><p><code>!!</code> 强行调用符 </p>
+<p>?. 安全调用符</p>
+<h2 id="非空断言"><a href="#非空断言" class="headerlink" title="非空断言"></a>非空断言</h2><p>可空类型强制类型转换成不可空类型可以通过在变量后面加上<code> !!</code> ，来达到类型转 换。</p>
+<h2 id="lateinit-关键字"><a href="#lateinit-关键字" class="headerlink" title="lateinit 关键字"></a>lateinit 关键字</h2><ul>
+<li>lateinit 只能修饰 var 可读可写变量（val 有初始值且不能被改变）</li>
+<li> lateinit 关键字声明的变量的类型必须是「不可空类型」</li>
+<li>lateinit 声明的变量不能有「初始值」</li>
+<li>lateinit 声明的变量不能是「基本数据类型」</li>
+<li>在构造器中初始化的属性不需要 lateinit 关键字</li>
+</ul>
+<h2 id="类型判断"><a href="#类型判断" class="headerlink" title="类型判断"></a>类型判断</h2><ul>
+<li>is 判断属于某类型</li>
+<li>!is 判断不属于某类型</li>
+<li>as 类型强转，失败时抛出类型强转失败异常</li>
+<li>as? 类型强转，但失败时不会抛出异常而是返回 null</li>
+</ul>
+<h2 id="获取-Class对象"><a href="#获取-Class对象" class="headerlink" title="获取 Class对象"></a>获取 Class对象</h2><p>使用 类名::class 获取的是 Kotlin 的类型是 KClass</p>
+<p>使用 类名::class.java 获取的是 Java 的类型</p>
+<h2 id="setter-getter"><a href="#setter-getter" class="headerlink" title="setter/getter"></a>setter/getter</h2><p>在 Kotlin 声明属性的时候(没有使用 <code>private</code> 修饰)，会自动生成一个私有属性和 一对公开的 <code>setter/getter</code> 函数。</p>
+<p>在写<code> setter/getter</code> 的时候使用 <code>field </code>来代替内部的私有属性(防止递归栈溢出)。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;  </span><br><span class="line">	<span class="keyword">var</span> code: String? = <span class="literal">null</span></span><br><span class="line">  <span class="comment">//默认效果</span></span><br><span class="line">        <span class="keyword">set</span>(value) &#123;</span><br><span class="line">            field = value</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">get</span>() &#123;</span><br><span class="line">            <span class="keyword">return</span> field</span><br><span class="line">        &#125;</span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>为什么 EditText.getText() 的时候可以简化，但是 EditText.setText() 的时候不能和 TextView.setText() 一样简化?</p>
+<p>因为 EditText.getText() 获得的类型是 Editable ，对应的如果 EditText.setText() 传入的参数也是 Editable 就可以简化了。</p>
+</blockquote>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> newEditable = Editable.Factory.getInstance().newEditable(<span class="string">&quot;Kotlin&quot;</span>) </span><br><span class="line">et_username.text = newEditable</span><br></pre></td></tr></table></figure>
+<h2 id="构造器"><a href="#构造器" class="headerlink" title="构造器"></a>构造器</h2><p>使用 <code>constructor</code> 关键字声明构造器</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123; </span><br><span class="line">	<span class="keyword">constructor</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我们在构造器主动调用了了父类构造，那么在继承类的时候就不能在类的后面加上小括号</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>(context: Context) : <span class="keyword">this</span>(context, <span class="literal">null</span>) </span><br><span class="line"><span class="comment">// 主动调用用了父类的构造器</span></span><br><span class="line"><span class="keyword">constructor</span>(context: Context, attr: AttributeSet?) : <span class="keyword">super</span>(context, attr)</span><br></pre></td></tr></table></figure>
+<h2 id="JvmField-生成属性"><a href="#JvmField-生成属性" class="headerlink" title="@JvmField 生成属性"></a>@JvmField 生成属性</h2><p>通过 @JvmField 注解可以让编译器只生成一个 public 的成员属性，不生成对应的 setter/getter 函数</p>
+<h2 id="Any-和-Unit"><a href="#Any-和-Unit" class="headerlink" title="Any 和 Unit"></a>Any 和 Unit</h2><ul>
+<li><code>Any</code> Kotlin 的顶层父类是 <code>Any</code> ，对应 Java 当中的 <code>Object </code>，但是比 <code>Object</code> 少了<code>wait()/notify()</code>等函数</li>
+<li><code>Unit</code> Kotlin 中的 <code>Unit</code> 对应 Java 中的<code> void</code></li>
+</ul>
+<h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><p>使用<code> arrayof()</code> 来创建数组，但是对于基本类型会有装箱拆箱过程，消耗性能，所以基本数据类型使用对应的 <code>intArrayOf() </code>等</p>
+<h2 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h2><p>Java 中的基本数据类型<code>int</code>,<code>float</code>,<code>double</code>对应Kotlin的不可空包装类型<code>Int</code>，<code>Float</code>,<code>Double</code></p>
+<p>Java中的包装类型<code>Int</code>,<code>Float</code>，<code>Double</code>,对应Kotlin的可空类型<code>Int？</code>，<code>Float？</code>,<code>Double？</code></p>
+<h2 id="Kotlin中生成Java静态函数-属性"><a href="#Kotlin中生成Java静态函数-属性" class="headerlink" title="Kotlin中生成Java静态函数/属性"></a>Kotlin中生成Java静态函数/属性</h2><h3 id="静态函数和属性"><a href="#静态函数和属性" class="headerlink" title="静态函数和属性"></a>静态函数和属性</h3><ul>
+<li>顶层函数</li>
+<li><code>object</code></li>
+<li><code>companion object</code></li>
+</ul>
+<p>其中，「顶层函数」直接在文件中定义函数和属性，会直接生成静态的，在 Java 中 通过「文件名Kt」来 访问，同时可以通过<code>@file:JvmName</code>注解来修改这个「类名」。</p>
+<p>Utils.kt</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span>  displayMetrics: DisplayMetrics = Resources.getSystem().getDisplayMetrics()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">dp2px</span><span class="params">(dp: <span class="type">Float</span>)</span></span>: <span class="built_in">Float</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Java中调用<code>UtilsKt.dp2px(21)</code></li>
+<li>Kotlin中调用<code>Utils.dp2px(21)</code></li>
+</ul>
+<blockquote>
+<p>需要注意，这种顶层函数不要声明在<code> module</code> 内最顶层的包中，至少要在一个 包中例如<code> com</code> 。不然不能方便使用。</p>
+<p>你也可以在文件头部增加注解<code>@file:JvmName(&quot;KotlinUtils&quot;)</code> 这样Java中调用时就变成了<code>KotlinUtils.dp2px(21)</code>注意，这个注解要加在包名前面</p>
+</blockquote>
+<p><code>object </code>和 <code>companion object</code> 都是生成单例例对象，然后通过单例对象访问 函数和属性的。    </p>
+<p>Object:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">object</span> CacheUtils &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> context = BaseApplication.currentApplication()</span><br><span class="line">		<span class="function"><span class="keyword">fun</span> <span class="title">save</span><span class="params">(key: <span class="type">String</span>?, value: <span class="type">String</span>?)</span></span> &#123;</span><br><span class="line">    	SP.edit().putString(key, value).apply()</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用：Java中：<code> CacheUtils.INSTANCE.save(&quot;123&quot;)</code>,Kotlin中<code>CacheUtils.save(&quot;123&quot;)</code></p>
+<p>伴生对象compainion：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BaseApplication</span>: <span class="type">Application</span></span>() &#123;</span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> currentApplication:Context</span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">currentApplication</span><span class="params">()</span></span>:Context &#123;</span><br><span class="line">            <span class="keyword">return</span> currentApplication</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate()</span><br><span class="line">        currentApplication = <span class="keyword">this</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Java调用<code>BaseApplication.Compainion.currentApplication();</code></p>
+<p>Kotlin调用<code>BaseApplication.currentApplication()</code></p>
+<h3 id="JvmStatic"><a href="#JvmStatic" class="headerlink" title="@JvmStatic"></a>@JvmStatic</h3><p>通过这个注解将 <code>object</code> 和 <code>companion object </code>的内部函数和属性，真正生成为静态的。</p>
+<h2 id="单例模式-匿名内部类"><a href="#单例模式-匿名内部类" class="headerlink" title="单例模式**/**匿名内部类"></a>单例模式**/**匿名内部类</h2><p>通过 object 关键字实现</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 单例</span></span><br><span class="line"><span class="keyword">object</span> Singleton &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 匿名内部类</span></span><br><span class="line"><span class="keyword">object</span> : OnClickListener &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h2><h3 id="字符串模版"><a href="#字符串模版" class="headerlink" title="字符串模版"></a>字符串模版</h3><p>通过 <code>$&#123;&#125; </code>的形式来作为字符串模版</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> number = <span class="number">100</span></span><br><span class="line"><span class="keyword">val</span> text = <span class="string">&quot;向你转账<span class="subst">$&#123;number&#125;</span>元。&quot;</span> <span class="comment">// 如果只是单一的变量，可以省略掉 &#123;&#125; val text2 = &quot;向你转账$number元。&quot;</span></span><br></pre></td></tr></table></figure>
+<h2 id="多行字符串"><a href="#多行字符串" class="headerlink" title="多行字符串"></a>多行字符串</h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> s = <span class="string">&quot;&quot;&quot; 我是第一行</span></span><br><span class="line"><span class="string">我是第二行 我是第三行</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span>.trimIndent()</span><br></pre></td></tr></table></figure>
+<h2 id="区间"><a href="#区间" class="headerlink" title="区间"></a>区间</h2><p><code>200..299</code> 表示<code> 200 -&gt; 299</code> 的区间(包括 <code>299</code> )</p>
+<h2 id="when-关键字"><a href="#when-关键字" class="headerlink" title="when 关键字"></a><strong>when</strong> 关键字</h2><p>Java 当中的<code>switch</code>的高级版，分支条件上可以支持表达式,<code>in</code> =<code> Java switch中的case</code>，如果只有一行需要执行，则不需要<code>&#123;&#125;</code></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">call.enqueue(<span class="keyword">object</span> : Callback &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onFailure</span><span class="params">(call: <span class="type">Call</span>, e: <span class="type">IOException</span>)</span></span> &#123;</span><br><span class="line">                entityCallback.onFailure(<span class="string">&quot;网络异常&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onResponse</span><span class="params">(call: <span class="type">Call</span>, response: <span class="type">Response</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">when</span> (response.code()) &#123;</span><br><span class="line">                    <span class="keyword">in</span> <span class="number">200.</span><span class="number">.299</span> -&gt; entityCallback.onSuccess(convert&lt;Any&gt;(response.body()!!.string(), type) <span class="keyword">as</span> T)</span><br><span class="line">                    <span class="keyword">in</span> <span class="number">400.</span><span class="number">.499</span> -&gt; entityCallback.onFailure(<span class="string">&quot;客户端错误&quot;</span>)</span><br><span class="line">                    <span class="keyword">in</span> <span class="number">501.</span><span class="number">.599</span> -&gt; entityCallback.onFailure(<span class="string">&quot;服务器错误&quot;</span>)</span><br><span class="line">                    <span class="keyword">else</span> -&gt; entityCallback.onFailure(<span class="string">&quot;未知错误&quot;</span>)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="受检异常"><a href="#受检异常" class="headerlink" title="受检异常"></a>受检异常</h2><p>Kotlin 不需要使用 try-catch 强制捕获异常</p>
+<h2 id="声明接口-抽象类-枚举-注解"><a href="#声明接口-抽象类-枚举-注解" class="headerlink" title="声明接口**/抽象类/枚举/**注解"></a>声明接口**/<strong>抽象类</strong>/<strong>枚举</strong>/**注解</h2><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 声明抽象类 </span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> </span></span><br><span class="line"><span class="comment">// 声明接口 </span></span><br><span class="line"><span class="class"><span class="keyword">interface</span></span></span><br><span class="line"><span class="comment">// 声明注解 </span></span><br><span class="line"><span class="keyword">annotation</span> <span class="class"><span class="keyword">class</span> </span></span><br><span class="line"><span class="comment">// 声明枚举</span></span><br><span class="line">enmu <span class="class"><span class="keyword">class</span></span></span><br></pre></td></tr></table></figure>
+<h2 id="编译期常量"><a href="#编译期常量" class="headerlink" title="编译期常量"></a>编译期常量</h2><p>在静态变量上加上 <code>const</code> 关键字变成编译期常量,switch和注解中使用</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LessonPresenter</span> </span>&#123;</span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">         <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> LESSON_PATH = <span class="string">&quot;lessons&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>相当于</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LessonPresenter</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LESSON_PATH = <span class="string">&quot;lessons&quot;</span>;</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+
+
+<h2 id="标签"><a href="#标签" class="headerlink" title="标签"></a>标签</h2><p>在 Java 中通过 「<code>类名.this</code> 例如 <code>Outer.this</code> 」 获取目标类引用 </p>
+<p>在Kotlin中通过「<code>this@类名</code> 例如<code>this@Outer</code>」获取目标类引用</p>
+<h2 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h2><p>Java中可以用List的类型接收ArrayList，Kotlin不行，因为Kotlin的List不能修改，所以初始化集合要用</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//可修改的</span></span><br><span class="line">arrayListOf&lt;&gt;()</span><br><span class="line">mutableListOf&lt;&gt;()</span><br><span class="line">mutableMapOf&lt;&gt;()</span><br><span class="line"><span class="comment">//不可修改的</span></span><br><span class="line">mapOf&lt;&gt;()</span><br><span class="line">listOf&lt;&gt;()</span><br></pre></td></tr></table></figure>
+<h2 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h2><p>记得让 IDE 来帮助生成 for 循环     <code>for(item in items)</code></p>
+<h2 id="内部类"><a href="#内部类" class="headerlink" title="内部类"></a>内部类</h2><p>在 Kotlin 当中，内部类默认是静态内部类 </p>
+<p>通过 <code>inner</code> 关键字声明为嵌套内部类</p>
+<h2 id="可⻅性修饰符"><a href="#可⻅性修饰符" class="headerlink" title="可⻅性修饰符"></a>可⻅性修饰符</h2><p>默认的可⻅性修饰符是 <code>public</code> </p>
+<p>新增的可⻅性修饰符 <code>internal</code> 表示当前模块可⻅在Java中想做到只能加@hide注解</p>
+<h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><p>注释中可以在任意地方使用 [] 来引用目标，代替 Java 中的    <code> @param</code> <code>@link </code>等。</p>
+<h2 id="open-final"><a href="#open-final" class="headerlink" title="open/final"></a>open/final</h2><p>Kotlin 中的类和函数，默认是被<code> final</code> 修饰的 (<code>abstract</code>和 <code>override</code>) 例外 ，想继承方法的话需要关键字(<code>open</code>,<code>abstract</code>和<code>override</code>)</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/05/HTTPS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1490,81 +1673,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/07/Zygote%E7%9A%84%E4%BD%9C%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/07/Zygote%E7%9A%84%E4%BD%9C%E7%94%A8/" class="post-title-link" itemprop="url">Zygote的作用</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-07 13:47:03" itemprop="dateCreated datePublished" datetime="2021-04-07T13:47:03+08:00">2021-04-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-04-30 08:35:31" itemprop="dateModified" datetime="2021-04-30T08:35:31+08:00">2021-04-30</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Framework/" itemprop="url" rel="index"><span itemprop="name">Framework</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <a id="more"></a>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1636,7 +1744,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">45</span>
+          <span class="site-state-item-count">46</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
