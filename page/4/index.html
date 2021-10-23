@@ -168,6 +168,438 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/29/Http%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/29/Http%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">Http的原理和工作机制</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-29 14:03:13" itemprop="dateCreated datePublished" datetime="2021-06-29T14:03:13+08:00">2021-06-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-12 05:37:48" itemprop="dateModified" datetime="2021-08-12T05:37:48+08:00">2021-08-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/http/" itemprop="url" rel="index"><span itemprop="name">http</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Http-基础"><a href="#Http-基础" class="headerlink" title="Http 基础"></a>Http 基础</h1><h2 id="Http的原理和工作机制"><a href="#Http的原理和工作机制" class="headerlink" title="Http的原理和工作机制"></a>Http的原理和工作机制</h2><h3 id="Http-定义-Http到底是什么"><a href="#Http-定义-Http到底是什么" class="headerlink" title="Http 定义 Http到底是什么"></a>Http 定义 Http到底是什么</h3><p>直观印象：</p>
+<ol>
+<li>浏览器输入地址，打开网页</li>
+<li>Android发送请求，返回对应的内容</li>
+</ol>
+<p>HyperText Transfer Protocol 超文本传输协议</p>
+<ul>
+<li><p>超文本：在电脑显示的，含有可以指向其他文本的文本</p>
+<p>其实就是Html，http最初就是为了传输Html文档而诞生的。</p>
+<p>HyperText ，所谓的超其实是可扩展的意思。</p>
+</li>
+</ul>
+<h4 id="HTTP-的工作方式"><a href="#HTTP-的工作方式" class="headerlink" title="HTTP 的工作方式"></a><strong>HTTP</strong> 的工作方式</h4><h5 id="浏览器"><a href="#浏览器" class="headerlink" title="浏览器 :"></a>浏览器 :</h5><p>用户输入地址后回⻋或点击链接 -&gt; 浏览器拼装 HTTP 报文并发送请求给服务器 -&gt; 服 务器处理请求后发送响应报文给浏览器 -&gt; 浏览器解析响应报文并使用渲染引擎显示 到界面</p>
+<h5 id="手机-App"><a href="#手机-App" class="headerlink" title="手机 App :"></a>手机 <strong>App</strong> :</h5><p>用户点击或界面自动触发联网需求 -&gt; Android 代码调用拼装 HTTP 报文并发送请求 到服务器 -&gt; 服务器处理请求后发送响应报文给手机 -&gt; Android 代码处理响应报文并 作出相应处理(如储存数据、加工数据、显示数据到界面)</p>
+<h3 id="URL-gt-HTTP报文"><a href="#URL-gt-HTTP报文" class="headerlink" title="URL -&gt; HTTP报文"></a>URL -&gt; HTTP报文</h3><h4 id="URL-格式"><a href="#URL-格式" class="headerlink" title="URL 格式"></a><strong>URL</strong> 格式</h4><p>三部分:协议类型、服务器地址(和端口号)、路径(Path) 协议类型://服务器地址[:端口号]/路径</p>
+<p> <a target="_blank" rel="noopener" href="http://hencoder.com/users?gender=male">http://hencoder.com/users?gender=male</a></p>
+<p>在浏览器输入Url会被转化成请求报文。</p>
+<h4 id="HTTP报文"><a href="#HTTP报文" class="headerlink" title="HTTP报文"></a>HTTP报文</h4><p>请求/响应报文都是由三大部分组成的</p>
+<p>第一行（请求/状态行）+Headers+Body</p>
+<p>Header和Body两者基本相同</p>
+<p>请求报文的第一行（请求行）：method + path + HTTP version组成（Host不是给服务器看的，是给主机的，所以不属于请求行，属于Header）</p>
+<p>响应报文的第一行（请求行）：HTTP version +status code+status message组成</p>
+<h4 id="请求报文-Request"><a href="#请求报文-Request" class="headerlink" title="请求报文 Request"></a>请求报文 Request</h4><p><img src="/2021/06/29/Http%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/image-20210625164634531.png" alt="image-20210625164634531">         </p>
+<p>Host不是给服务器看的，是给主机的，所以不属于请求行。</p>
+<p>​      Http 有，0.9 1.1 2.0版本，0.9已经废弃，1.1正被大量使用，正在向2.0迁移</p>
+<p>Body，提供给服务器看的具体内容（一般般业务相关），不是必须的。</p>
+<p>Body是提供给服务器，让服务器去处理的内容，而用来定位请求的都在Head中。</p>
+<h4 id="响应报文"><a href="#响应报文" class="headerlink" title="响应报文"></a>响应报文</h4><p><img src="/2021/06/29/Http%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/image-20210625164714772.png" alt="image-20210625164714772"></p>
+<p>和请求报文（Request）基本一样，</p>
+<p>除了第一行，叫状态行。返回了一个状态码和状态信息，是这次请求的简单描述。</p>
+<h2 id="Http的请求方法和状态码"><a href="#Http的请求方法和状态码" class="headerlink" title="Http的请求方法和状态码"></a>Http的请求方法和状态码</h2><h3 id="请求方法"><a href="#请求方法" class="headerlink" title="请求方法"></a>请求方法</h3><blockquote>
+<p>重复执行多次结果还是一样，就是有幂等性</p>
+</blockquote>
+<h4 id="Get"><a href="#Get" class="headerlink" title="Get"></a>Get</h4><ul>
+<li>获取资源，没有Body,具有幂等性</li>
+<li>是第一个版本（0.9）就存在的方法，在浏览器输入地址调用的就是Get方法，它不对服务器的数据进行操作。</li>
+</ul>
+<blockquote>
+<p>Body是操作服务器数据用的，里面的的内容是给服务器读的，作为只获取数据不操作数据的Get请求<strong>自然不需要Body</strong>，</p>
+<p>如果想传递参数，就要拼在Requst 请求行等path上 比如 /user/1 传递参数1</p>
+</blockquote>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string"></span> /users/1 <span class="string"></span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>api.github.com</span><br></pre></td></tr></table></figure>
+<p>对应 Retrofit 的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GET(&quot;/users/&#123;id&#125;&quot;)</span></span><br><span class="line"><span class="function">Call&lt;User&gt; <span class="title">getUser</span><span class="params">(<span class="meta">@Path(&quot;id&quot;)</span> String id,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="meta">@Query(&quot;gender&quot;)</span> String gender)</span></span>;</span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>在Get 增加Body标签，Retrofit甚至会报错。</p>
+</blockquote>
+<h4 id="Post"><a href="#Post" class="headerlink" title="Post"></a>Post</h4><ul>
+<li>增加和修改资源，有且一定有Body，不具有幂等性</li>
+</ul>
+<blockquote>
+<p>既然要新增/修改资源，不增加参数（Body）服务器自然无法修改</p>
+</blockquote>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string"></span> /users <span class="string"></span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>api.github.com</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>13</span><br><span class="line">name=rengwuxian&amp;gender=male</span><br></pre></td></tr></table></figure>
+<p>对应 Retrofit 的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FormUrlEncoded</span></span><br><span class="line"><span class="meta">@POST(&quot;/users&quot;)</span></span><br><span class="line"><span class="function">Call&lt;User&gt; <span class="title">addUser</span><span class="params">(<span class="meta">@Field(&quot;name&quot;)</span> String name,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="meta">@Field(&quot;gender&quot;)</span> String gender)</span></span>;</span><br></pre></td></tr></table></figure>
+<h4 id="Put"><a href="#Put" class="headerlink" title="Put"></a>Put</h4><ul>
+<li>修改（只修改），有Body，具有幂等性</li>
+</ul>
+<p>Post的和Put的区别</p>
+<table>
+<thead>
+<tr>
+<th align="center">相似</th>
+<th align="center">区别</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">都可以修改数据都符合标准</td>
+<td align="center">Post不具有幂等性，执行多次返回不同的结果，因为它可以增加资源。Put具有幂等性，执行多次返回相同的结果，例如多次修改性别为女，结果用户的性别还是女。</td>
+</tr>
+</tbody></table>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">PUT</span> <span class="string"></span> /users/1 <span class="string"></span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>api.github.com</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>13</span><br><span class="line">gender=female</span><br></pre></td></tr></table></figure>
+<p>对应 Retrofit 的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FormUrlEncoded</span></span><br><span class="line"><span class="meta">@PUT(&quot;/users/&#123;id&#125;&quot;)</span></span><br><span class="line"><span class="function">Call&lt;User&gt; <span class="title">updateGender</span><span class="params">(<span class="meta">@Path(&quot;id&quot;)</span> String id,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="meta">@Field(&quot;gender&quot;)</span> String gender)</span></span>;</span><br></pre></td></tr></table></figure>
+<h4 id="Delete"><a href="#Delete" class="headerlink" title="Delete"></a>Delete</h4><ul>
+<li>删除资源，没有Body，有幂等性（删除用户1，重复执行无反应，因为已经删除了，从结果来看是一样的）</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Delete /users/1 Http/1.1</span><br><span class="line">Host api.github.com  </span><br></pre></td></tr></table></figure>
+<p>从path就足以定位用户删除了，无需Body</p>
+<p>对应 Retrofit 的代码:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@DELETE(&quot;/users/&#123;id&#125;&quot;)</span><br><span class="line">Call&lt;User&gt; getUser(@Path(&quot;id&quot;) String id,</span><br><span class="line">@Query(&quot;gender&quot;) String gender);</span><br></pre></td></tr></table></figure>
+<h4 id="Head"><a href="#Head" class="headerlink" title="Head"></a>Head</h4><p>和Get请求完全相同，返回响应没有Body，其他请求方法的响应都是有Body的。可以快速得到资源信息。</p>
+<h3 id="状态码-（日常中最重要的2打头-成功，4打头客户端错误。）"><a href="#状态码-（日常中最重要的2打头-成功，4打头客户端错误。）" class="headerlink" title="状态码 （日常中最重要的2打头 成功，4打头客户端错误。）"></a>状态码 （日常中最重要的2打头 成功，4打头客户端错误。）</h3><ul>
+<li><p>作用： 对结果作出类型化的描述（如获得成功，内容未找到）</p>
+<ul>
+<li><p>1xx:临时性消息。如:</p>
+<ul>
+<li><p>100 (继续发送)，如果你发送的文件太大，想分段发送。</p>
+<p>Header传<code>Excpet： 100-continue</code>，</p>
+<p>服务器响应<code>HTTP/1.1 100</code>代表允许你继续发送。 </p>
+<p>发送成功后返回<code>HTTP/1.1 200</code>或者201</p>
+</li>
+<li><p>101(正在切换协议 比如http1.1和http2.0的请求不兼容，</p>
+<p> 一般会加一个<code>Upgrade： h2c</code>的header试着请求，询问服务器是否支持<code>Http2.0</code>，</p>
+<p> 服务器响应<code>HTTP/1.1 101</code>，则代表服务器支持http2.0</p>
+<p> 服务器响应<code>HTTP/1.1 200</code>，代表不识别Http2.0的请求) </p>
+</li>
+</ul>
+</li>
+<li><p>2xx:成功。最典型的是 200(OK)、201(创建成功)。</p>
+</li>
+<li><p>3xx:重定向。如 301(永久移动)、302(暂时移动)、304(内容未改变)。 对于浏览器来说表现一样，</p>
+<p>但是301可以通知搜索引擎，你的网站已迁移，搜索引擎会将权重转移到新域名。</p>
+</li>
+<li><p>4xx:客户端错误。如 400(客户端请求错误)、401(认证失败)、403(被禁 止)、404(找不到内容)。</p>
+</li>
+<li><p>5xx:服务器错误。如 500(服务器内部错误)</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>日常中最重要的2打头 成功，4打头客户端错误。</p>
+<h2 id="HTTP的Header和Body"><a href="#HTTP的Header和Body" class="headerlink" title="HTTP的Header和Body"></a>HTTP的Header和Body</h2><p>Body是报文的核心，但是所有的Body都是配合Header使用的，提交用户信息有多个方法，都是由Header定义的。</p>
+<p>Header是Http消息的元数据（metadata） 即<strong>数据的数据</strong> 关于数据的数据，数据的属性。</p>
+<h3 id="Host-目标主机名-，作用是给DNS查询IP地址，交给主机查找子主机。"><a href="#Host-目标主机名-，作用是给DNS查询IP地址，交给主机查找子主机。" class="headerlink" title="Host 目标主机名 ，作用是给DNS查询IP地址，交给主机查找子主机。"></a>Host 目标主机名 ，作用是给DNS查询IP地址，交给主机查找子主机。</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Get /user/1 HTTP/1.1</span><br><span class="line">Host api.github.com</span><br><span class="line"></span><br><span class="line">host不是查询主机地址的，查询主机地址的工作DNS已经做了。 Domain Name System 域名系统，</span><br><span class="line">所以这个Host 是给对方主机看的，英文一个主机可能有多个虚拟主机（子主机），比如阿里云服务器部署了多个主机</span><br><span class="line">hencoder.com</span><br><span class="line">haocoder.com</span><br></pre></td></tr></table></figure>
+<h3 id="ContentType-ContentLength-Body的类型和长度"><a href="#ContentType-ContentLength-Body的类型和长度" class="headerlink" title="ContentType/ContentLength:Body的类型和长度"></a>ContentType/ContentLength:Body的类型和长度</h3><h4 id="ContentLength"><a href="#ContentLength" class="headerlink" title="ContentLength"></a>ContentLength</h4><p>Body的字节长度，因为我门传输的是二进制字符我们不知道主机的解析方式，所以不能🈯️定某个字符作为终止符号（例如用\n做终止符号，可能这次请求的Body数据只是用\n换行），所以我们用二进制字节长度来告诉主机在哪里结束读取/解析Body中的数据。</p>
+<h4 id="ContentType内容的类型-，也即是Body的格式"><a href="#ContentType内容的类型-，也即是Body的格式" class="headerlink" title="ContentType内容的类型 ，也即是Body的格式"></a>ContentType内容的类型 ，也即是Body的格式</h4><h5 id="text-html-html文本"><a href="#text-html-html文本" class="headerlink" title="text/html : html文本"></a>text/html : html文本</h5><p>用于浏览器页面的响应。浏览器是不知道用户访问的url的资源类型的，可以是html也可以是Json</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">HTTP/1.1</span> <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>text/html; charset=utf-8</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>853</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">  &lt;meta charset=&quot;utf-8&quot;&gt;</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h5 id="application-x-www-form-urlencoded-普通表单-纯文字表单，也是最早的表单。-image-20200726224015531-Users-zhangzhuang-Library-Application-Support-typora-user-images-image-20200726224015531-png"><a href="#application-x-www-form-urlencoded-普通表单-纯文字表单，也是最早的表单。-image-20200726224015531-Users-zhangzhuang-Library-Application-Support-typora-user-images-image-20200726224015531-png" class="headerlink" title="application/x-www-form-urlencoded: 普通表单/纯文字表单，也是最早的表单。![image-20200726224015531](/Users/zhangzhuang/Library/Application Support/typora-user-images/image-20200726224015531.png)"></a>application/x-www-form-urlencoded: 普通表单/纯文字表单，也是最早的表单。![image-20200726224015531](/Users/zhangzhuang/Library/Application Support/typora-user-images/image-20200726224015531.png)</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string"></span> /users <span class="string"></span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>api.github.com</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>27</span><br><span class="line">name=rengwuxian&amp;gender=male</span><br></pre></td></tr></table></figure>
+<p>对应 Retrofit 的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FormUrlEncoded</span></span><br><span class="line"><span class="meta">@POST(&quot;/users&quot;)</span></span><br><span class="line"><span class="function">Call&lt;User&gt; <span class="title">addUser</span><span class="params">(<span class="meta">@Field(&quot;name&quot;)</span> String name,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="meta">@Field(&quot;gender&quot;)</span> String gender)</span></span></span><br></pre></td></tr></table></figure>
+
+
+<h5 id="multipart-form-data-Web-⻚面（表单）含有二进制文件时的提交方式。-常见的传图片方式。"><a href="#multipart-form-data-Web-⻚面（表单）含有二进制文件时的提交方式。-常见的传图片方式。" class="headerlink" title="multipart/form-data Web ⻚面（表单）含有二进制文件时的提交方式。 常见的传图片方式。"></a>multipart/form-data Web ⻚面（表单）含有二进制文件时的提交方式。 常见的传图片方式。<img src="/2021/06/29/Http%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/image-20200726225142875.png" alt="image-20200726225142875"></h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string"></span> /users <span class="string"></span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>hencoder.com</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=----</span><br><span class="line">WebKitFormBoundary7MA4YWxkTrZu0gW</span><br><span class="line">Content-Length: 2382</span><br><span class="line">------WebKitFormBoundary7MA4YWxkTrZu0gW</span><br><span class="line">Content-Disposition: form-data; name=&quot;name&quot;</span><br><span class="line">rengwuxian</span><br><span class="line">------WebKitFormBoundary7MA4YWxkTrZu0gW</span><br><span class="line">Content-Disposition: form-data; name=&quot;avatar&quot;;</span><br><span class="line">filename=&quot;avatar.jpg&quot;</span><br><span class="line">Content-Type: image/jpeg</span><br><span class="line">JFIFHHvOwX9jximQrWa......</span><br><span class="line">------WebKitFormBoundary7MA4YWxkTrZu0gW--</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Boundary 后面的一长串文字是为了分割普通表单文字和二进制数据的，如果和二进制数据恰好重复请求就会失败，概率很小。普通表单不会用boundary来分割内容，因为分割用的字符串长度太长，浪费资源。</span><br></pre></td></tr></table></figure>
+<p>对应 Retrofit 的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Multipart</span></span><br><span class="line"><span class="meta">@POST(&quot;/users&quot;)</span></span><br><span class="line"><span class="function">Call&lt;User&gt; <span class="title">addUser</span><span class="params">(<span class="meta">@Part(&quot;name&quot;)</span> RequestBody name,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="meta">@Part(&quot;avatar&quot;)</span> RequestBody avatar)</span></span>;</span><br><span class="line">...</span><br><span class="line">RequestBody namePart =</span><br><span class="line">RequestBody.create(MediaType.parse(<span class="string">&quot;text/plain&quot;</span>),</span><br><span class="line">nameStr);</span><br><span class="line">RequestBody avatarPart =</span><br><span class="line">RequestBody.create(MediaType.parse(<span class="string">&quot;image/jpeg&quot;</span>),</span><br><span class="line">avatarFile);</span><br><span class="line">api.addUser(namePart, avatarPart)</span><br></pre></td></tr></table></figure>
+<p> 所以Retrofit 的参数的注解@Query，@Feild 都是因为Content-type不同所以才改变的，它们是不兼容的Body格式。Ps: 用普通表单+base64传图片是错误的。</p>
+<p>Retrofit中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">body 要用field活着Part注解，它们是不兼容的，user?gender &#x3D; femal  这个@Qurey标签就是管gender字段的</span><br></pre></td></tr></table></figure>
+<h5 id="单项内容-文本或非文本都可：application-json-image-jpeg-application-zip-…"><a href="#单项内容-文本或非文本都可：application-json-image-jpeg-application-zip-…" class="headerlink" title="单项内容(文本或非文本都可：application/json , image/jpeg , application/zip …)"></a>单项内容(文本或非文本都可：application/json , image/jpeg , application/zip …)</h5><p>用于 Web Api 的响应或者 POST / PUT 的请求 请求中提交 JSON</p>
+<p><strong>application/json , image/jpeg , application/zip …：</strong></p>
+<blockquote>
+<p>请求中提交Json：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">POST &#x2F;users HTTP&#x2F;1.1</span><br><span class="line">Host: hencoder.com</span><br><span class="line">Content-Type: application&#x2F;json; charset&#x3D;utf-8</span><br><span class="line">Content-Length: 38</span><br><span class="line">&#123;&quot;name&quot;:&quot;rengwuxian&quot;,&quot;gender&quot;:&quot;male&quot;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/users</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>hencoder.com</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/json; charset=utf-8</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>38</span><br><span class="line">&#123;&quot;name&quot;:&quot;rengwuxian&quot;,&quot;gender&quot;:&quot;male&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>Retrofit中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">å<span class="meta">@POST(&quot;/users&quot;)</span></span><br><span class="line"><span class="function">Call&lt;User&gt; <span class="title">addUser</span><span class="params">(<span class="meta">@Body(&quot;user&quot;)</span> User user)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>// 需要使用 JSON 相关的 Converter api.addUser(user);</p>
+<p>响应中返回 JSON</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">HTTP/1.1</span> <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">content-type</span><span class="punctuation">: </span>application/json; charset=utf-8</span><br><span class="line"><span class="attribute">content-length</span><span class="punctuation">: </span>234</span><br><span class="line">[&#123;&quot;login&quot;:&quot;mojombo&quot;,&quot;id&quot;:1,&quot;node_id&quot;:&quot;MDQ6VXNl</span><br><span class="line">cjE=&quot;,&quot;avatar_url&quot;:&quot;https://avatars0.githubuse</span><br><span class="line">rcontent.com/u/1?v=4&quot;,&quot;gravat......</span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>请求中提交二进制内容</p>
+</blockquote>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/user/1/avatar</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>hencoder.com</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>image/jpeg</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>1575</span><br><span class="line">JFIFHH9......</span><br></pre></td></tr></table></figure>
+<p>对应 Retrofit 的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@POST(&quot;users/&#123;id&#125;/avatar&quot;)</span></span><br><span class="line"><span class="function">Call&lt;User&gt; <span class="title">updateAvatar</span><span class="params">(<span class="meta">@Path(&quot;id&quot;)</span> String id, <span class="meta">@Body</span></span></span></span><br><span class="line"><span class="function"><span class="params">RequestBody avatar)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>…</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">RequestBody avatarBody =</span><br><span class="line">RequestBody.create(MediaType.parse(<span class="string">&quot;image/jpeg&quot;</span>),</span><br><span class="line">avatarFile);</span><br><span class="line">api.updateAvatar(id, avatarBody)</span><br></pre></td></tr></table></figure>
+<p>相应中返回二进制内容</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">HTTP/1.1</span> <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">content-type</span><span class="punctuation">: </span>image/jpeg</span><br><span class="line"><span class="attribute">content-length</span><span class="punctuation">: </span>1575</span><br><span class="line">JFIFHH9......</span><br></pre></td></tr></table></figure>
+<h3 id="Transfer-chunked-分块传输编码-Chunked-Transfer-Encoding"><a href="#Transfer-chunked-分块传输编码-Chunked-Transfer-Encoding" class="headerlink" title="Transfer: chunked (分块传输编码 Chunked Transfer Encoding)"></a>Transfer: chunked (分块传输编码 Chunked Transfer Encoding)</h3><p>用于当响应发起时，内容⻓度还没能确定的情况下。和 Content-Length 不同时使 用。用途是尽早给出响应，减少用户等待。</p>
+<p>格式:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">HTTP/1.1</span> <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>text/html</span><br><span class="line"><span class="attribute">Transfer-Encoding</span><span class="punctuation">: </span>chunked</span><br><span class="line">4 (当前数据块的长度)</span><br><span class="line">Chun</span><br><span class="line">9</span><br><span class="line">ked Trans</span><br><span class="line">12</span><br><span class="line">fer Encoding</span><br><span class="line">0</span><br></pre></td></tr></table></figure>
+<h3 id="Location"><a href="#Location" class="headerlink" title="Location"></a>Location</h3><p>指定重定向的目标 URL</p>
+<h3 id="User-Agent"><a href="#User-Agent" class="headerlink" title="User-Agent"></a>User-Agent</h3><p>用户代理，即是谁实际发送请求、接受响应的，例如手机浏览器、某款手机 App。</p>
+<h3 id="Range-Accept-Range"><a href="#Range-Accept-Range" class="headerlink" title="Range / Accept-Range"></a>Range / Accept-Range</h3><p>按范围取数据</p>
+<p><code>Accept-Range: bytes </code>响应报文中出现，表示服务器支持按字节来取范围数据</p>
+<p><code>Range: bytes=&lt;start&gt;-&lt;end&gt; </code>请求报文中出现，表示要取哪段数据</p>
+<p><code>Content-Range:&lt;start&gt;-&lt;end&gt;/total</code> 响应报文中出现，表示发送的是哪段 数据</p>
+<p>作用:断点续传、多线程下载。</p>
+<h3 id="其他-Headers"><a href="#其他-Headers" class="headerlink" title="其他 Headers"></a>其他 Headers</h3><ul>
+<li>Accept: 客户端能接受的数据类型。如 text/html </li>
+<li>Accept-Charset: 客户端接受的字符集。如 utf-8</li>
+<li>Accept-Encoding: 客户端接受的压缩编码类型。如 gzip </li>
+<li>Content-Encoding:压缩类型。如 gzip</li>
+</ul>
+<h3 id="Cache"><a href="#Cache" class="headerlink" title="Cache"></a>Cache</h3><p>作用:在客户端或中间网络节点缓存数据，降低从服务器取数据的频率，以提高网络性能。</p>
+<p>Cache和Buffer的区别：</p>
+<p>Cache：用过了，以后还会用，先存着。</p>
+<p>Buffer：针对工作流，下游稍后用，上游先多生产一些。</p>
+<h2 id="REST"><a href="#REST" class="headerlink" title="REST"></a>REST</h2><p>REST 的定义众说纷纭，没有统一答案。 扔物线的观点:REST HTTP 即正确使用 HTTP。包括:</p>
+<ul>
+<li>使用资源的格式来定义 URL</li>
+<li>规范地使用 method 来定义网络请求操作 </li>
+<li>规范地使用 status code 来表示响应状态 </li>
+<li>其他符合 HTTP 规范的设计准则</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">重新利用hexo和github page 建立了一个blog</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-30 08:35:31" itemprop="dateCreated datePublished" datetime="2021-04-30T08:35:31+08:00">2021-04-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hexo/" itemprop="url" rel="index"><span itemprop="name">hexo</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Hexo-GitHub-Pages-Typora-构建博客-1-Hexo-的安装"><a href="#Hexo-GitHub-Pages-Typora-构建博客-1-Hexo-的安装" class="headerlink" title="Hexo + GitHub Pages + Typora 构建博客 (1) Hexo 的安装"></a>Hexo + GitHub Pages + Typora 构建博客 (1) Hexo 的安装</h2><p>最近在学一些网络知识，但是使用市面上支持 <a target="_blank" rel="noopener" href="https://www.runoob.com/markdown/md-tutorial.html">Markdown </a>的 笔记工具（如简书，有道云笔记，印象笔记）的产品，时常遇到两类问题：</p>
+<ol>
+<li><p>功能过于复杂（有道，印象），很多功能我用不上，且打开有些卡顿</p>
+</li>
+<li><p>没有在线存储文件或者图片的能力（Typora）</p>
+</li>
+<li><p>在线打开操作不够方便，体验不够好（简书，掘金）</p>
+</li>
+<li><p>需要付费</p>
+</li>
+</ol>
+<p>因此我准备构建一套的博客工具，方案采用</p>
+<p> Hexo+Git Page +Typora，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">A[简易博客系统] --&gt; B(Hexo 生成静态网页)</span><br><span class="line">A --&gt; C(Github Page Mini服务器)</span><br><span class="line">A --&gt; D(Typora Mini客户端 编辑文本)</span><br><span class="line">E[简易博客系统]</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/04/30/Hexo%20+%20GitHub%20Pages%20+%20Typora%20%E6%9E%84%E5%BB%BA%E5%8D%9A%E5%AE%A2%20(1)%20Hexo%20%E7%9A%84%E5%AE%89%E8%A3%85/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/" class="post-title-link" itemprop="url">Kotlin方法与Lambda表达式</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-25 18:41:00" itemprop="dateCreated datePublished" datetime="2021-04-25T18:41:00+08:00">2021-04-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-18 00:05:22" itemprop="dateModified" datetime="2021-07-18T00:05:22+08:00">2021-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kotlin/" itemprop="url" rel="index"><span itemprop="name">Kotlin</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Kotlin方法与Lambda表达式"><a href="#Kotlin方法与Lambda表达式" class="headerlink" title="Kotlin方法与Lambda表达式"></a>Kotlin方法与Lambda表达式</h1>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/04/25/Kotlin%E6%96%B9%E6%B3%95%E4%B8%8ELambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/12/adb%E7%9B%B8%E5%85%B3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1051,900 +1483,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/09/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/09/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5/" class="post-title-link" itemprop="url">多线程和线程同步</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-03-09 13:52:30" itemprop="dateCreated datePublished" datetime="2021-03-09T13:52:30+08:00">2021-03-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-26 16:43:02" itemprop="dateModified" datetime="2021-08-26T16:43:02+08:00">2021-08-26</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/%E7%BA%BF%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">线程</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="进程和线程-介绍"><a href="#进程和线程-介绍" class="headerlink" title="进程和线程(介绍)"></a>进程和线程(介绍)</h1><ul>
-<li><p>操作系统中运行多个软件。</p>
-</li>
-<li><p>一个运行中的软件可能包含多个进程。</p>
-</li>
-<li><p> 一个运行中的进程可能包含多个线程。</p>
-</li>
-<li><p> 操作系统开辟一段内存/资源给进程。</p>
-</li>
-</ul>
-<h2 id="进程和线程的异同"><a href="#进程和线程的异同" class="headerlink" title="进程和线程的异同"></a>进程和线程的异同</h2><ul>
-<li>进程之间的内存不共享，线程程可以共享资源，都可以并行工作。</li>
-<li>他们本质上不是一个东西，像是家庭和家庭成员的关系,进程相当于一个运行的程序，线程是一个程序里的并行线路之一。</li>
-</ul>
-<h2 id="CPU-线程和操作系统线程"><a href="#CPU-线程和操作系统线程" class="headerlink" title="CPU 线程和操作系统线程"></a>CPU 线程和操作系统线程</h2><ol>
-<li><p>CPU 线程：</p>
-<p>多核 CPU 的每个核各自独立运行，因此每个核一个线程 「四核八线程」:CPU 硬件方在硬件级别对 CPU 进行了一核多线程的 支持(本质上依然是每个核一个线程)</p>
-</li>
-<li><p>操作系统线程:</p>
-<p>操作系统利用时间分片的方式，把 CPU 的运行拆分给多条 运行逻辑，即为操作系统的线程，开发中接触的是操作系统线程。</p>
-</li>
-</ol>
-<p>单核 CPU 也可以运行多线程操作系统 </p>
-<h2 id="线程是什么"><a href="#线程是什么" class="headerlink" title="线程是什么:"></a>线程是什么:</h2><p>按代码顺序执行下来，执行完毕就结束的一条线</p>
-<h2 id="UI-线程为什么不会结束"><a href="#UI-线程为什么不会结束" class="headerlink" title="UI 线程为什么不会结束?"></a>UI 线程为什么不会结束?</h2><p>因为它在初始化完毕后会执行死循环，循环的内 容是刷新界面。</p>
-<p>为什么一直循环却不会卡，就是因为在循环所以程序才没有结束，一次循环就是一次生命周期。</p>
-<p>如果在ui线程中写了死循环，那么ui的下一次刷新就永远无法到来，就卡住了。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/09/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">Koa入门</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-03-07 23:04:57" itemprop="dateCreated datePublished" datetime="2021-03-07T23:04:57+08:00">2021-03-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-25 17:27:32" itemprop="dateModified" datetime="2021-06-25T17:27:32+08:00">2021-06-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%89%8D%E7%AB%AF/Node/" itemprop="url" rel="index"><span itemprop="name">Node</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%89%8D%E7%AB%AF/Node/Koa/" itemprop="url" rel="index"><span itemprop="name">Koa</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Koa-简介"><a href="#Koa-简介" class="headerlink" title="Koa 简介"></a>Koa 简介</h1><h2 id="什么是Koa"><a href="#什么是Koa" class="headerlink" title="什么是Koa"></a>什么是Koa</h2><p>Koa是一个新的Web框架，致力于成为web应用和 API 开发领域中的一个更小的、更有表现力的、更健壮的基石。</p>
-<p>利用 <strong>asyc 函数</strong> 丢弃回调函数，并增强错误处理。Koa没有任何预置的中间件，可以快速地编写服务端的应用程序。</p>
-<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h3><ul>
-<li>koa application （应用程序）</li>
-<li>Context （上下文） 责任链模式使用中间件响应request</li>
-<li>Request （请求）、Response （响应）</li>
-</ul>
-<img src="/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/image-20210308084411717.png" alt="image-20210308084411717" style="zoom:50%;">
-
-<h3 id="Hello-Wolrd"><a href="#Hello-Wolrd" class="headerlink" title="Hello Wolrd"></a>Hello Wolrd</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm init -y</span><br><span class="line">npm install --save koa</span><br></pre></td></tr></table></figure>
-<p>index.js</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">const Koa &#x3D; require(&#39;koa&#39;)</span><br><span class="line">const app &#x3D; new Koa()</span><br><span class="line"></span><br><span class="line">app.use(async ctx &#x3D;&gt; &#123; </span><br><span class="line">  ctx.body &#x3D; &#39;Helllo World&#39;</span><br><span class="line">&#125;)</span><br><span class="line">&#x2F;&#x2F;端口号 3000</span><br><span class="line">app.listen(3000)</span><br></pre></td></tr></table></figure>
-<p>运行</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node index.js</span><br></pre></td></tr></table></figure>
-<h2 id="Requst-属性、路由基本用法、await-amp-sync核心原理"><a href="#Requst-属性、路由基本用法、await-amp-sync核心原理" class="headerlink" title="Requst 属性、路由基本用法、await &amp; sync核心原理"></a>Requst 属性、路由基本用法、await &amp; sync核心原理</h2><h3 id="ctx-和Request-amp-Response"><a href="#ctx-和Request-amp-Response" class="headerlink" title="ctx 和Request &amp;Response"></a>ctx 和Request &amp;Response</h3><p>ctx对象包括此次请求的host，request ，response等信息。</p>
-<p>ctx.request 获取request信息，包括请求方法和内容。</p>
-<p>console.log(ctx)：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  request: &#123;</span><br><span class="line">    method: &#39;GET&#39;,</span><br><span class="line">    url: &#39;&#x2F;&#39;,</span><br><span class="line">    header: &#123;</span><br><span class="line">      host: &#39;localhost:3000&#39;,</span><br><span class="line">      connection: &#39;keep-alive&#39;,</span><br><span class="line">      &#39;cache-control&#39;: &#39;max-age&#x3D;0&#39;,</span><br><span class="line">      &#39;sec-ch-ua&#39;: &#39;&quot; Not A;Brand&quot;;v&#x3D;&quot;99&quot;, &quot;Chromium&quot;;v&#x3D;&quot;90&quot;, &quot;Google Chrome&quot;;v&#x3D;&quot;90&quot;&#39;,</span><br><span class="line">      &#39;sec-ch-ua-mobile&#39;: &#39;?0&#39;,</span><br><span class="line">      &#39;upgrade-insecure-requests&#39;: &#39;1&#39;,</span><br><span class="line">      &#39;user-agent&#39;: &#39;Mozilla&#x2F;5.0 (Macintosh; Intel Mac OS X 10_14_6) &#39; +</span><br><span class="line">        &#39;AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;90.0.4430.85 &#39; +</span><br><span class="line">        &#39;Safari&#x2F;537.36&#39;,</span><br><span class="line">      accept: &#39;text&#x2F;html,application&#x2F;xhtml+xml,application&#x2F;xml;q&#x3D;0.9,image&#x2F;avif,image&#x2F;webp,image&#x2F;apng,*&#x2F;*;q&#x3D;0.8,application&#x2F;signed-exchange;v&#x3D;b3;q&#x3D;0.9&#39;,</span><br><span class="line">      &#39;sec-fetch-site&#39;: &#39;none&#39;,</span><br><span class="line">      &#39;sec-fetch-mode&#39;: &#39;navigate&#39;,</span><br><span class="line">      &#39;sec-fetch-user&#39;: &#39;?1&#39;,</span><br><span class="line">      &#39;sec-fetch-dest&#39;: &#39;document&#39;,</span><br><span class="line">      &#39;accept-encoding&#39;: &#39;gzip, deflate, br&#39;,</span><br><span class="line">      &#39;accept-language&#39;: &#39;en-GB,en;q&#x3D;0.9,zh-CN;q&#x3D;0.8,zh;q&#x3D;0.7&#39;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  response: &#123;</span><br><span class="line">    status: 404,</span><br><span class="line">    message: &#39;Not Found&#39;,</span><br><span class="line">    header: [Object: null prototype] &#123;&#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  app: &#123; subdomainOffset: 2, proxy: false, env: &#39;development&#39; &#125;,</span><br><span class="line">  originalUrl: &#39;&#x2F;&#39;,</span><br><span class="line">  req: &#39;&lt;original node req&gt;&#39;,</span><br><span class="line">  res: &#39;&lt;original node res&gt;&#39;,</span><br><span class="line">  socket: &#39;&lt;original node socket&gt;&#39;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="router让应用拥有api-url-的地址"><a href="#router让应用拥有api-url-的地址" class="headerlink" title="router让应用拥有api/url 的地址"></a>router让应用拥有api/url 的地址</h3><p>npmjs.com 下载koa-router</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -s koa-router </span><br></pre></td></tr></table></figure>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 引入router</span></span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">&#x27;koa-router&#x27;</span>)</span><br><span class="line"><span class="comment">// router类实例</span></span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router()</span><br><span class="line"><span class="comment">//get请求，url 为空(根目录)</span></span><br><span class="line">router.get(<span class="string">&#x27;/&#x27;</span>,<span class="function"><span class="params">ctx</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(ctx)</span><br><span class="line">  <span class="built_in">console</span>.log(ctx.request)</span><br><span class="line">  ctx.body = <span class="string">&#x27;Hello World!!&#x27;</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="comment">//get请求，url路径 为/api</span></span><br><span class="line">router.get(<span class="string">&#x27;/api&#x27;</span>,<span class="function"><span class="params">ctx</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(ctx)</span><br><span class="line">  <span class="built_in">console</span>.log(ctx.request)</span><br><span class="line">  ctx.body = <span class="string">&#x27;Hello Api!!&#x27;</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">//将所有定义在router类傻姑娘的方法应用到app上去处理</span></span><br><span class="line">app.use(router.routes())<span class="comment">//应用router对象上的所有route</span></span><br><span class="line">  .use(router.allowedMethods())<span class="comment">// 拦截器，拦截应用中没有的请求，直接返回4xx或者5xx</span></span><br><span class="line"></span><br><span class="line">app.listen(<span class="number">3000</span>)</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="async-await"><a href="#async-await" class="headerlink" title="async/await"></a>async/await</h3><h4 id="Koa核心原理：洋葱模型"><a href="#Koa核心原理：洋葱模型" class="headerlink" title="Koa核心原理：洋葱模型"></a>Koa核心原理：洋葱模型</h4><img src="/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/image-20210430151809727.png" alt="image-20210430151809727" style="zoom:50%;">
-
-<p>一个Request进来，会依次执行中间件，</p>
-<ul>
-<li>执行顺序：顺序执行</li>
-<li>回调的舒徐：反向执行</li>
-<li>先进后出</li>
-</ul>
-<p>官方推荐对数据的操作全部使用中间件完成。</p>
-<p>参考文档：</p>
-<p>app.use(function)</p>
-<p>将给定的中间件方法添加到此应用程序。<code>app.use()</code> 返回 <code>this</code>, 因此可以链式表达.</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">app.use(someMiddleware)</span><br><span class="line">app.use(someOtherMiddleware)</span><br><span class="line">app.listen(<span class="number">3000</span>)</span><br></pre></td></tr></table></figure>
-<p>它等同于</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">app.use(someMiddleware)</span><br><span class="line">  .use(someOtherMiddleware)</span><br><span class="line">  .listen(<span class="number">3000</span>)</span><br></pre></td></tr></table></figure>
-<p>执行过程：先入后出</p>
-<p>先入：request 进入时：</p>
-<ol>
-<li>request进入后按顺序执行next（）方法之前的代码 顺序是middleware1，2，3，</li>
-<li>middleware3 ，没有next()方法，视为终止传递，开始回传</li>
-</ol>
-<p>后出：</p>
-<ol>
-<li><p>顺序将会反过来：2，1，因为3 中next() 后面的代码,(因为middleware3没有next方法，所以回传后也没有可以执行的内容)</p>
-</li>
-<li><p>middleware3加入next方法则执行next（）后面代码的顺序为：middleware3，middleware2，middleware1，因为request进入时middleware3 已经没有可以向下传递的中间件了，还是从3开始回传</p>
-</li>
-</ol>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">&#x27;koa&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa()</span><br><span class="line"></span><br><span class="line"><span class="comment">//中间件 0</span></span><br><span class="line"><span class="keyword">const</span> middleware3 = <span class="function"><span class="keyword">function</span> <span class="title">async</span>(<span class="params">ctx,next</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;this is a middleware3!&#x27;</span>)</span><br><span class="line">  <span class="built_in">console</span>.log(ctx.request.path)</span><br><span class="line">  <span class="comment">//不写next（）方法， 视为终止传递，开始回传</span></span><br><span class="line">  <span class="comment">// next()</span></span><br><span class="line">  <span class="comment">// console.log(&#x27;this is a middleware3! End&#x27;)</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//中间件1</span></span><br><span class="line"><span class="keyword">const</span> middleware1 = <span class="function"><span class="keyword">function</span> <span class="title">async</span>(<span class="params">ctx,next</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;this is a middleware1!&#x27;</span>)</span><br><span class="line">  <span class="built_in">console</span>.log(ctx.request.path)</span><br><span class="line">  <span class="comment">//写了next方法，会传递给下一个中间件</span></span><br><span class="line">  next()</span><br><span class="line">  <span class="comment">//按照app.use方法插入中间件的顺序（先进后出）middleware2回传后执行，</span></span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;this is a middleware1! End&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//中间件2</span></span><br><span class="line"><span class="keyword">const</span> middleware2 = <span class="function"><span class="keyword">function</span> <span class="title">async</span>(<span class="params">ctx,next</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;this is a middleware2&#x27;</span>)</span><br><span class="line">  <span class="built_in">console</span>.log(ctx.request.path)</span><br><span class="line">  <span class="comment">//写了next方法，会传递给下一个中间件</span></span><br><span class="line">  next()</span><br><span class="line">  <span class="comment">//middleware没有next方法，so按照app.use方法插入中间件的顺序，middleware2先执行回传的方法</span></span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">&#x27;this is a middleware2! End&#x27;</span>)</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">app.use(middleware1)</span><br><span class="line">app.use(middleware2)</span><br><span class="line">app.use(middleware3)</span><br><span class="line">app.listen(<span class="number">3000</span>)</span><br></pre></td></tr></table></figure>
-<p>terminal输出：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">this is a middleware1!</span><br><span class="line">/</span><br><span class="line">this is a middleware2</span><br><span class="line">/</span><br><span class="line">this is a middleware3!</span><br><span class="line">/</span><br><span class="line">this is a middleware3! End</span><br><span class="line">this is a middleware2! End</span><br><span class="line">this is a middleware1! End</span><br></pre></td></tr></table></figure>
-<h4 id="Koa中的async、await"><a href="#Koa中的async、await" class="headerlink" title="Koa中的async、await"></a>Koa中的async、await</h4><p><strong>小tip：Await必须 async包裹，async里面可以没有await</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;await async eg</span><br><span class="line">router.get(&#39;&#x2F;async&#39;,async (ctx) &#x3D;&gt; &#123;</span><br><span class="line">  let result &#x3D; await new Promise((resolve) &#x3D;&gt; &#123;</span><br><span class="line">    setTimeout(function () &#123;</span><br><span class="line">      resolve(&#39;hello world 2s later&#39;)</span><br><span class="line">    &#125;,2000)</span><br><span class="line">  &#125;)</span><br><span class="line">  ctx.body &#x3D; result</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="Koa特点"><a href="#Koa特点" class="headerlink" title="Koa特点"></a>Koa特点</h3><ul>
-<li>简洁</li>
-<li>await /async</li>
-<li>丰富的中间件</li>
-</ul>
-<h1 id="进阶篇"><a href="#进阶篇" class="headerlink" title="进阶篇"></a>进阶篇</h1><h2 id="Koa开发RESTful接口"><a href="#Koa开发RESTful接口" class="headerlink" title="Koa开发RESTful接口"></a>Koa开发RESTful接口</h2><h3 id="Koa中间件"><a href="#Koa中间件" class="headerlink" title="Koa中间件"></a>Koa中间件</h3><ul>
-<li>路由： <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/koa-router">koa-router</a></li>
-<li>协议解析： <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/koa-body">koa-body</a></li>
-<li>跨域处理：<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/@koa/cors">@koa/cors</a></li>
-</ul>
-<p>中间件查看：<a target="_blank" rel="noopener" href="https://www.npmjs.com/">https://www.npmjs.com/</a></p>
-<p>一次性安装以上中间件：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -S koa-router koa-body @koa/cors</span><br></pre></td></tr></table></figure>
-<h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4><p>Eg:</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 引入router</span></span><br><span class="line"><span class="keyword">const</span> Router = <span class="built_in">require</span>(<span class="string">&#x27;koa-router&#x27;</span>)</span><br><span class="line"><span class="comment">//引入 跨域处理中间件</span></span><br><span class="line"><span class="keyword">const</span> cors = <span class="built_in">require</span>(<span class="string">&#x27;@koa/cors&#x27;</span>)</span><br><span class="line"><span class="comment">//引入 koa-body，协议解析中间件</span></span><br><span class="line"><span class="keyword">const</span> koaBody = <span class="built_in">require</span>(<span class="string">&#x27;koa-body&#x27;</span>)</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">//restful 接口</span></span><br><span class="line">router.post(<span class="string">&#x27;/post&#x27;</span>,<span class="keyword">async</span> (ctx) =&gt; &#123;</span><br><span class="line">  <span class="comment">// es6 写法，相当于body请求体里的内容全部赋值给body对象</span></span><br><span class="line">    <span class="keyword">let</span> &#123;body&#125; =ctx.request</span><br><span class="line">    <span class="built_in">console</span>.log(body)</span><br><span class="line">    <span class="built_in">console</span>.log(ctx.request)</span><br><span class="line">    ctx.body = &#123;</span><br><span class="line">      <span class="comment">// 扩展运算符，相当于把body中的内容扩展开后返回回去,如果去掉的话，传json串的时候返回的最外层会带上body&#123;&#125;</span></span><br><span class="line">      ...body</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;)</span><br><span class="line"><span class="comment">//中间件是有执行顺序的，先use koabody解析，再use @koa/cors 处理跨域</span></span><br><span class="line">app.use(koaBody())</span><br><span class="line">app.use(cors())</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<h4 id="路由前缀设置"><a href="#路由前缀设置" class="headerlink" title="路由前缀设置"></a>路由前缀设置</h4><p>也就是router的prefix</p>
-<p>Eg：在所有router前面加上</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 增加前缀 api 加上它，所有请求都要在前面加上前缀/api</span></span><br><span class="line">router.prefix(<span class="string">&#x27;/api&#x27;</span>)</span><br></pre></td></tr></table></figure>
-<h4 id="获取GET请求中的params"><a href="#获取GET请求中的params" class="headerlink" title="获取GET请求中的params"></a>获取GET请求中的params</h4><p>请求参数：<code>http://localhost:3000/api/api?name=zz1&amp;age=28</code></p>
-<p>Eg</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">router.get(<span class="string">&#x27;/api&#x27;</span>,<span class="function"><span class="params">ctx</span> =&gt;</span> &#123;</span><br><span class="line">   <span class="keyword">const</span> params = ctx.request.query</span><br><span class="line">   <span class="comment">//parms = &#123; name: &#x27;zz1&#x27;, age: &#x27;28&#x27; &#125;</span></span><br><span class="line">   <span class="built_in">console</span>.log(params)</span><br><span class="line">   <span class="built_in">console</span>.log(params.name,params.age)</span><br><span class="line">  <span class="comment">// console.log(ctx)</span></span><br><span class="line">  <span class="comment">// console.log(ctx.request)</span></span><br><span class="line">  ctx.body = &#123;</span><br><span class="line">    name : params.name,</span><br><span class="line">    age  : params.age</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-<p>Terminal 输出</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Object: null prototype] &#123; name: &#39;zz1&#39;, age: &#39;28&#39; &#125;</span><br><span class="line">zz1</span><br></pre></td></tr></table></figure>
-<p>请求后返回的body为：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;name&quot;: &quot;zz1&quot;,</span><br><span class="line">    &quot;age&quot;: &quot;28&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>因为是Json类型的，默认的返回不够美观我们可以使用 中间件<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/koa-json">koa-json</a></p>
-<p>安装：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -S koa-json</span><br></pre></td></tr></table></figure>
-<p>简单Eg：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> json = <span class="built_in">require</span>(<span class="string">&#x27;koa-json&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> Koa = <span class="built_in">require</span>(<span class="string">&#x27;koa&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> app = <span class="keyword">new</span> Koa();</span><br><span class="line"> </span><br><span class="line">app.use(json());</span><br></pre></td></tr></table></figure>
-<p>只在传参pretty=pretty时开启Json解析</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">app.use(json(&#123; <span class="attr">pretty</span>: <span class="literal">false</span>, <span class="attr">param</span>: <span class="string">&#x27;pretty&#x27;</span> &#125;));</span><br></pre></td></tr></table></figure>
-<p>Eg：浏览器访问：<a target="_blank" rel="noopener" href="http://localhost:3000/api/api?name=zz1&amp;age=28&amp;pretty=pretty%E6%AD%A4%E6%97%B6body%E4%B8%AD%E7%9A%84json%E4%B8%B2%E5%B7%B2%E8%A7%A3%E6%9E%90%EF%BC%8C%E4%B8%8D%E4%BC%A0pretty%E5%8F%82%E6%95%B0%E5%88%99%E4%B8%8D%E8%A7%A3%E6%9E%90Json">http://localhost:3000/api/api?name=zz1&amp;age=28&amp;pretty=pretty此时body中的json串已解析，不传pretty参数则不解析Json</a></p>
-<p>也可以在浏览器复制返回的Json在console输入JS代码格式化Json</p>
-<p><img src="/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/image-20210430180620550.png" alt="image-20210430180620550"></p>
-<h2 id="webpack-升级v5"><a href="#webpack-升级v5" class="headerlink" title="webpack 升级v5"></a>webpack 升级v5</h2><p>webpack核心概念</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/#entry">入口(entry)</a></li>
-<li><a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/#output">输出(output)</a></li>
-<li><a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/#loaders">loader</a></li>
-<li><a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/#plugins">插件(plugin)</a></li>
-<li><a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/#mode">模式(mode)</a></li>
-</ul>
-<p>webpack v5版本会对以上代码产生影响，解决方案：</p>
-<ol>
-<li>使用webpack v4 webpackcli v3<code>cnpm i -D webpack@4 webpack-cli@3</code></li>
-<li>使用webpack v5 webpackcli v4则采用如下配置</li>
-</ol>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&#x27;path&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> &#123; CleanWebpackPlugin &#125; = <span class="built_in">require</span>(<span class="string">&#x27;clean-webpack-plugin&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> nodeExternals = <span class="built_in">require</span>(<span class="string">&#x27;webpack-node-externals&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> webpackconfig = &#123;</span><br><span class="line">  mode: <span class="string">&#x27;development&#x27;</span>,</span><br><span class="line">  entry: &#123;</span><br><span class="line">    server: path.join(__dirname, <span class="string">&#x27;src/index.js&#x27;</span>)</span><br><span class="line">  &#125;,</span><br><span class="line">  output: &#123;</span><br><span class="line">    filename: <span class="string">&#x27;[name].bundle.js&#x27;</span>,</span><br><span class="line">    path: path.join(__dirname, <span class="string">&#x27;./dist&#x27;</span>)</span><br><span class="line">  &#125;,</span><br><span class="line">  devtool: <span class="string">&#x27;eval-cheap-source-map&#x27;</span></span><br><span class="line">  <span class="built_in">module</span>: &#123;</span><br><span class="line">    rules: [</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.(js|jsx)$/</span>,</span><br><span class="line">        use: &#123;</span><br><span class="line">          loader: <span class="string">&#x27;babel-loader&#x27;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        exclude: [path.join(__dirname, <span class="string">&#x27;node_modules&#x27;</span>)]</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  plugins: [</span><br><span class="line">    <span class="keyword">new</span> CleanWebpackPlugin()</span><br><span class="line">  ],</span><br><span class="line">  externals: [nodeExternals()],</span><br><span class="line">  target: <span class="string">&#x27;node&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = webpackconfig</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>v5 说明：<a target="_blank" rel="noopener" href="https://webpack.docschina.org/blog/2020-10-10-webpack-5-release/">https://webpack.docschina.org/blog/2020-10-10-webpack-5-release/</a></p>
-<p>v4迁移v5指南：<a target="_blank" rel="noopener" href="https://webpack.docschina.org/migrate/5/">https://webpack.docschina.org/migrate/5/</a></p>
-<h2 id="工作目录、合并路由、静态资源服务"><a href="#工作目录、合并路由、静态资源服务" class="headerlink" title="工作目录、合并路由、静态资源服务"></a>工作目录、合并路由、静态资源服务</h2><h3 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h3><p><a target="_blank" rel="noopener" href="https://gitee.com/laonaiping/koa-pro">https://gitee.com/laonaiping/koa-pro</a></p>
-<p>工作目录：</p>
-<ol>
-<li>按照功能模块进行区分</li>
-<li>路由压缩(只要使用一次use即可不用重复调用)： npm install koa-combine-routers –save</li>
-<li>静态资源： koa-static</li>
-</ol>
-<p>初始化项目目录</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">初始化一个项目 koa-pro</span><br><span class="line">npm init -y</span><br><span class="line">npm install koa koa-router koa-body @koa/cors koa-json koa-combine-routers koa-helment koa-static --save</span><br><span class="line">//koa-pro 下新建 public目录放静态资源文件</span><br><span class="line">mkdir public</span><br><span class="line">//koa-pro 下新建 src目录</span><br><span class="line">mkdir src</span><br><span class="line">//src  下新建 index.js 作为入口文件</span><br><span class="line">touch src/index.js </span><br><span class="line">//src 下新建api文件夹 进行路由业务处理</span><br><span class="line">mkdir src/api </span><br><span class="line">//routes 下新建routes.js  合并routes</span><br><span class="line">mkdir src/routes</span><br></pre></td></tr></table></figure>
-<p>安全头</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">koa-helmet 安全头</span><br><span class="line"><span class="keyword">const</span> helmet = <span class="built_in">require</span>(<span class="string">&#x27;koa-helmet&#x27;</span>)</span><br><span class="line">app.use(helmet())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>静态资源压缩</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">koa-<span class="keyword">static</span> 静态文件引入</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">static</span> = <span class="built_in">require</span>(<span class="string">&#x27;koa-static&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&#x27;path&#x27;</span>)</span><br><span class="line"></span><br><span class="line">app.use(<span class="keyword">static</span>(path.join(__dirname, <span class="string">&#x27;../public&#x27;</span>)))       </span><br></pre></td></tr></table></figure>
-
-
-<h2 id="Koa开发热加载、ES6语法支持"><a href="#Koa开发热加载、ES6语法支持" class="headerlink" title="Koa开发热加载、ES6语法支持"></a>Koa开发热加载、ES6语法支持</h2><h4 id="热加载-nodemon"><a href="#热加载-nodemon" class="headerlink" title="热加载 nodemon"></a>热加载 nodemon</h4><p>js发生变化时直接启动，起到一个热加载到效果</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">安装到测试环境</span><br><span class="line">npm install -D nodemon</span><br><span class="line">查看版本</span><br><span class="line">npx nodemon --version</span><br><span class="line">启动index.js</span><br><span class="line">npx nodemon src/index.js</span><br><span class="line">修改一下配置文件的npm 脚本</span><br><span class="line">package.json &gt;&gt;</span><br><span class="line"><span class="string">&quot;script&quot;</span>: &#123;</span><br><span class="line">   <span class="string">&quot;start&quot;</span>: <span class="string">&quot;nodemon src/app.js&quot;</span></span><br><span class="line">&#125;</span><br><span class="line">这样我们每次调试只要使用 `npm run start` 就可以使用热加载功能啦</span><br></pre></td></tr></table></figure>
-<h4 id="ES6-语法支持"><a href="#ES6-语法支持" class="headerlink" title="ES6 语法支持"></a>ES6 语法支持</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">npm install -D webpack webpack-cli </span><br><span class="line">npm install -D clean-webpack-plugin webpack-node-externals @babel/core @babel/node @babel/preset-env babel-loader cross-env @babel/node </span><br><span class="line">// 创建配置文件</span><br><span class="line">touch webpack.config.js</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<ol>
-<li>clean-webpack-plugin: 清理dist目录下的文件</li>
-<li>webpack-node-externals 主要是对node_modules下的文件做一个排除处理</li>
-<li>@babel/core @babel/node 调试需要</li>
-<li>@babel/preset-env 对特性做支持</li>
-<li>babel-loader 在webpack中使用到的loader</li>
-<li>cross-env 设置环境变量 </li>
-</ol>
-<p>下配置不适用最新版本webpack的需要降级：使用webpack v4 webpackcli v3<code>cnpm i -D webpack@4 webpack-cli@3</code></p>
-<p>webpack.config.js:</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&#x27;path&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> nodeExternals = <span class="built_in">require</span>(<span class="string">&#x27;webpack-node-externals&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> &#123;CleanWebpackPlugin&#125; = <span class="built_in">require</span>(<span class="string">&#x27;clean-webpack-plugin&#x27;</span>)</span><br><span class="line">webpackconfig = &#123;</span><br><span class="line">	target: <span class="string">&quot;node&quot;</span>,</span><br><span class="line">	mode: <span class="string">&#x27;development&#x27;</span>,</span><br><span class="line">	entry: &#123;</span><br><span class="line">		server: path.join(__dirname, <span class="string">&#x27;./src/index.js&#x27;</span>)</span><br><span class="line">	&#125;,</span><br><span class="line">	output: &#123;</span><br><span class="line">		filename: <span class="string">&#x27;[name].bundle.js&#x27;</span>,</span><br><span class="line">		path: path.join(__dirname, <span class="string">&#x27;./dist&#x27;</span>)</span><br><span class="line">	&#125;,</span><br><span class="line">	devtool:<span class="string">&#x27;eval-source-map&#x27;</span>,</span><br><span class="line">	<span class="built_in">module</span>: &#123;</span><br><span class="line">		rules: [</span><br><span class="line">			&#123;</span><br><span class="line">				test: <span class="regexp">/\.(js|jsx)$/</span>,</span><br><span class="line">				use: &#123;</span><br><span class="line">					loader: <span class="string">&#x27;babel-loader&#x27;</span></span><br><span class="line">				&#125;,</span><br><span class="line">				exclude: [path.join(__dirname, <span class="string">&#x27;/node_modules&#x27;</span>)]</span><br><span class="line">			&#125;</span><br><span class="line">		]</span><br><span class="line">	&#125;,</span><br><span class="line">	externals: [nodeExternals()],</span><br><span class="line">	plugins: [</span><br><span class="line">		<span class="keyword">new</span> CleanWebpackPlugin()</span><br><span class="line">	],</span><br><span class="line">	node: &#123;</span><br><span class="line">		<span class="built_in">console</span>: <span class="literal">true</span>,</span><br><span class="line">		<span class="built_in">global</span>: <span class="literal">true</span>,</span><br><span class="line">		process: <span class="literal">true</span>,</span><br><span class="line">		Buffer: <span class="literal">true</span>,</span><br><span class="line">		__filename: <span class="literal">true</span>,</span><br><span class="line">		__dirname: <span class="literal">true</span>,</span><br><span class="line">		setImmediate: <span class="literal">true</span>,</span><br><span class="line">		path: <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(webpackconfig)</span><br><span class="line"><span class="built_in">module</span>.exports = webpackconfig</span><br></pre></td></tr></table></figure>
-<p>.babelrc</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;presets&quot;: [</span><br><span class="line">		[</span><br><span class="line">			&quot;@babel&#x2F;preset-env&quot;,</span><br><span class="line">			&#123;</span><br><span class="line">				&quot;targets&quot;: &#123;</span><br><span class="line">					&quot;node&quot;: &quot;current&quot;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		]</span><br><span class="line">	]</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>npx webpack (打包指令)运行成功之后，index引用改为ES6语法</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> koa <span class="keyword">from</span> <span class="string">&#x27;koa&#x27;</span></span><br><span class="line"><span class="keyword">import</span> path <span class="keyword">from</span> <span class="string">&#x27;path&#x27;</span></span><br><span class="line"><span class="keyword">import</span> helmet <span class="keyword">from</span> <span class="string">&#x27;koa-helmet&#x27;</span></span><br><span class="line"><span class="keyword">import</span> statics <span class="keyword">from</span> <span class="string">&#x27;koa-static&#x27;</span></span><br><span class="line"><span class="keyword">import</span> router <span class="keyword">from</span> <span class="string">&#x27;./routes/routes&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> koa()</span><br></pre></td></tr></table></figure>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> npx nodemon --exec babel-node src/index.js</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">除了npx运行方式，可以在package,json中添加脚本运行</span><br><span class="line"></span><br><span class="line">  <span class="string">&quot;scripts&quot;</span>: &#123;</span><br><span class="line"></span><br><span class="line">   <span class="comment">//&quot;start&quot;: &quot;nodemon src/index.js&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;start&quot;</span>: <span class="string">&quot;nodemon --exec babel-node src/index.js&quot;</span></span><br><span class="line"></span><br><span class="line">  &#125;,</span><br><span class="line">      </span><br></pre></td></tr></table></figure>
-
-
-<h1 id="调试篇"><a href="#调试篇" class="headerlink" title="调试篇"></a>调试篇</h1><h2 id="调试webpack、配置vscode调试"><a href="#调试webpack、配置vscode调试" class="headerlink" title="调试webpack、配置vscode调试"></a>调试webpack、配置vscode调试</h2><p>如何查看webpack配置是否正确</p>
-<h4 id="webpack-config-js"><a href="#webpack-config-js" class="headerlink" title="webpack.config.js:"></a>webpack.config.js:</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">console.log(webpackconfig)</span><br></pre></td></tr></table></figure>
-<h4 id="使用node-调试"><a href="#使用node-调试" class="headerlink" title="使用node 调试"></a>使用node 调试</h4><p> 监视调试的过程     </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npx node --inspect-brk ./node_modules/.bin/webpack  --inline --progress </span><br><span class="line">npx node --inspect-brk ./node_modules/webpack/bin/webpack --inline --progress  </span><br></pre></td></tr></table></figure>
-<p>第一种苹果电脑适用  第二种windows电话适用</p>
-<p>执行之后，谷歌浏览器打开  chrome://inspect/#devices</p>
-<p>点击inspect  ,打开一个webpack的调试窗口  </p>
-<p>在const webpackconfig  前添加debugger断点</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">module.exports &#x3D; webpackconfig前添加console.log(webpackconfig)</span><br><span class="line">debuggerconsole.log(webpackconfig)</span><br></pre></td></tr></table></figure>
-<p>把调试语句添加到package.json的scripts里</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;scripts&quot;</span>: &#123;  </span><br><span class="line"><span class="string">&quot;start&quot;</span>: <span class="string">&quot;nodemon --exec babel-node src/index.js&quot;</span>,   </span><br><span class="line"><span class="string">&quot;webpack:debug&quot;</span>: <span class="string">&quot;node --inspect-brk ./node_modules/webpack/bin/webpack --inline --progress&quot;</span>  &#125;,</span><br><span class="line">之后可以使用 npm run webpack:debug</span><br></pre></td></tr></table></figure>
-<img src="/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/image-20210527184528651.png" alt="image-20210527184528651" style="zoom:50%;">
-
-<p>点击运行开始debug</p>
-<img src="/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/image-20210527184556060.png" alt="image-20210527184556060" style="zoom:50%;">
-
-<h3 id="VsCode-调试"><a href="#VsCode-调试" class="headerlink" title="VsCode 调试"></a>VsCode 调试</h3><ol>
-<li><p>点小虫子之后选择调试环境为NodeJs</p>
-<p><img src="/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/image-20210527185236825.png" alt="image-20210527185236825"></p>
-</li>
-<li><p>修改调试配置文件 .vscode/launch.json</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 使用 IntelliSense 了解相关属性。 </span></span><br><span class="line">  <span class="comment">// 悬停以查看现有属性的描述。</span></span><br><span class="line">  <span class="comment">// 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387</span></span><br><span class="line">  <span class="attr">&quot;version&quot;</span>: <span class="string">&quot;0.2.0&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;configurations&quot;</span>: [</span><br><span class="line">    </span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;pwa-node&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;request&quot;</span>: <span class="string">&quot;launch&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;Launch Program&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;skipFiles&quot;</span>: [</span><br><span class="line">        <span class="string">&quot;&lt;node_internals&gt;/**&quot;</span></span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">&quot;program&quot;</span>: <span class="string">&quot;$&#123;file&#125;&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;runtimeExecutable&quot;</span>: <span class="string">&quot;$&#123;workspaceFolder&#125;/node_modules/.bin/nodemon&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;program&quot;</span>: <span class="string">&quot;$&#123;workspaceFolder&#125;/src/index.js&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;runtimeArgs&quot;</span>: [<span class="string">&quot;--exec&quot;</span>, <span class="string">&quot;babel-node&quot;</span>]</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-</li>
-<li><p>给要调试的内容打断点开启调试</p>
- <img src="/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/image-20210527194728471.png" alt="image-20210527194728471" style="zoom: 67%;">
-</li>
-<li><p>在监视里加上想监视的变量名<br><img src="/2021/03/07/Koa%E5%85%A5%E9%97%A81-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%8E%9F%E7%90%86/image-20210527194542709.png" alt="image-20210527194542709"></p>
-</li>
-</ol>
-<p>#实战篇</p>
-<h2 id="优化webpack配置、npm构建脚本"><a href="#优化webpack配置、npm构建脚本" class="headerlink" title="优化webpack配置、npm构建脚本"></a>优化webpack配置、npm构建脚本</h2><h4 id="npm构建脚本"><a href="#npm构建脚本" class="headerlink" title="npm构建脚本"></a>npm构建脚本</h4><ul>
-<li>检查npm依赖包是否有需要更新的</li>
-</ul>
-<p>全局安装 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g npm-check-updates</span><br></pre></td></tr></table></figure>
-<p>查看可以更新的依赖包</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ncu</span><br></pre></td></tr></table></figure>
-<p>更新package.json</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ncu -u</span><br></pre></td></tr></table></figure>
-<p>删除node_modules文件夹，重新 npm install</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rm -rf node_modules</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="koa-compose-整合中间件，避免了重复的use-中间件"><a href="#koa-compose-整合中间件，避免了重复的use-中间件" class="headerlink" title="koa-compose 整合中间件，避免了重复的use 中间件"></a>koa-compose 整合中间件，避免了重复的use 中间件</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install koa-compose -S</span><br></pre></td></tr></table></figure>
-<h4 id="优化webpack的配置"><a href="#优化webpack的配置" class="headerlink" title="优化webpack的配置"></a>优化webpack的配置</h4><ul>
-<li><p>webpack-merge 合并webpack配置</p>
-</li>
-<li><p>terser-webpack-plugin 压缩js代码， webpack5及以上版本不需要安装</p>
-</li>
-<li><p>推荐配置</p>
-</li>
-</ul>
-<h5 id="多套webpack-配置-（开发，打包，基本）"><a href="#多套webpack-配置-（开发，打包，基本）" class="headerlink" title="多套webpack 配置 （开发，打包，基本）"></a>多套webpack 配置 （开发，打包，基本）</h5><p>通过env处理多套环境的webpack配置。<code>webpack.config.prod.js</code>,<code>webpack.config.dev.js</code>,<code>webpack.config.base.js</code></p>
-<p>webpack.config.base 基本配置</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">plugins: [</span><br><span class="line">		<span class="keyword">new</span> CleanWebpackPlugin(),</span><br><span class="line">		<span class="keyword">new</span> webpack.EnvironmentPlugin([<span class="string">&#x27;NODE_ENV&#x27;</span>])</span><br><span class="line">	],</span><br></pre></td></tr></table></figure>
-<p>EnvironmentPlugin允许我们配置一个常量在打包的时候进行使用。这个常量除了可以区别我们的webpack配置，还可以区分打包时的端口号，打包时的url。</p>
-<h5 id="webpack-merge-合并webpack配置"><a href="#webpack-merge-合并webpack配置" class="headerlink" title="webpack-merge 合并webpack配置"></a>webpack-merge 合并webpack配置</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm i webpack-merge -D</span><br></pre></td></tr></table></figure>
-<p>webpack.config.dev.js 开发配置</p>
-<h5 id="terser-webpack-plugin-压缩js代码，-webpack5及以上版本不需要安装"><a href="#terser-webpack-plugin-压缩js代码，-webpack5及以上版本不需要安装" class="headerlink" title="terser-webpack-plugin 压缩js代码， webpack5及以上版本不需要安装"></a>terser-webpack-plugin 压缩js代码， webpack5及以上版本不需要安装</h5><p><a target="_blank" rel="noopener" href="https://v4.webpack.docschina.org/plugins/terser-webpack-plugin/">https://v4.webpack.docschina.org/plugins/terser-webpack-plugin/</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm i terser-webpack-plugin -D</span><br></pre></td></tr></table></figure>
-
-
-
-
-<h2 id="Koa应用打包优化"><a href="#Koa应用打包优化" class="headerlink" title="Koa应用打包优化"></a>Koa应用打包优化</h2><h4 id="打包资源压缩，避免重复依赖"><a href="#打包资源压缩，避免重复依赖" class="headerlink" title="打包资源压缩，避免重复依赖"></a>打包资源压缩，避免重复依赖</h4><p>SplitChunksPlugin</p>
-<p><a target="_blank" rel="noopener" href="https://v4.webpack.docschina.org/plugins/split-chunks-plugin/">https://v4.webpack.docschina.org/plugins/split-chunks-plugin/</a></p>
-<p>配置：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//打包资源压缩，避免重复依赖 SplitChunksPlugin</span></span><br><span class="line">splitChunks: &#123;</span><br><span class="line">  cacheGroups: &#123;</span><br><span class="line">    commons: &#123;</span><br><span class="line">      name: <span class="string">&#x27;commons&#x27;</span>,</span><br><span class="line">      chunks: <span class="string">&#x27;initial&#x27;</span>,</span><br><span class="line">      minChunks: <span class="number">3</span>,</span><br><span class="line">      enforce: <span class="literal">true</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
-<p>执行脚本</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&quot;build&quot;: &quot;cross-env NODE_ENV=production webpack --config config/webpack.config.prod.js&quot;,</span><br><span class="line">&quot;dev&quot;: &quot;cross-env NODE_ENV=dev nodemon --exec babel-node --inspect ./src/index.js&quot;</span><br></pre></td></tr></table></figure>
-<h4 id="Clean-脚本"><a href="#Clean-脚本" class="headerlink" title="Clean 脚本"></a>Clean 脚本</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm i -D rimraf</span><br><span class="line">//package.json scripts增加clean操作</span><br><span class="line"><span class="string">&quot;clean&quot;</span>: <span class="string">&quot;rimraf dist&quot;</span></span><br></pre></td></tr></table></figure>
-<h4 id="Koa-compress"><a href="#Koa-compress" class="headerlink" title="Koa-compress"></a>Koa-compress</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm install koa-compress</span><br><span class="line">koa-compress压缩koa的中间件，基本使用方法：</span><br><span class="line">app.use(compress());       </span><br></pre></td></tr></table></figure>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/04/%E9%80%89%E6%8B%A9%E5%99%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/04/%E9%80%89%E6%8B%A9%E5%99%A8/" class="post-title-link" itemprop="url">选择器</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-03-04 14:46:10" itemprop="dateCreated datePublished" datetime="2021-03-04T14:46:10+08:00">2021-03-04</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-25 17:27:32" itemprop="dateModified" datetime="2021-06-25T17:27:32+08:00">2021-06-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%89%8D%E7%AB%AF/css/" itemprop="url" rel="index"><span itemprop="name">css</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>引用了后盾人的教程，感谢。</p>
-<h2 id="基本选择器"><a href="#基本选择器" class="headerlink" title="基本选择器"></a>基本选择器</h2><table>
-<thead>
-<tr>
-<th align="left">选择器</th>
-<th>示例</th>
-<th align="left">描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">.class</td>
-<td>.intro</td>
-<td align="left">选择 class=”intro” 的所有元素</td>
-</tr>
-<tr>
-<td align="left">#id</td>
-<td>#firstname</td>
-<td align="left">选择 id=”firstname” 的所有元素</td>
-</tr>
-<tr>
-<td align="left">*</td>
-<td>*</td>
-<td align="left">选择所有元素</td>
-</tr>
-<tr>
-<td align="left">element</td>
-<td>p</td>
-<td align="left">选择所有元素</td>
-</tr>
-<tr>
-<td align="left">element,element</td>
-<td>div,p</td>
-<td align="left">选择所有元素和所有元素</td>
-</tr>
-<tr>
-<td align="left">element element</td>
-<td>div p</td>
-<td align="left">选择元素内部的所有元素</td>
-</tr>
-<tr>
-<td align="left">element&gt;element</td>
-<td>div&gt;p</td>
-<td align="left">选择父元素为元素的所有元素</td>
-</tr>
-<tr>
-<td align="left">element+element</td>
-<td>div+p</td>
-<td align="left">选择紧接在元素之后的所有元素</td>
-</tr>
-</tbody></table>
-<h3 id="标签选择"><a href="#标签选择" class="headerlink" title="标签选择"></a>标签选择</h3><p>使用 <code>*</code> 可为所有元素设置样式。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">* &#123;</span><br><span class="line">    text-decoration: none;</span><br><span class="line">    color: #6c757d;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>根据标签为元素设置样式</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">h1 &#123;</span><br><span class="line">	color: red;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>同时设置多个元素组合</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">h1,h2 &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>元素在多个组件中存在</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">h1,h2 &#123;</span><br><span class="line">    color: red;	</span><br><span class="line">&#125;</span><br><span class="line">h1,h3&#123;</span><br><span class="line">    background: #dcdcdc;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="类选择器"><a href="#类选择器" class="headerlink" title="类选择器"></a>类选择器</h3><p>类选择器是为一类状态声明样式规则，下面是把文本居中定义为类样式。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;style&gt;</span><br><span class="line">.text-center &#123;</span><br><span class="line">    text-align: center;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/style&gt;</span><br><span class="line"></span><br><span class="line">&lt;h1 class=&quot;text-center&quot;&gt;houdunren.com&lt;/h1&gt;</span><br><span class="line">&lt;h2 class=&quot;text-center&quot;&gt;hdcms.com&lt;/h2&gt;</span><br></pre></td></tr></table></figure>
-<p>将类选择器指定为具体标签</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.help-block &#123;</span><br><span class="line">    background: red;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">span.help-block &#123;</span><br><span class="line">    font-size: 12px;</span><br><span class="line">    color: #aaa;</span><br><span class="line">    background: none;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;span class=&quot;help-block&quot;&gt;感谢访问后盾人&lt;/span&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="ID选择器"><a href="#ID选择器" class="headerlink" title="ID选择器"></a>ID选择器</h3><p>为有 id 属性的元素设置样式</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#container &#123;</span><br><span class="line">    background: red;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">&lt;h1 id=&quot;container&quot;&gt;houdunren.com&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>文档中ID应该是唯一的，虽然为多个元素设置同一个ID也可以产生样式效果，但这是不符合规范的。</p>
-<p>建议优先使用类选择器</p>
-</blockquote>
-<h2 id="结构选择器"><a href="#结构选择器" class="headerlink" title="结构选择器"></a>结构选择器</h2><table>
-<thead>
-<tr>
-<th align="left">选择器</th>
-<th>示例</th>
-<th align="left">描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">element element</td>
-<td>div p</td>
-<td align="left">选择元素内部的所有元素</td>
-</tr>
-<tr>
-<td align="left">element&gt;element</td>
-<td>div&gt;p</td>
-<td align="left">选择父元素为元素的所有元素</td>
-</tr>
-<tr>
-<td align="left">element+element</td>
-<td>div+p</td>
-<td align="left">选择紧接在元素之后的元素</td>
-</tr>
-<tr>
-<td align="left">element~element2</td>
-<td>p~ul</td>
-<td align="left">选择元素同级并在元素后面的所有元素</td>
-</tr>
-</tbody></table>
-<h3 id="后代选择器"><a href="#后代选择器" class="headerlink" title="后代选择器"></a>后代选择器</h3><p>HTML中元素是以父子级、兄弟关系存在的。后代选择器指元素后的元素（不只是子元素，是后代元素）。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">main article h2,main h1 &#123;</span><br><span class="line">    color: green;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;main&gt;</span><br><span class="line">	&lt;article&gt;</span><br><span class="line">		&lt;h2 name=&quot;houdunren&quot;&gt;houdunren.com&lt;/h2&gt;</span><br><span class="line">		&lt;aside&gt;</span><br><span class="line">			&lt;h2&gt;houdunwang.com&lt;/h2&gt;</span><br><span class="line">		&lt;/aside&gt;</span><br><span class="line">	&lt;/article&gt;</span><br><span class="line">	&lt;h2 name=&quot;hdcms.com&quot;&gt;hdcms.com&lt;/h2&gt;</span><br><span class="line">	&lt;h1&gt;后盾人&lt;/h1&gt;</span><br><span class="line">&lt;/main&gt;</span><br></pre></td></tr></table></figure>
-<p>这里article之外的h2枚变色，因为不是article的后代,article下的h2 全变色，不只是子级，孙级或者更深的h2层级也会变色。</p>
-<h3 id="子元素选择"><a href="#子元素选择" class="headerlink" title="子元素选择"></a>子元素选择</h3><p>子元素选择器中选择子元素，不包括孙级及以下元素。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">main article&gt;h2 &#123;</span><br><span class="line">    color: green;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;main&gt;</span><br><span class="line">	&lt;article&gt;</span><br><span class="line">		&lt;h2 name=&quot;houdunren&quot;&gt;houdunren.com&lt;/h2&gt;</span><br><span class="line">		&lt;aside&gt;</span><br><span class="line">			&lt;h2&gt;houdunwang.com&lt;/h2&gt;</span><br><span class="line">		&lt;/aside&gt;</span><br><span class="line">	&lt;/article&gt;</span><br><span class="line">	&lt;h2 name=&quot;hdcms.com&quot;&gt;hdcms.com&lt;/h2&gt;</span><br><span class="line">	&lt;h1&gt;后盾人&lt;/h1&gt;</span><br><span class="line">&lt;/main&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="紧邻兄弟元素"><a href="#紧邻兄弟元素" class="headerlink" title="紧邻兄弟元素"></a>紧邻兄弟元素</h3><p>用于选择紧挨着的同级兄弟元素。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">main article+h2 &#123;</span><br><span class="line">    color: green;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;main&gt;</span><br><span class="line">	&lt;article&gt;</span><br><span class="line">		&lt;h2 name=&quot;houdunren&quot;&gt;houdunren.com&lt;/h2&gt;</span><br><span class="line">		&lt;aside&gt;</span><br><span class="line">			&lt;h2&gt;houdunwang.com&lt;/h2&gt;</span><br><span class="line">		&lt;/aside&gt;</span><br><span class="line">	&lt;/article&gt;</span><br><span class="line">	&lt;h2 name=&quot;hdcms.com&quot;&gt;hdcms.com&lt;/h2&gt;</span><br><span class="line">	&lt;h1&gt;后盾人&lt;/h1&gt;</span><br><span class="line">&lt;/main&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="后面兄弟元素"><a href="#后面兄弟元素" class="headerlink" title="后面兄弟元素"></a>后面兄弟元素</h3><p>用于选择后面的所有兄弟元素。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">main article~* &#123;</span><br><span class="line">    color: green;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;main&gt;</span><br><span class="line">	&lt;article&gt;</span><br><span class="line">		&lt;h2 name=&quot;houdunren&quot;&gt;houdunren.com&lt;/h2&gt;</span><br><span class="line">		&lt;aside&gt;</span><br><span class="line">			&lt;h2&gt;houdunwang.com&lt;/h2&gt;</span><br><span class="line">		&lt;/aside&gt;</span><br><span class="line">	&lt;/article&gt;</span><br><span class="line">	&lt;h2 name=&quot;hdcms.com&quot;&gt;hdcms.com&lt;/h2&gt;</span><br><span class="line">	&lt;h1&gt;后盾人&lt;/h1&gt;</span><br><span class="line">&lt;/main&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="属性选择器"><a href="#属性选择器" class="headerlink" title="属性选择器"></a>属性选择器</h2><p>根据属性来为元素设置样式也是常用的场景。</p>
-<table>
-<thead>
-<tr>
-<th align="left">选择器</th>
-<th>示例</th>
-<th align="left">描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">[attribute]</td>
-<td>[target]</td>
-<td align="left">带有 target 属性所有元素</td>
-</tr>
-<tr>
-<td align="left">[attribute=value]</td>
-<td>[target=_blank]</td>
-<td align="left">targe 属性 等于”_blank” 的所有元素</td>
-</tr>
-<tr>
-<td align="left">[attribute~=value]</td>
-<td>[title~=houdunren]</td>
-<td align="left">title 属性包含单词 “houdunren” 的所有元素</td>
-</tr>
-<tr>
-<td align="left">[attribute|=value]</td>
-<td>[title|=hd]</td>
-<td align="left"><code>title 属性值为 &quot;hd&quot;的单词，或hd-cms</code> 以<code>-</code>连接的的独立单词</td>
-</tr>
-<tr>
-<td align="left">[attribute*=value]</td>
-<td>a[src*=”hdcms”]</td>
-<td align="left">src 属性中包含 “hdcms” 字符的每个 元素</td>
-</tr>
-<tr>
-<td align="left">[attribute^=value]</td>
-<td>a[src^=”https”]</td>
-<td align="left">src 属性值以 “https” 开头的每个 元素</td>
-</tr>
-<tr>
-<td align="left">[attribute$=value]</td>
-<td>a[src$=”.jpeg”]</td>
-<td align="left">src 属性以 “.jpeg” 结尾的所有 元素</td>
-</tr>
-</tbody></table>
-<p>为具有 <code>class</code> 属性的h1标签设置样式</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">h1[class] &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;h1 class=&quot;container&quot;&gt;houdunren.com&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
-<p>约束多个属性</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">h1[class][id] &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;h1 class=&quot;container&quot; id &gt;houdunren.com&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
-<p>具体属性值设置样式</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">a[href=&quot;https://www.houdunren.com&quot;] &#123;</span><br><span class="line">    color: green;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;a href=&quot;https://www.houdunren.com&quot;&gt;后盾人&lt;/a&gt;</span><br><span class="line">&lt;a href=&quot;&quot;&gt;HDCMS&lt;/a&gt;</span><br></pre></td></tr></table></figure>
-<p><code>^</code> 以指定值开头的元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">h2[name^=&quot;hdcms&quot;] &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;h2 name=&quot;houdunren&quot;&gt;houdunren.com&lt;/h2&gt;</span><br><span class="line">&lt;h2 name=&quot;hdcms.com&quot;&gt;hdcms.com&lt;/h2&gt;</span><br></pre></td></tr></table></figure>
-<p><code>$</code> 以指定值结尾的元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;h2 name=&quot;houdunren&quot;&gt;houdunren.com&lt;/h2&gt;</span><br><span class="line">&lt;h2 name=&quot;hdcms.com&quot;&gt;hdcms.com&lt;/h2&gt;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">h2[name$=&quot;com&quot;] &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>*</code> 属性内部任何位置出现值的元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">h2[name*=&quot;houdunren&quot;] &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;h2 name=&quot;houdunren&quot;&gt;houdunren.com&lt;/h2&gt;</span><br><span class="line">&lt;h2 name=&quot;houdunren.com&quot;&gt;hdcms.com&lt;/h2&gt;</span><br></pre></td></tr></table></figure>
-<p><code>~</code> 属性值中包含指定词汇的元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">h2[name~=&quot;houdunren&quot;] &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;h2 name=&quot;houdunren&quot;&gt;houdunren.com&lt;/h2&gt;</span><br><span class="line">&lt;h2 name=&quot;houdunren web&quot;&gt;hdcms.com&lt;/h2&gt;</span><br></pre></td></tr></table></figure>
-<p><code>|</code> 以指定值开头或以属性连接破折号的元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">h2[name|=&quot;houdunren&quot;] &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;h2 name=&quot;houdunren&quot;&gt;houdunren.com&lt;/h2&gt;</span><br><span class="line">&lt;h2 name=&quot;houdunren-web&quot;&gt;hdcms.com&lt;/h2&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="伪类选择器"><a href="#伪类选择器" class="headerlink" title="伪类选择器"></a>伪类选择器</h2><p>为元素的不同状态或不确定存在的元素设置样式规则。</p>
-<table>
-<thead>
-<tr>
-<th>状态</th>
-<th>示例</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>:link</td>
-<td>a:link</td>
-<td>选择所有未被访问的链接</td>
-</tr>
-<tr>
-<td>:visited</td>
-<td>a:visited</td>
-<td>选择所有已被访问的链接</td>
-</tr>
-<tr>
-<td>:hover</td>
-<td>a:hover</td>
-<td>鼠标移动到元素上时</td>
-</tr>
-<tr>
-<td>:active</td>
-<td>a:active</td>
-<td>点击正在发生时</td>
-</tr>
-<tr>
-<td>:focus</td>
-<td>input::focus</td>
-<td>选择获得焦点的 input 元素</td>
-</tr>
-<tr>
-<td>:root</td>
-<td>:root</td>
-<td>选择文档的根元素即html。</td>
-</tr>
-<tr>
-<td>:empty</td>
-<td>p:empty</td>
-<td>选择没有子元素的每个元素（包括文本节点）。</td>
-</tr>
-<tr>
-<td>:first-child</td>
-<td>p:first-child</td>
-<td>选择属于父元素的第一个子元素的每个元素</td>
-</tr>
-<tr>
-<td>:last-child</td>
-<td>p:last-child</td>
-<td>选择属于其父元素最后一个子元素每个元素。</td>
-</tr>
-<tr>
-<td>:first-of-type</td>
-<td>p:first-of-type</td>
-<td>选择属于其父元素的首个元素的每个元素</td>
-</tr>
-<tr>
-<td>:last-of-type</td>
-<td>p:last-of-type</td>
-<td>选择属于其父元素的最后元素的每个元素。</td>
-</tr>
-<tr>
-<td>:only-of-type</td>
-<td>p:only-of-type</td>
-<td>选择属于其父元素唯一的元素的每个元素。</td>
-</tr>
-<tr>
-<td>:only-child</td>
-<td>p:only-child</td>
-<td>选择属于其父元素的唯一子元素的每个元素。</td>
-</tr>
-<tr>
-<td>:nth-child(n)</td>
-<td>p:nth-child(2)</td>
-<td>选择属于其父元素的第二个子元素的每个元素。</td>
-</tr>
-<tr>
-<td>:nth-child(odd)</td>
-<td>p:nth-child(odd)</td>
-<td>选择属于其父元素的奇数元素。</td>
-</tr>
-<tr>
-<td>:nth-child(even)</td>
-<td>p:nth-child(even)</td>
-<td>选择属于其父元素的偶数元素。</td>
-</tr>
-<tr>
-<td>:nth-of-type(n)</td>
-<td>p:nth-of-type(2)</td>
-<td>选择属于其父元素第二个元素的每个元素。</td>
-</tr>
-<tr>
-<td>:nth-last-child(n)</td>
-<td>p:nth-last-child(2)</td>
-<td>同上，从最后一个子元素开始计数。</td>
-</tr>
-<tr>
-<td>:nth-last-of-type(n)</td>
-<td>p:nth-last-of-type(2)</td>
-<td>同上，但是从最后一个子元素开始计数。</td>
-</tr>
-<tr>
-<td>:not(selector)</td>
-<td>:not(p)</td>
-<td>选择非元素的每个元素</td>
-</tr>
-</tbody></table>
-<h3 id="超链接伪类"><a href="#超链接伪类" class="headerlink" title=":超链接伪类"></a>:超链接伪类</h3><p>定义链接的不同状态</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">a:link &#123;</span><br><span class="line">    color: red</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">a:visited &#123;</span><br><span class="line">    color: green</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">a:hover &#123;</span><br><span class="line">    color: blue</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">a:active &#123;</span><br><span class="line">    color: yellow</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;a href=&quot;https://www.houdunren.com&quot;&gt;后盾人&lt;/a&gt;</span><br></pre></td></tr></table></figure>
-<p>不只是链接可以使用伪类，其他元素也可以使用。下面是对表单的点击与获取焦点状态的样式设置。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">input:focus &#123;</span><br><span class="line">    background: green;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">input:hover &#123;</span><br><span class="line">    background: blue;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">input:active &#123;</span><br><span class="line">    background: yellow;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;input type=&quot;text&quot;&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="target"><a href="#target" class="headerlink" title=":target"></a>:target</h3><p>用于控制具有锚点目标元素的样式</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">div &#123;</span><br><span class="line">	height: 900px;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">div:target &#123;</span><br><span class="line">	color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;a href=&quot;#hdcms&quot;&gt;hdcms&lt;/a&gt;</span><br><span class="line">&lt;div&gt;&lt;/div&gt;</span><br><span class="line">&lt;div id=&quot;hdcms&quot;&gt;</span><br><span class="line">	hdcms内容管理系统</span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="root"><a href="#root" class="headerlink" title=":root"></a>:root</h3><p>根元素选择伪类即选择html</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">:root &#123;</span><br><span class="line">    font-size: 100px;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="empty"><a href="#empty" class="headerlink" title=":empty"></a>:empty</h3><p>没有内容和空白的元素。下面第一个p标签会产生样式，第二个不会因为有空白内容</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">:empty &#123;</span><br><span class="line">    border: solid 2px red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;p&gt;&lt;/p&gt;</span><br><span class="line">&lt;p&gt; &lt;/p&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="结构伪类"><a href="#结构伪类" class="headerlink" title="结构伪类"></a>结构伪类</h2><p>下面来通过结构伪类选择器选择树状结构中的标签元素。</p>
-<h3 id="first-child"><a href="#first-child" class="headerlink" title=":first-child"></a>:first-child</h3><p>选择元素中<code>span</code> 标签并且是第一个。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">article span:first-child &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;article&gt;</span><br><span class="line">	&lt;span&gt;houdunren.com&lt;/span&gt;</span><br><span class="line">	&lt;aside&gt;</span><br><span class="line">		&lt;span&gt;houdunwang.com&lt;/span&gt;</span><br><span class="line">		&lt;span&gt;hdcms.com&lt;/span&gt;</span><br><span class="line">	&lt;/aside&gt;</span><br><span class="line">&lt;/article&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="first-of-type"><a href="#first-of-type" class="headerlink" title=":first-of-type"></a>:first-of-type</h3><p>选择类型是<code>span</code> 的第一个元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">article span:first-of-type &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;article&gt;</span><br><span class="line">	&lt;span&gt;houdunren.com&lt;/span&gt;</span><br><span class="line">	&lt;aside&gt;</span><br><span class="line">		&lt;strong&gt;hdcms.com&lt;/strong&gt;</span><br><span class="line">		&lt;span&gt;houdunwang.com&lt;/span&gt;</span><br><span class="line">	&lt;/aside&gt;</span><br><span class="line">&lt;/article&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="last-child"><a href="#last-child" class="headerlink" title=":last-child"></a>:last-child</h3><p>选择元素中<code>span</code> 标签并且是最后一个。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">article span:last-child &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;article&gt;</span><br><span class="line">  &lt;span&gt;houdunren.com&lt;/span&gt;</span><br><span class="line">  &lt;aside&gt;</span><br><span class="line">    &lt;strong&gt;hdcms.com&lt;/strong&gt;</span><br><span class="line">    &lt;span&gt;houdunwang.com&lt;/span&gt;</span><br><span class="line">  &lt;/aside&gt;</span><br><span class="line">  &lt;span&gt;hdphp.com&lt;/span&gt;</span><br><span class="line">&lt;/article&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="last-of-type"><a href="#last-of-type" class="headerlink" title=":last-of-type"></a>:last-of-type</h3><p>选择类型为<code>span</code> 的最后一个元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">article span:last-of-type &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;article&gt;</span><br><span class="line">  &lt;span&gt;houdunren.com&lt;/span&gt;</span><br><span class="line">  &lt;aside&gt;</span><br><span class="line">  	&lt;span&gt;houdunwang.com&lt;/span&gt;</span><br><span class="line">  	&lt;strong&gt;hdcms.com&lt;/strong&gt;</span><br><span class="line">  &lt;/aside&gt;</span><br><span class="line">  &lt;span&gt;hdphp.com&lt;/span&gt;</span><br><span class="line">&lt;/article&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="only-child"><a href="#only-child" class="headerlink" title=":only-child"></a>:only-child</h3><p>选择是唯一子元素的<code>span</code> 标签</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">article span:only-child &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;article&gt;</span><br><span class="line">	&lt;span&gt;houdunren.com&lt;/span&gt;</span><br><span class="line">	&lt;aside&gt;</span><br><span class="line">		&lt;span&gt;houdunwang.com&lt;/span&gt;</span><br><span class="line">	&lt;/aside&gt;</span><br><span class="line">&lt;/article&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="only-of-type"><a href="#only-of-type" class="headerlink" title=":only-of-type"></a>:only-of-type</h3><p>选择同级中类型是<code>span</code> 的唯一子元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">article span:only-of-type &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;article&gt;</span><br><span class="line">	&lt;span&gt;houdunren.com&lt;/span&gt;</span><br><span class="line">	&lt;aside&gt;</span><br><span class="line">		&lt;span&gt;houdunwang.com&lt;/span&gt;</span><br><span class="line">		&lt;span&gt;hdcms.com&lt;/span&gt;</span><br><span class="line">	&lt;/aside&gt;</span><br><span class="line">&lt;/article&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="nth-child-n"><a href="#nth-child-n" class="headerlink" title=":nth-child(n)"></a>:nth-child(n)</h3><p>选择第二个元素并且是span标签的</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">article span:nth-child(2) &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;article&gt;</span><br><span class="line">  &lt;span&gt;houdunren.com&lt;/span&gt;</span><br><span class="line">  &lt;aside&gt;</span><br><span class="line">    &lt;span&gt;houdunwang.com&lt;/span&gt;</span><br><span class="line">    &lt;span&gt;hdcms.com&lt;/span&gt;</span><br><span class="line">  &lt;/aside&gt;</span><br><span class="line">  &lt;span&gt;hdphp.com&lt;/span&gt;</span><br><span class="line">&lt;/article&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="nth-of-type-n"><a href="#nth-of-type-n" class="headerlink" title=":nth-of-type(n)"></a>:nth-of-type(n)</h3><p>选择第二个<code>span</code> 元素，不管中间的其他元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">article span:nth-of-child(2) &#123;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;article&gt;</span><br><span class="line">  &lt;span&gt;houdunren.com&lt;/span&gt;</span><br><span class="line">  &lt;aside&gt;</span><br><span class="line">    &lt;span&gt;houdunwang.com&lt;/span&gt;</span><br><span class="line">    &lt;span&gt;hdcms.com&lt;/span&gt;</span><br><span class="line">  &lt;/aside&gt;</span><br><span class="line">  &lt;span&gt;hdphp.com&lt;/span&gt;</span><br><span class="line">&lt;/article&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="计算数量"><a href="#计算数量" class="headerlink" title="计算数量"></a>计算数量</h3><p>n为0/1/2/3… ，下面是隔列变色</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">table tr&gt;td:nth-child(2n+1) &#123;</span><br><span class="line">    background: green;</span><br><span class="line">    color: white;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;table border=&quot;1&quot;&gt;</span><br><span class="line">  &lt;tr&gt;</span><br><span class="line">    &lt;td&gt;houdunren.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;hdcms.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;后盾人&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;houdunwang.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;hdcms&lt;/td&gt;</span><br><span class="line">  &lt;/tr&gt;</span><br><span class="line">&lt;/table&gt;</span><br></pre></td></tr></table></figure>
-<p>从第三个开始设置样式</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">table tr&gt;td:nth-child(n+3) &#123;</span><br><span class="line">    background: rgb(128, 35, 2);</span><br><span class="line">    color: white;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>设置前三个元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">table tr&gt;td:nth-child(-n+3) &#123;</span><br><span class="line">    background: rgb(128, 35, 2);</span><br><span class="line">    color: white;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="奇数元素"><a href="#奇数元素" class="headerlink" title="奇数元素"></a>奇数元素</h3><p>选择奇数单元格</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">table tr&gt;td:nth-child(odd) &#123;</span><br><span class="line">    background: green;</span><br><span class="line">    color: white;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;table border=&quot;1&quot;&gt;</span><br><span class="line">  &lt;tr&gt;</span><br><span class="line">    &lt;td&gt;houdunren.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;hdcms.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;后盾人&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;houdunwang.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;hdcms&lt;/td&gt;</span><br><span class="line">  &lt;/tr&gt;</span><br><span class="line">&lt;/table&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="偶数元素"><a href="#偶数元素" class="headerlink" title="偶数元素"></a>偶数元素</h3><p>选择偶数单元格</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">table tr&gt;td:nth-child(even) &#123;</span><br><span class="line">    background: green;</span><br><span class="line">    color: white;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;table border=&quot;1&quot;&gt;</span><br><span class="line">  &lt;tr&gt;</span><br><span class="line">    &lt;td&gt;houdunren.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;hdcms.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;后盾人&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;houdunwang.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;hdcms&lt;/td&gt;</span><br><span class="line">  &lt;/tr&gt;</span><br><span class="line">&lt;/table&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="nth-last-child-n"><a href="#nth-last-child-n" class="headerlink" title=":nth-last-child(n)"></a>:nth-last-child(n)</h3><p>从最后一个元素开始获取</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">table tr&gt;td:nth-last-child(2n+1)&#123;</span><br><span class="line">    background: green;</span><br><span class="line">    color: white;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;table border=&quot;1&quot;&gt;</span><br><span class="line">  &lt;tr&gt;</span><br><span class="line">    &lt;td&gt;houdunren.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;hdcms.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;后盾人&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;houdunwang.com&lt;/td&gt;</span><br><span class="line">    &lt;td&gt;hdcms&lt;/td&gt;</span><br><span class="line">  &lt;/tr&gt;</span><br><span class="line">&lt;/table&gt;</span><br></pre></td></tr></table></figure>
-<p>取最后两个元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">main&gt;ul li:nth-last-child(-n+2) &#123;</span><br><span class="line">	color: red;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="nth-last-of-type-n"><a href="#nth-last-of-type-n" class="headerlink" title=":nth-last-of-type(n)"></a>:nth-last-of-type(n)</h3><p>从最后一个元素开始选择<code>span</code> 标签 。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">article span:nth-last-of-type(1) &#123;</span><br><span class="line">    background: red;</span><br><span class="line">    color: white;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;article&gt;</span><br><span class="line">  &lt;aside&gt;</span><br><span class="line">  	&lt;span&gt;houdunren.com&lt;/span&gt;</span><br><span class="line">  	&lt;span&gt;houdunwang.com&lt;/span&gt;</span><br><span class="line">  	&lt;strong&gt;hdcms.com&lt;/strong&gt;</span><br><span class="line">  &lt;/aside&gt;</span><br><span class="line">	&lt;span&gt;hdphp.com&lt;/span&gt;</span><br><span class="line">&lt;/article&gt;</span><br></pre></td></tr></table></figure>
-<p>:not(selector)</p>
-<p>排除第一个li元素</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ul li:not(:nth-child(1)) &#123;</span><br><span class="line">    background: red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;ul&gt;</span><br><span class="line">  &lt;li&gt;houdunren.com&lt;/li&gt;</span><br><span class="line">  &lt;li&gt;hdcms.com&lt;/li&gt;</span><br><span class="line">  &lt;li&gt;后盾人&lt;/li&gt;</span><br><span class="line">&lt;/ul&gt;</span><br></pre></td></tr></table></figure>
-<p>###表单伪类)表单伪类</p>
-<table>
-<thead>
-<tr>
-<th>选择器</th>
-<th>示例</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>:enabled</td>
-<td>input:enabled</td>
-<td>选择每个启用的 input 元素</td>
-</tr>
-<tr>
-<td>:disabled</td>
-<td>input:disabled</td>
-<td>选择每个禁用的 input 元素</td>
-</tr>
-<tr>
-<td>:checked</td>
-<td>input:checked</td>
-<td>选择每个被选中的 input 元素</td>
-</tr>
-<tr>
-<td>:required</td>
-<td>input:required</td>
-<td>包含<code>required</code>属性的元素</td>
-</tr>
-<tr>
-<td>:optional</td>
-<td>input:optional</td>
-<td>不包含<code>required</code>属性的元素</td>
-</tr>
-<tr>
-<td>:valid</td>
-<td>input:valid</td>
-<td>验证通过的表单元素</td>
-</tr>
-<tr>
-<td>:invalid</td>
-<td>input:invalid</td>
-<td>验证不通过的表单</td>
-</tr>
-</tbody></table>
-<h3 id="表单属性样式"><a href="#表单属性样式" class="headerlink" title="表单属性样式"></a>表单属性样式</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">input:enabled &#123;</span><br><span class="line">    background: red;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">input:disabled &#123;</span><br><span class="line">    background: #dddddd;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">input:checked+label &#123;</span><br><span class="line">    color: green;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;input type=&quot;text&quot; disabled&gt;</span><br><span class="line">&lt;input type=&quot;text&quot; name=&quot;info&quot;&gt;</span><br><span class="line"></span><br><span class="line">&lt;input type=&quot;radio&quot; name=&quot;sex&quot; checked id=&quot;boy&quot;&gt;</span><br><span class="line">&lt;label for=&quot;boy&quot;&gt;男&lt;/label&gt;</span><br><span class="line">&lt;input type=&quot;radio&quot; name=&quot;sex&quot; checked id=&quot;girl&quot;&gt;</span><br><span class="line">&lt;label for=&quot;girl&quot;&gt;女&lt;/label&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="表单必选样式"><a href="#表单必选样式" class="headerlink" title="表单必选样式"></a>表单必选样式</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">input:required &#123;</span><br><span class="line">    border: solid 2px blue;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">input:optional &#123;</span><br><span class="line">	background: #dcdcdc; </span><br><span class="line">	border: none;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;input type=&quot;text&quot; name=&quot;title&quot; required&gt;</span><br><span class="line">&lt;input type=&quot;text&quot; name=&quot;name&quot;&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="表单验证样式"><a href="#表单验证样式" class="headerlink" title="表单验证样式"></a>表单验证样式</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">input:valid &#123;</span><br><span class="line">    border: solid 1px green;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">input:invalid &#123;</span><br><span class="line">    border: solid 1px red;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;form&gt;</span><br><span class="line">&lt;input type=&quot;email&quot;&gt;</span><br><span class="line">&lt;button&gt;保存&lt;/button&gt;</span><br><span class="line">&lt;/form&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="字符伪类-字符伪类"><a href="#字符伪类-字符伪类" class="headerlink" title="字符伪类)字符伪类"></a>字符伪类)字符伪类</h3><table>
-<thead>
-<tr>
-<th>状态</th>
-<th>示例</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>::first-letter</td>
-<td>p:first-letter</td>
-<td>选择每个元素的首字母</td>
-</tr>
-<tr>
-<td>::first-line</td>
-<td>p:first-line</td>
-<td>选择每个元素的首行</td>
-</tr>
-<tr>
-<td>::before</td>
-<td>p:before</td>
-<td>在每个元素的内容之前插入内容</td>
-</tr>
-<tr>
-<td>::after</td>
-<td>p:after</td>
-<td>在每个元素的内容之后插入内容</td>
-</tr>
-</tbody></table>
-<h3 id="首字母大写"><a href="#首字母大写" class="headerlink" title="首字母大写"></a>首字母大写</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">p::first-line &#123;</span><br><span class="line"> font-size: 20px;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;p&gt;</span><br><span class="line"> 后盾人不断更新视频教程</span><br><span class="line">&lt;/p&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="段落首行处理"><a href="#段落首行处理" class="headerlink" title="段落首行处理"></a>段落首行处理</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">p::first-letter &#123;</span><br><span class="line">    font-size: 30px;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;p&gt;</span><br><span class="line">	后盾人不断更新视频教程</span><br><span class="line">&lt;/p&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="在元素前添加"><a href="#在元素前添加" class="headerlink" title="在元素前添加"></a>在元素前添加</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">span::before &#123;</span><br><span class="line">    content: &#x27;⇰&#x27;;</span><br><span class="line">    color: red;</span><br><span class="line">&#125;</span><br><span class="line">span::after &#123;</span><br><span class="line">    content: &#x27;⟲&#x27;;</span><br><span class="line">    color: green;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;span&gt;后盾人&lt;/span&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="搜索框示例"><a href="#搜索框示例" class="headerlink" title="搜索框示例"></a>搜索框示例</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">div &#123;</span><br><span class="line">    border: solid 1px #ddd;</span><br><span class="line">    width: 150px;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">div&gt;input[type=&quot;text&quot;] &#123;</span><br><span class="line">    border: none;</span><br><span class="line">    outline: none;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">div&gt;input[type=&quot;text&quot;]+span:after &#123;</span><br><span class="line">    content: &quot;\21AA&quot;;</span><br><span class="line">    font-size: 14px;</span><br><span class="line">    cursor: pointer;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;div&gt;</span><br><span class="line">	&lt;input type=&quot;text&quot;&gt;&lt;span&gt;&lt;/span&gt;</span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure>
-<p>###添加属性内容</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">h2::before &#123;</span><br><span class="line">	content: attr(title);</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;h2 title=&quot;后盾人&quot;&gt;houdunren.com&lt;/h2&gt;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2016,20 +1554,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-count">50</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

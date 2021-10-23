@@ -36,7 +36,7 @@
 <meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819165217192.png">
 <meta property="og:image" content="http://example.com/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210820094705937.png">
 <meta property="article:published_time" content="2021-08-17T09:31:59.000Z">
-<meta property="article:modified_time" content="2021-08-20T02:23:05.997Z">
+<meta property="article:modified_time" content="2021-10-10T12:32:17.341Z">
 <meta property="article:author" content="oldnineping">
 <meta property="article:tag" content="JVM">
 <meta name="twitter:card" content="summary">
@@ -211,7 +211,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-20 10:23:05" itemprop="dateModified" datetime="2021-08-20T10:23:05+08:00">2021-08-20</time>
+                <time title="修改时间：2021-10-10 20:32:17" itemprop="dateModified" datetime="2021-10-10T20:32:17+08:00">2021-10-10</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -528,7 +528,7 @@
 <h4 id="锁相关"><a href="#锁相关" class="headerlink" title="锁相关"></a>锁相关</h4><p><strong>锁的升级（膨胀）：</strong></p>
 <p>锁只能升级不能降级，无锁 -&gt; 偏向锁 -&gt; 轻量级锁 -&gt; 重量级锁</p>
 <p>没有被偏向锁标记id的线程调用偏向锁，会处于等待状态，偏向锁升级轻量锁</p>
-<p>偏向锁自旋次数超过限制，升级为重量级锁</p>
+<p>轻量锁（自旋锁）如果仍想拿到锁，会进行自旋请求（若占用锁的线程能很快执行完毕，不停的去尝试拿锁可能很快就拿到了），自旋次数超过限制，升级为重量级锁</p>
 <p>无锁状态中的 hashcode 是懒加载的，一个对象一旦计算过 hashcode 就被不会成为偏向锁，而是直接升级成重量锁。 而一个偏向锁状态的对象，一旦计算过 hashcode (Object 默认 的或者是 System 类提供的)，那么会立即升级到重量级锁。 所以使用的时候我们会在对象内部专门建一个对象作为锁，这种情况下一定程度上能防止对象直接升级成重量级锁。</p>
 <p><img src="/2021/08/17/Jvm%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/image-20210819165217192.png" alt="image-20210819165217192"></p>
 <h2 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h2><p>主流的虚拟机实现都是堆区域回收（并没有明确说明方法区不能回收）。</p>
@@ -669,20 +669,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-count">50</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

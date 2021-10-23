@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="小程序前置知识与小程序核心语法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="uniapp前置知识与小程序核心语法">
+<meta property="og:url" content="http://example.com/2021/10/17/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B8%8E%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A0%B8%E5%BF%83%E8%AF%AD%E6%B3%95/index.html">
+<meta property="og:site_name" content="地球上的小东西">
+<meta property="og:description" content="小程序前置知识与小程序核心语法">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20211018001905052.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20211018001806025.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20211018005832564.png">
+<meta property="article:published_time" content="2021-10-17T14:00:34.000Z">
+<meta property="article:modified_time" content="2021-10-23T07:51:51.356Z">
+<meta property="article:author" content="oldnineping">
+<meta property="article:tag" content="uniapp">
+<meta property="article:tag" content="微信小程序">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20211018001905052.png">
+
+<link rel="canonical" href="http://example.com/2021/10/17/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B8%8E%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A0%B8%E5%BF%83%E8%AF%AD%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>uniapp前置知识与小程序核心语法 | 地球上的小东西</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">地球上的小东西</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hiahiahiahia</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/17/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B8%8E%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A0%B8%E5%BF%83%E8%AF%AD%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          uniapp前置知识与小程序核心语法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-17 22:00:34" itemprop="dateCreated datePublished" datetime="2021-10-17T22:00:34+08:00">2021-10-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-10-23 15:51:51" itemprop="dateModified" datetime="2021-10-23T15:51:51+08:00">2021-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/uniapp/" itemprop="url" rel="index"><span itemprop="name">uniapp</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/uniapp/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">微信小程序</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="小程序前置知识与小程序核心语法"><a href="#小程序前置知识与小程序核心语法" class="headerlink" title="小程序前置知识与小程序核心语法"></a>小程序前置知识与小程序核心语法</h1><a id="more"></a>
+
+<h2 id="认识小程序"><a href="#认识小程序" class="headerlink" title="认识小程序"></a>认识小程序</h2><h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>根据官网文档进行微信公众平台小程序账号申请：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/">https://mp.weixin.qq.com/</a></p>
+<p>下载<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/wxamp/thirdtools/extend?token=792253097&lang=zh_CN">开发工具</a>并新建项目</p>
+<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20211018001905052.png" alt="image-20211018001905052"></p>
+<p>一定需要注册小程序账号能获得有appId</p>
+<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20211018001806025.png" alt="image-20211018001806025"></p>
+<h3 id="小程序基本概念"><a href="#小程序基本概念" class="headerlink" title="小程序基本概念"></a>小程序基本概念</h3><h4 id="小程序的基本组成结构"><a href="#小程序的基本组成结构" class="headerlink" title="小程序的基本组成结构"></a>小程序的基本组成结构</h4><h5 id="pages-文件夹存小程序的页面"><a href="#pages-文件夹存小程序的页面" class="headerlink" title="pages 文件夹存小程序的页面"></a>pages 文件夹存小程序的页面</h5><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20211018005832564.png" alt="image-20211018005832564" style="zoom:50%;">
+
+<p>每个页面对应一个文件夹，包含 index.js，index.json ，index.wxml，index.wxss四个文件，</p>
+<p>一个小程序页面也就是由这四个文件组成的 <strong>js,wxml,json,wxss</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">文件类型</th>
+<th align="left">必需</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/framework/app-service/page.html">js</a></td>
+<td align="left">是</td>
+<td align="left">页面逻辑，存放页面存储数据，事件函数，页面生命周期</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/framework/view/wxml/">wxml</a></td>
+<td align="left">是</td>
+<td align="left">页面结构，页面的模板结构</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/framework/config.html#%E9%A1%B5%E9%9D%A2%E9%85%8D%E7%BD%AE">json</a></td>
+<td align="left">否</td>
+<td align="left">页面配置，可以配置当前页面的外观、表现等</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/framework/view/wxss.html">wxss</a></td>
+<td align="left">否</td>
+<td align="left">页面样式表</td>
+</tr>
+</tbody></table>
+<h5 id="project-config-json-项目配置文件"><a href="#project-config-json-项目配置文件" class="headerlink" title="project.config.json 项目配置文件"></a>project.config.json 项目配置文件</h5><p>项目配置文件，记录对小程序开发工具做的个性化配置</p>
+<ul>
+<li>setting 中保存了 编译相关配置</li>
+<li>projectname 保存了 项目名称</li>
+<li>appid 保存了小程序账号的id</li>
+</ul>
+<h5 id="sitemap-json-配置是否可以被微信索引"><a href="#sitemap-json-配置是否可以被微信索引" class="headerlink" title="sitemap.json 配置是否可以被微信索引"></a>sitemap.json 配置是否可以被微信索引</h5><p>文档<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/framework/sitemap.html&quot;">https://developers.weixin.qq.com/miniprogram/dev/framework/sitemap.html&quot;</a></p>
+<ul>
+<li><p>rules 配置项指定了索引规则</p>
+</li>
+<li><p>action表示命中该规则的页面是否能被索引</p>
+</li>
+</ul>
+<h5 id="其他配置"><a href="#其他配置" class="headerlink" title="其他配置"></a>其他配置</h5><p>utils 文件夹是工具类文件夹</p>
+<p>app.json 小程序公共配置文件</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// 整个程序的页面路径</span></span><br><span class="line">  &quot;pages&quot;:[</span><br><span class="line">    &quot;pages/index/index&quot;,</span><br><span class="line">    <span class="string">&quot;pages/logs/logs&quot;</span></span><br><span class="line">  ],</span><br><span class="line"><span class="comment">// 窗口的一些表现</span></span><br><span class="line">  &quot;window&quot;:&#123;</span><br><span class="line">    &quot;backgroundTextStyle&quot;:&quot;light&quot;,</span><br><span class="line">    &quot;navigationBarBackgroundColor&quot;: &quot;#fff&quot;,</span><br><span class="line">    &quot;navigationBarTitleText&quot;: &quot;Weixin&quot;,</span><br><span class="line">    &quot;navigationBarTextStyle&quot;:&quot;black&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;style&quot;: &quot;v2&quot;,</span><br><span class="line">  &quot;sitemapLocation&quot;: &quot;sitemap.json&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="WXML-VS-HTML"><a href="#WXML-VS-HTML" class="headerlink" title="WXML VS HTML"></a>WXML VS HTML</h3><h4 id="什么是WXML"><a href="#什么是WXML" class="headerlink" title="什么是WXML"></a>什么是WXML</h4><p>WXML（WeiXin Markup Language）是框架设计的一套标签语言，用来构建小程序的页面结构，作用类似于网页开发中的HTML</p>
+<h4 id="WXML和-HTML的区别"><a href="#WXML和-HTML的区别" class="headerlink" title="WXML和 HTML的区别"></a>WXML和 HTML的区别</h4><ol>
+<li><p>标签名不一样</p>
+<p>html： div，span，img，a</p>
+<p>wxml： view，text，image，navigatior（小程序提供的组件）</p>
+</li>
+<li><p>属性节点不同<br><code>&lt;a href=&quot;#&quot;&gt; 超链接 &lt;/a&gt;</code></p>
+<p><code>  &lt;navigator url=&quot;/pages/home/home&quot;&gt;跳转到home页&lt;/navigator&gt;</code></p>
+</li>
+<li><p>提供了动态渲染数据的模板语法</p>
+<ul>
+<li>数据绑定</li>
+<li>条件渲染</li>
+<li>列表渲染</li>
+</ul>
+</li>
+</ol>
+<h4 id="我是否可以在-wxml-文件中写入-div标签？并说出原因"><a href="#我是否可以在-wxml-文件中写入-div标签？并说出原因" class="headerlink" title="我是否可以在 wxml 文件中写入 div标签？并说出原因"></a>我是否可以在 wxml 文件中写入 div标签？并说出原因</h4><ul>
+<li><p>可以写入，但是 <strong>不要</strong>使用 </p>
+</li>
+<li><p>在微信wxml中 div标签会被解析成<strong>类view</strong> 标签效果(h1,div标签都会被解析成类似view标签，原有的属性样式都会被去掉)    </p>
+</li>
+</ul>
+<h3 id="WXSS-VS-CSS"><a href="#WXSS-VS-CSS" class="headerlink" title="WXSS VS CSS"></a>WXSS VS CSS</h3><ol>
+<li>什么是WXSS？</li>
+</ol>
+<ul>
+<li>WXSS (WeiXin Style Sheets)是一套样式语言，用于描述 WXML 的组件样式。</li>
+<li>类似于网页开发中的CSS</li>
+<li>WXSS 具有CSS 大部分的特性</li>
+</ul>
+<ol start="2">
+<li>新增了尺寸单位 – “rpx” 一个 rpx 为页面宽度的 1/750 ，微信将页面的宽度分成了</li>
+<li>提供了全局样式和局部样式<ol>
+<li>群居样式 写入到根目录到 wxss 中的样式</li>
+<li>局部样式： 写入到 页面的 wxss中的样式</li>
+</ol>
+</li>
+<li>此外 wxss仅支持部分css 选择器<ol>
+<li> .class (推荐使用) 和 #id</li>
+<li>element</li>
+<li>并集选择器和后代选择器</li>
+<li>:: after 和 before 等 伪类选择器</li>
+</ol>
+</li>
+</ol>
+<h4 id="wxss-新增了什么尺寸单位"><a href="#wxss-新增了什么尺寸单位" class="headerlink" title="wxss 新增了什么尺寸单位"></a>wxss 新增了什么尺寸单位</h4><h4 id="wxss-中推荐使用什么选择器"><a href="#wxss-中推荐使用什么选择器" class="headerlink" title="wxss 中推荐使用什么选择器"></a>wxss 中推荐使用什么选择器</h4><h2 id="小程序核心语法"><a href="#小程序核心语法" class="headerlink" title="小程序核心语法"></a>小程序核心语法</h2>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/uniapp/" rel="tag"># uniapp</a>
+              <a href="/tags/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F/" rel="tag"># 微信小程序</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/08/View%E7%9A%84%E8%A7%A6%E6%91%B8%E5%8F%8D%E9%A6%88%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" rel="prev" title="View的触摸反馈原理全解析">
+      <i class="fa fa-chevron-left"></i> View的触摸反馈原理全解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/18/%E6%B3%9B%E5%9E%8B%E8%AF%A6%E8%A7%A3/" rel="next" title="泛型详解">
+      泛型详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%E4%B8%8E%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A0%B8%E5%BF%83%E8%AF%AD%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">小程序前置知识与小程序核心语法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A4%E8%AF%86%E5%B0%8F%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.1.</span> <span class="nav-text">认识小程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.1.1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.2.</span> <span class="nav-text">小程序基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BB%84%E6%88%90%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">小程序的基本组成结构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#pages-%E6%96%87%E4%BB%B6%E5%A4%B9%E5%AD%98%E5%B0%8F%E7%A8%8B%E5%BA%8F%E7%9A%84%E9%A1%B5%E9%9D%A2"><span class="nav-number">1.1.2.1.1.</span> <span class="nav-text">pages 文件夹存小程序的页面</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#project-config-json-%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.2.1.2.</span> <span class="nav-text">project.config.json 项目配置文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#sitemap-json-%E9%85%8D%E7%BD%AE%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E8%A2%AB%E5%BE%AE%E4%BF%A1%E7%B4%A2%E5%BC%95"><span class="nav-number">1.1.2.1.3.</span> <span class="nav-text">sitemap.json 配置是否可以被微信索引</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E9%85%8D%E7%BD%AE"><span class="nav-number">1.1.2.1.4.</span> <span class="nav-text">其他配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WXML-VS-HTML"><span class="nav-number">1.1.3.</span> <span class="nav-text">WXML VS HTML</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFWXML"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">什么是WXML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WXML%E5%92%8C-HTML%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">WXML和 HTML的区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%91%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E5%9C%A8-wxml-%E6%96%87%E4%BB%B6%E4%B8%AD%E5%86%99%E5%85%A5-div%E6%A0%87%E7%AD%BE%EF%BC%9F%E5%B9%B6%E8%AF%B4%E5%87%BA%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">我是否可以在 wxml 文件中写入 div标签？并说出原因</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WXSS-VS-CSS"><span class="nav-number">1.1.4.</span> <span class="nav-text">WXSS VS CSS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#wxss-%E6%96%B0%E5%A2%9E%E4%BA%86%E4%BB%80%E4%B9%88%E5%B0%BA%E5%AF%B8%E5%8D%95%E4%BD%8D"><span class="nav-number">1.1.4.1.</span> <span class="nav-text">wxss 新增了什么尺寸单位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#wxss-%E4%B8%AD%E6%8E%A8%E8%8D%90%E4%BD%BF%E7%94%A8%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9%E5%99%A8"><span class="nav-number">1.1.4.2.</span> <span class="nav-text">wxss 中推荐使用什么选择器</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A0%B8%E5%BF%83%E8%AF%AD%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">小程序核心语法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="oldnineping"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">oldnineping</p>
+  <div class="site-description" itemprop="description">技术日记和杂七杂八的dx</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oldnineping</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
