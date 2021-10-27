@@ -20,24 +20,31 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="数组中重复的数字在一个长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的，但不知道有几个数字是重复的。也不知道每个数字重复几次。请找出数组中第一个重复的数字。 例如，如果输入长度为7的数组{2,3,1,0,2,5,3}，那么对应的输出是第一个重复的数字2。 返回描述： 如果数组中有重复的数字，函数返回true，否则返回false。 如果数组中有重复的数字，把重复的数字放到参">
+  <meta name="description" content="整数数组数组中重复的数字在一个长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的，但不知道有几个数字是重复的。也不知道每个数字重复几次。请找出数组中第一个重复的数字。 例如，如果输入长度为7的数组{2,3,1,0,2,5,3}，那么对应的输出是第一个重复的数字2。 返回描述： 如果数组中有重复的数字，函数返回true，否则返回false。 如果数组中有重复的数字，把重复的数">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【剑指offer01】-数组">
-<meta property="og:url" content="http://example.com/2021/02/19/%E3%80%90%E5%89%91%E6%8C%87offer01%E3%80%91-%E6%95%B0%E7%BB%84/index.html">
+<meta property="og:title" content="【剑指offer01】">
+<meta property="og:url" content="http://example.com/2021/02/19/%E5%89%91%E6%8C%87offer/index.html">
 <meta property="og:site_name" content="地球上的小东西">
-<meta property="og:description" content="数组中重复的数字在一个长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的，但不知道有几个数字是重复的。也不知道每个数字重复几次。请找出数组中第一个重复的数字。 例如，如果输入长度为7的数组{2,3,1,0,2,5,3}，那么对应的输出是第一个重复的数字2。 返回描述： 如果数组中有重复的数字，函数返回true，否则返回false。 如果数组中有重复的数字，把重复的数字放到参">
+<meta property="og:description" content="整数数组数组中重复的数字在一个长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的，但不知道有几个数字是重复的。也不知道每个数字重复几次。请找出数组中第一个重复的数字。 例如，如果输入长度为7的数组{2,3,1,0,2,5,3}，那么对应的输出是第一个重复的数字2。 返回描述： 如果数组中有重复的数字，函数返回true，否则返回false。 如果数组中有重复的数字，把重复的数">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/02/19/%E3%80%90%E5%89%91%E6%8C%87offer01%E3%80%91-%E6%95%B0%E7%BB%84/image-20210220182656143.png">
+<meta property="og:image" content="http://example.com/2021/02/19/%E5%89%91%E6%8C%87offer/image-20210220182656143.png">
+<meta property="og:image" content="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20211027000327775.png">
+<meta property="og:image" content="https://www.nowcoder.com/equation?tex=O(n)&preview=true">
+<meta property="og:image" content="https://www.nowcoder.com/equation?tex=O(n)&preview=true">
+<meta property="og:image" content="https://www.nowcoder.com/equation?tex=O(n)&preview=true">
+<meta property="og:image" content="https://www.nowcoder.com/equation?tex=O(n)&preview=true">
+<meta property="og:image" content="https://pic.leetcode-cn.com/9ce26a709147ad9ce6152d604efc1cc19a33dc5d467ed2aae5bc68463fdd2888.gif">
+<meta property="og:image" content="https://pic.leetcode-cn.com/8951bc3b8b7eb4da2a46063c1bb96932e7a69910c0a93d973bd8aa5517e59fc8.gif">
 <meta property="article:published_time" content="2021-02-19T08:26:58.000Z">
-<meta property="article:modified_time" content="2021-06-25T09:27:32.132Z">
+<meta property="article:modified_time" content="2021-10-27T16:52:53.930Z">
 <meta property="article:author" content="oldnineping">
 <meta property="article:tag" content="数据结构与算法">
 <meta property="article:tag" content="数组">
 <meta property="article:tag" content="剑指offer">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/02/19/%E3%80%90%E5%89%91%E6%8C%87offer01%E3%80%91-%E6%95%B0%E7%BB%84/image-20210220182656143.png">
+<meta name="twitter:image" content="http://example.com/2021/02/19/%E5%89%91%E6%8C%87offer/image-20210220182656143.png">
 
-<link rel="canonical" href="http://example.com/2021/02/19/%E3%80%90%E5%89%91%E6%8C%87offer01%E3%80%91-%E6%95%B0%E7%BB%84/">
+<link rel="canonical" href="http://example.com/2021/02/19/%E5%89%91%E6%8C%87offer/">
 
 
 <script id="page-configurations">
@@ -50,7 +57,7 @@
   };
 </script>
 
-  <title>【剑指offer01】-数组 | 地球上的小东西</title>
+  <title>【剑指offer01】 | 地球上的小东西</title>
   
 
 
@@ -176,7 +183,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/19/%E3%80%90%E5%89%91%E6%8C%87offer01%E3%80%91-%E6%95%B0%E7%BB%84/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/19/%E5%89%91%E6%8C%87offer/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -189,7 +196,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          【剑指offer01】-数组
+          【剑指offer01】
         </h1>
 
         <div class="post-meta">
@@ -206,7 +213,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-25 17:27:32" itemprop="dateModified" datetime="2021-06-25T17:27:32+08:00">2021-06-25</time>
+                <time title="修改时间：2021-10-28 00:52:53" itemprop="dateModified" datetime="2021-10-28T00:52:53+08:00">2021-10-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -237,13 +244,13 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="数组中重复的数字"><a href="#数组中重复的数字" class="headerlink" title="数组中重复的数字"></a>数组中重复的数字</h1><p>在一个长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的，但不知道有几个数字是重复的。也不知道每个数字重复几次。请找出数组中第一个重复的数字。 例如，如果输入长度为7的数组{2,3,1,0,2,5,3}，那么对应的输出是第一个重复的数字2。</p>
+        <h2 id="整数"><a href="#整数" class="headerlink" title="整数"></a>整数</h2><h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><h3 id="数组中重复的数字"><a href="#数组中重复的数字" class="headerlink" title="数组中重复的数字"></a>数组中重复的数字</h3><p>在一个长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的，但不知道有几个数字是重复的。也不知道每个数字重复几次。请找出数组中第一个重复的数字。 例如，如果输入长度为7的数组{2,3,1,0,2,5,3}，那么对应的输出是第一个重复的数字2。</p>
 <p>返回描述：</p>
 <p>如果数组中有重复的数字，函数返回true，否则返回false。</p>
 <p>如果数组中有重复的数字，把重复的数字放到参数duplication[0]中。（ps:duplication已经初始化，可以直接赋值使用。）</p>
 <a id="more"></a>
 
-<h2 id="方法一：哈希-遍历"><a href="#方法一：哈希-遍历" class="headerlink" title="方法一：哈希+遍历"></a>方法一：哈希+遍历</h2><p>题目中含有<strong>重复</strong>的字眼，第一反应应该想到哈希，set。这里我们用哈希来解。<br>算法步骤：</p>
+<h4 id="方法一：哈希-遍历"><a href="#方法一：哈希-遍历" class="headerlink" title="方法一：哈希+遍历"></a>方法一：哈希+遍历</h4><p>题目中含有<strong>重复</strong>的字眼，第一反应应该想到哈希，set。这里我们用哈希来解。<br>算法步骤：</p>
 <ol>
 <li><p>新建一个HashSet对象</p>
 </li>
@@ -255,7 +262,7 @@
 <p>代码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">duplicate</span><span class="params">(<span class="keyword">int</span> numbers[],<span class="keyword">int</span> length,<span class="keyword">int</span> [] duplication)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(numbers==<span class="keyword">null</span>||numbers.length==<span class="number">0</span>)&#123;</span><br><span class="line">          <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      Set&lt;Integer&gt; set = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line">      <span class="comment">//set.add(numbers[0]);</span></span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; numbers.length; i++) &#123;</span><br><span class="line">          <span class="keyword">if</span> (set.contains(numbers[i]))&#123;</span><br><span class="line">              duplication[<span class="number">0</span>]=numbers[i];</span><br><span class="line">              <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">          &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">              set.add(numbers[i]);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  </span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
 <p>时间复杂度：O(N)<br>空间复杂度：O(N)</p>
-<h2 id="方法二：in-place算法-这个算法算出的不是第一个重复的数，是任意的"><a href="#方法二：in-place算法-这个算法算出的不是第一个重复的数，是任意的" class="headerlink" title="方法二：in-place算法 (这个算法算出的不是第一个重复的数，是任意的)"></a>方法二：in-place算法 (这个算法算出的不是第一个重复的数，是任意的)</h2><p>方法一中的一个条件我们没有用到。也就是数据的范围是0-n-1。所以我们可以这么做：</p>
+<h4 id="方法二：in-place算法-这个算法算出的不是第一个重复的数，是任意的"><a href="#方法二：in-place算法-这个算法算出的不是第一个重复的数，是任意的" class="headerlink" title="方法二：in-place算法 (这个算法算出的不是第一个重复的数，是任意的)"></a>方法二：in-place算法 (这个算法算出的不是第一个重复的数，是任意的)</h4><p>方法一中的一个条件我们没有用到。也就是数据的范围是0-n-1。所以我们可以这么做：</p>
 <ol>
 <li><p>设置一个指针i指向开头0，</p>
 </li>
@@ -264,11 +271,51 @@
 <li><p>如果arr[i] != i, 说明没有正确放在位置上，那么我们就把arr[i]放在正确的位置上，也就是交换<br>arr[i] 和arr[arr[i]]。交换之后，如果arr[i] ！= i, 继续交换。</p>
 </li>
 <li><p>如果交换的过程中，arr[i] == arr[arr[i]]，说明遇到了重复值，返回即可。<br>如下图：</p>
-<p><img src="/2021/02/19/%E3%80%90%E5%89%91%E6%8C%87offer01%E3%80%91-%E6%95%B0%E7%BB%84/image-20210220182656143.png" alt="image-20210220182656143"></p>
+<p><img src="/2021/02/19/%E5%89%91%E6%8C%87offer/image-20210220182656143.png" alt="image-20210220182656143"></p>
 </li>
 </ol>
    <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">duplicate</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> length, <span class="keyword">int</span>[] duplication)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (nums == <span class="keyword">null</span> || length &lt;= <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; length; i++) &#123;</span><br><span class="line">        <span class="keyword">while</span> (nums[i] != i) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] == nums[nums[i]]) &#123;</span><br><span class="line">                duplication[<span class="number">0</span>] = nums[i];</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            swap(nums, i, nums[i]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> t = nums[i];</span><br><span class="line">    nums[i] = nums[j];</span><br><span class="line">    nums[j] = t;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>时间复杂度：O(N)<br>空间复杂度：O(1)</p>
+<h2 id="链表"><a href="#链表" class="headerlink" title="链表"></a>链表</h2><p>涉及到链表的操作，一定要在纸上把过程先画出来，再写程序。</p>
+<h3 id="从尾到头打印链表"><a href="#从尾到头打印链表" class="headerlink" title="从尾到头打印链表"></a>从尾到头打印链表</h3><ul>
+<li>给出一个链表，需要我们从尾部到头部打印出这个链表的所有的节点的权值。</li>
+</ul>
+<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20211027000327775.png" alt="image-20211027000327775"></p>
+<h4 id="非递归："><a href="#非递归：" class="headerlink" title="非递归："></a>非递归：</h4><p>listNode 是链表，只能从头遍历到尾，但是输出却要求从尾到头，这是典型的”先进后出”，我们可以想到栈！<br>ArrayList 中有个方法是 add(index,value)，可以指定 index 位置插入 value 值<br>所以我们在遍历 listNode 的同时将每个遇到的值插入到 list 的 0 位置，最后输出 listNode 即可得到逆序链表</p>
+<p>时间复杂度：<img src="https://www.nowcoder.com/equation?tex=O(n)&preview=true" alt="img"><br>空间复杂度：<img src="https://www.nowcoder.com/equation?tex=O(n)&preview=true" alt="img"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ArrayList&lt;Integer&gt; <span class="title">printListFromTailToHead</span><span class="params">(ListNode listNode)</span> </span>&#123;</span><br><span class="line">        ArrayList&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        ListNode tmp = listNode;</span><br><span class="line">        <span class="keyword">while</span>(tmp!=<span class="keyword">null</span>)&#123;</span><br><span class="line">            list.add(<span class="number">0</span>,tmp.val);</span><br><span class="line">            tmp = tmp.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="递归"><a href="#递归" class="headerlink" title="递归"></a>递归</h4><p>既然非递归都实现了，那么我们也可以利用递归，借助系统的”栈”帮忙打印</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    ArrayList&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ArrayList&lt;Integer&gt; <span class="title">printListFromTailToHead</span><span class="params">(ListNode listNode)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(listNode!=<span class="keyword">null</span>)&#123;</span><br><span class="line">            printListFromTailToHead(listNode.next);</span><br><span class="line">            list.add(listNode.val);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>时间复杂度：<img src="https://www.nowcoder.com/equation?tex=O(n)&preview=true" alt="img"><br>空间复杂度：<img src="https://www.nowcoder.com/equation?tex=O(n)&preview=true" alt="img"></p>
+<h3 id="反转链表"><a href="#反转链表" class="headerlink" title="反转链表"></a>反转链表</h3><h4 id="非递归"><a href="#非递归" class="headerlink" title="非递归"></a>非递归</h4><p>双指针</p>
+<ol>
+<li>定义两个指针： pre 和 cur ；pre 在前 cur在后。</li>
+<li>每次让 pre 的 next指向 cur ，实现一次局部反转</li>
+<li>局部反转完成之后，pre 和 cur 同时往前移动一个位置</li>
+<li>循环上述过程，直至 pre 到达链表尾部</li>
+</ol>
+<p>下图 中 cur和pre 画反了</p>
+<p><img src="https://pic.leetcode-cn.com/9ce26a709147ad9ce6152d604efc1cc19a33dc5d467ed2aae5bc68463fdd2888.gif"></p>
+<p>复杂度：</p>
+<ul>
+<li>时间复杂度：O(n)，假设 n** 是列表的长度，时间复杂度是 O(n)。</li>
+<li>空间复杂度：O(1)。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">reverseList</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">        ListNode prev = <span class="keyword">null</span>;</span><br><span class="line">        ListNode curr = head;</span><br><span class="line">        <span class="keyword">while</span> (curr != <span class="keyword">null</span>) &#123;</span><br><span class="line">            ListNode nextTemp = curr.next;</span><br><span class="line">            curr.next = prev;</span><br><span class="line">            prev = curr;</span><br><span class="line">            curr = nextTemp;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> prev;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="递归-1"><a href="#递归-1" class="headerlink" title="递归"></a>递归</h4><ol>
+<li>使用递归函数，一直递归到链表的最后一个结点，该结点就是反转后的头结点，记作 ret .</li>
+<li>此后，每次函数在返回的过程中，让当前结点的下一个结点的 next 指针指向当前节点。</li>
+<li>同时让当前结点的 next指针指向 NULL，从而实现从链表尾部开始的局部反转</li>
+<li>当递归函数全部出栈后，链表反转完成。</li>
+</ol>
+<p><img src="https://pic.leetcode-cn.com/8951bc3b8b7eb4da2a46063c1bb96932e7a69910c0a93d973bd8aa5517e59fc8.gif"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ListNode <span class="title">reverseList</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (head == <span class="keyword">null</span> || head.next == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> head;</span><br><span class="line">        &#125;</span><br><span class="line">        ListNode ret = reverseList(head.next);</span><br><span class="line">        head.next.next = head;</span><br><span class="line">        head.next = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>复杂度：</p>
+<p>时间复杂度：O(n)，假设n 是列表的长度，那么时间复杂度为 O(n)。<br>空间复杂度：O(n)，由于使用递归，将会使用隐式栈空间。递归深度可能会达到 n 层。</p>
+<h4 id="删除链表的节点"><a href="#删除链表的节点" class="headerlink" title="删除链表的节点"></a>删除链表的节点</h4><p>给定单向链表的头指针和一个要删除的节点的值，定义一个函数删除该节点。</p>
+<p>返回删除后的链表的头节点。</p>
 
     </div>
 
@@ -354,7 +401,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E4%B8%AD%E9%87%8D%E5%A4%8D%E7%9A%84%E6%95%B0%E5%AD%97"><span class="nav-number">1.</span> <span class="nav-text">数组中重复的数字</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80%EF%BC%9A%E5%93%88%E5%B8%8C-%E9%81%8D%E5%8E%86"><span class="nav-number">1.1.</span> <span class="nav-text">方法一：哈希+遍历</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8C%EF%BC%9Ain-place%E7%AE%97%E6%B3%95-%E8%BF%99%E4%B8%AA%E7%AE%97%E6%B3%95%E7%AE%97%E5%87%BA%E7%9A%84%E4%B8%8D%E6%98%AF%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%87%8D%E5%A4%8D%E7%9A%84%E6%95%B0%EF%BC%8C%E6%98%AF%E4%BB%BB%E6%84%8F%E7%9A%84"><span class="nav-number">1.2.</span> <span class="nav-text">方法二：in-place算法 (这个算法算出的不是第一个重复的数，是任意的)</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B4%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">整数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84"><span class="nav-number">2.</span> <span class="nav-text">数组</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E4%B8%AD%E9%87%8D%E5%A4%8D%E7%9A%84%E6%95%B0%E5%AD%97"><span class="nav-number">2.1.</span> <span class="nav-text">数组中重复的数字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80%EF%BC%9A%E5%93%88%E5%B8%8C-%E9%81%8D%E5%8E%86"><span class="nav-number">2.1.1.</span> <span class="nav-text">方法一：哈希+遍历</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8C%EF%BC%9Ain-place%E7%AE%97%E6%B3%95-%E8%BF%99%E4%B8%AA%E7%AE%97%E6%B3%95%E7%AE%97%E5%87%BA%E7%9A%84%E4%B8%8D%E6%98%AF%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%87%8D%E5%A4%8D%E7%9A%84%E6%95%B0%EF%BC%8C%E6%98%AF%E4%BB%BB%E6%84%8F%E7%9A%84"><span class="nav-number">2.1.2.</span> <span class="nav-text">方法二：in-place算法 (这个算法算出的不是第一个重复的数，是任意的)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%93%BE%E8%A1%A8"><span class="nav-number">3.</span> <span class="nav-text">链表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E5%B0%BE%E5%88%B0%E5%A4%B4%E6%89%93%E5%8D%B0%E9%93%BE%E8%A1%A8"><span class="nav-number">3.1.</span> <span class="nav-text">从尾到头打印链表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E9%80%92%E5%BD%92%EF%BC%9A"><span class="nav-number">3.1.1.</span> <span class="nav-text">非递归：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%92%E5%BD%92"><span class="nav-number">3.1.2.</span> <span class="nav-text">递归</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E8%BD%AC%E9%93%BE%E8%A1%A8"><span class="nav-number">3.2.</span> <span class="nav-text">反转链表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E9%80%92%E5%BD%92"><span class="nav-number">3.2.1.</span> <span class="nav-text">非递归</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%92%E5%BD%92-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">递归</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E9%93%BE%E8%A1%A8%E7%9A%84%E8%8A%82%E7%82%B9"><span class="nav-number">3.2.3.</span> <span class="nav-text">删除链表的节点</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
