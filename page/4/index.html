@@ -168,6 +168,378 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/" class="post-title-link" itemprop="url">TCP/IP协议族</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-02 17:07:33" itemprop="dateCreated datePublished" datetime="2021-07-02T17:07:33+08:00">2021-07-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-28 18:19:39" itemprop="dateModified" datetime="2021-07-28T18:19:39+08:00">2021-07-28</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/TCP-IP/" itemprop="url" rel="index"><span itemprop="name">TCP/IP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="TCP-IP"><a href="#TCP-IP" class="headerlink" title="TCP/IP"></a>TCP/IP</h1><p>概念：一系列协议组成的网络分层模型。</p>
+<h2 id="为什么要分层？"><a href="#为什么要分层？" class="headerlink" title="为什么要分层？"></a><strong>为什么要分层？</strong></h2><p>因为网络不稳定。</p>
+<p><strong>网络不稳定造成的问题：</strong></p>
+<ul>
+<li><p>传输较大数据时，在复杂网络环境中容易传输失败。</p>
+</li>
+<li><p>若传输失败时，需要把整个报文重新传因此</p>
+</li>
+</ul>
+<p>为了解决这些问题：我们需要将报文分块，传输成功后接收方再将报文拼装好。</p>
+<p><strong>分块传输的优点：</strong></p>
+<ul>
+<li><p>数据分块后，体积变小了，提高了传输的成功率</p>
+</li>
+<li><p>数据分块后，若传输失败，可以只重新传失败的数据块而不是重传全部数据</p>
+</li>
+</ul>
+<p><strong>实际应用中，我们使用的网络协议不止有HTTP，还有FTP，DNS等协议都有分块传输的需求，我们需要划分两个层级：</strong></p>
+<ol>
+<li>HTTP，FTP，DNS等协议组成的应用层。</li>
+<li>用于分块传输/接收组装报文的传输层。</li>
+</ol>
+<p><strong>两层分层仍然不能满足实际应用，因为不是所有请求都是需要失败重传的</strong>，游戏/直播等追求实时性的应用是不需要失败重传的，使用的是UDP协议，而失败重传的是TCP协议，所以我们需要拆分一个网络层（IP层）来支持传输层，进行网络数据传输。</p>
+<p><strong>最后，网络层（IP层）也只是一个协议/标准，我们仍然需要真正的物理层面的支持</strong>，这部分能力被划分为数据链路层。</p>
+<img src="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/image-20210705143657813.png" alt="image-20210705143657813" style="zoom:50%;">
+
+<ul>
+<li><p>Application Layer 应用层:HTTP、FTP、DNS </p>
+</li>
+<li><p>Transport Layer 传输层:TCP、UDP</p>
+</li>
+<li><p>Internet Layer 网络层:IP</p>
+</li>
+<li><p>Link Layer 数据链路层:以太网、Wi-Fi</p>
+</li>
+</ul>
+<h2 id="TCP-连接"><a href="#TCP-连接" class="headerlink" title="TCP 连接"></a>TCP 连接</h2><h3 id="TCP链接"><a href="#TCP链接" class="headerlink" title="TCP链接"></a>TCP链接</h3><p>链接：通信双方互相确认可以通信</p>
+<p>建立链接：通信双方建立确认「可以通信」，不会将对方的消息丢弃，即为「建立连接」</p>
+<p>TCP链接是有状态的（HTTP是无状态的）</p>
+<p>所谓状态是指：我不用每次通信都告知对方自己是谁，要请求什么，对方已经了解你的状态了。</p>
+<p>而Http则需要每次请求时都带上header等信息确认状态。</p>
+<h3 id="Java中的TCP实现-：Socket-套接字"><a href="#Java中的TCP实现-：Socket-套接字" class="headerlink" title="Java中的TCP实现 ：Socket(套接字)"></a>Java中的TCP实现 ：Socket(套接字)</h3><p>是对TCP端口的具象化，可以收发消息。</p>
+<p>端口：  和外界链接，确认对象状态需要一个收发器，这个收发器就是端口。它只和链接对象做交互，这样的话每个对象对应的链接身份一定是确认过的。Java中端口的具像化则是套接字（Socket英文原意则为插座，正如连根线相连需要插座一样）</p>
+<img src="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/image-20210705152317860.png" alt="image-20210705152317860" style="zoom:50%;">
+
+<h3 id="TCP连接的建立与关闭"><a href="#TCP连接的建立与关闭" class="headerlink" title="TCP连接的建立与关闭"></a>TCP连接的建立与关闭</h3><p>Tcp报文结构：首部+数据</p>
+<p>首部部分字段定义：</p>
+<p>序号（seq number）：TCP链接中传送到字节流中的每一个字节都按顺序编号。首部的序号指本报文段发送的数据的第一个字节的序号。</p>
+<p>两个ACK：一个是确认值(Acknowledgement)，为1便是确认连接，是首部的一个字段。<br>另一个是确认编号(Acknowledgement Number)，即接收到的上一次远端主机传来的seq然后+1，再发送给远端主机。提示远端主机已经成功接收上一次所有数据。</p>
+<p>同步（syn）：建立连接时用来同步序号。</p>
+<p>终止FIN：用来释放一个链接。</p>
+<h4 id="建立："><a href="#建立：" class="headerlink" title="建立："></a>建立：</h4><p>三次握手：</p>
+<p>所谓三次握手(Three-way Handshake)，是指建立一个 TCP 连接时，需要客户端和服务器总共发送3个包。 三次握手的目的是连接服务器指定端口，建立 TCP 连接，并同步连接双方的序列号和确认号，交换 TCP 窗口大小信 息。在 socket 编程中，客户端执行 connect() 时。将触发三次握手。</p>
+<p>简单模型：</p>
+<ol>
+<li>A给B发一个消息 </li>
+<li>B：知道了，我也要给你发消息</li>
+<li>A: 我也知道你要给我发消息了</li>
+</ol>
+<p>详细：</p>
+<p><strong>第一次握手(SYN=1, seq=x):</strong> </p>
+<p>客户端发送一个 TCP 的 SYN 标志位置1的包，指明客户端打算连接的服务器的端口，以及初始序号 X,保存在包头 的序列号(Sequence Number)字段里。发送完毕后，客户端进入 SYN_SEND 状态。</p>
+<p><strong>第二次握手(SYN=1, ACK=1, seq=y, ACKnum=x+1)：</strong></p>
+<p>服务器发回确认包(ACK)应答。即 SYN 标志位和 ACK 标志位均为1。服务器端选择自己 ISN 序列号，放到 Seq 域 里，同时将确认序号(Acknowledgement Number)设置为客户的 ISN 加1，即X+1。 发送完毕后，服务器端进入</p>
+<p>SYN_RCVD 状态。</p>
+<p><strong>第三次握手(ACK=1，ACKnum=y+1)：</strong></p>
+<p>客户端再次发送确认包(ACK)，SYN 标志位为0，ACK 标志位为1，并且把服务器发来 ACK 的序号字段+1，放在确 定字段中发送给对方，并且在数据段放写ISN的+1<br> 发送完毕后，客户端进入 ESTABLISHED 状态，当服务器端接收到这个包时，也进入 ESTABLISHED 状态，TCP 握手 结束。</p>
+<p>完成三次握手，主机A与主机B开始传送数据。</p>
+<p><strong>注意</strong> ：因为一个SYN将占用一个序号，所以要加1。</p>
+<p>各个状态名称与含义</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">- CLOSED: 这个没什么好说的了，表示初始状态。 </span><br><span class="line">- LISTEN: 这个也是非常容易理解的一个状态，表示服务器端的某个SOCKET处于监听状态，可以接受连接了。 </span><br><span class="line">- SYN_RECV: 这个状态表示接受到了SYN报文，在正常情况下，这个状态是服务器端的SOCKET在建立TCP连接时的三次握手会话过程中的一个中间状态，很短暂，基本 上用netstat你是很难看到这种状态的，除非你特意写了一个客户端测试程序，故意将三次TCP握手过程中最后一个ACK报文不予发送。因此这种状态 时，当收到客户端的ACK报文后，它会进入到ESTABLISHED状态。 </span><br><span class="line">- SYN_SENT: 这个状态与SYN_RECV遥想呼应，当客户端SOCKET执行CONNECT连接时，它首先发送SYN报文，因此也随即它会进入到了SYN_SENT状 态，并等待服务端的发送三次握手中的第2个报文。SYN_SENT状态表示客户端已发送SYN报文。</span><br><span class="line">- ESTABLISHED：这个容易理解了，表示连接已经建立了。</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/image-20210708150804856.png" alt="image-20210708150804856"></p>
+<h4 id="关闭"><a href="#关闭" class="headerlink" title="关闭"></a>关闭</h4><p>为什么关闭：省资源</p>
+<p>怎么关闭：释放链接</p>
+<p>四次挥手</p>
+<p>由于TCP连接是全双工的，因此每个方向都必须单独进行关闭。这个原则是当一方完成它的数据发送任务后就能发送一个FIN来终止这个方向的连接。收到一个 FIN只意味着这一方向上没有数据流动，一个TCP连接在收到一个FIN后仍能发送数据。首先进行关闭的一方将执行主动关闭，而另一方执行被动关闭。</p>
+<p>TCP的连接的拆除需要发送四个包，因此称为四次挥手(four-way handshake)。客户端或服务器均可主动发起挥手动作，在socket编程中，任何一方执行close()操作即可产生挥手操作。</p>
+<p>简单：</p>
+<p>第一条</p>
+<p>A：我没有消息给你了</p>
+<p>B：我知道了</p>
+<p>第二条：</p>
+<p>B：我也没有消息给你了</p>
+<p>A：我也知道了</p>
+<p>为何分两条发：A不发送的时候，B可能还有消息要发送。</p>
+<p>详细：</p>
+<p>TCP 的连接的拆除需要发送四个包，因此称为四次挥手(Four-way handshake)，也叫做改进的三次握手。客户端或服务器均可主动发起挥手动作，在 socket 编程中，任何一方执行 close() 操作即可产生挥手操作。</p>
+<ol>
+<li>**第一次挥手(FIN=1，seq=x)**假设客户端想要关闭连接，客户端发送一个 FIN 标志位置为1的包，表示自己已经没有数据可以发送了，但是仍然 可以接受数据。发送完毕后，客户端进入 FIN_WAIT_1 状态。</li>
+<li><strong>第二次挥手(ACK=1，ACKnum=x+1</strong>)服务器端确认客户端的 FIN 包，发送一个确认包，表明自己接受到了户端关闭连接的请求，但还没有准备好关闭 连接。发送完毕后，服务器端进入 CLOSE_WAIT 状态，客户端接收到这个确认包之后，进入 FIN_WAIT_2 状态，等待服务 器端关闭连接。</li>
+<li><strong>第三次挥手(FIN=1，seq=y)</strong> 服务器端准备好关闭连接时，向客户端发送结束连接请求，FIN 置为1。发送完毕后，服务器端进入 LAST_ACK 状态，等待来自客户端的最后一个ACK。 </li>
+<li><strong>第四次挥手(ACK=1，ACKnum=y+1)</strong><br>客户端接收到来自服务器端的关闭请求，发送一个确认包，并进入 TIME_WAIT 状态，等待可能出现的要求重传的 ACK 包。服务器端接收到这个确认包之后，关闭连接，进入 CLOSED 状态。 客户端等待了某个固定时间(两个最大段生命周期，2MSL，2 Maximum Segment Lifetime)之后，没有收到服务器端的 ACK ，认为服务器端已经正常关闭连接，于是自己也关闭连接，进入 四次挥手的示意图如下:</li>
+</ol>
+<p><img src="/2021/07/02/TCP-IP%E5%8D%8F%E8%AE%AE%E6%97%8F/image-20210708144606170.png" alt="image-20210708144606170"></p>
+<h2 id="⻓连接"><a href="#⻓连接" class="headerlink" title="⻓连接"></a>⻓连接</h2><h3 id="为什么要⻓连接"><a href="#为什么要⻓连接" class="headerlink" title="为什么要⻓连接?"></a>为什么要⻓连接?</h3><p>因为移动网络并不在 Internet 中，而是在运营商的内网，并不具有真正的公网 IP， 因此当某个 TCP 连接在一段时间不通信之后，网关会出于网络性能考虑而关闭这条 TCP 连接和公网的连接通道，导致这个 TCP 端口不再能收到外部通信消息，即 TCP 连接被动关闭。</p>
+<h3 id="⻓连接的实现方式"><a href="#⻓连接的实现方式" class="headerlink" title="⻓连接的实现方式"></a>⻓连接的实现方式</h3><p>心跳。即在一定间隔时间内，使用 TCP 连接发送超短无意义消息来让网关不能将自 己定义为「空闲连接」，从而防止网关将自己的连接关闭。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/" class="post-title-link" itemprop="url">登陆和授权</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-02 12:45:47 / 修改时间：17:09:19" itemprop="dateCreated datePublished" datetime="2021-07-02T12:45:47+08:00">2021-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/http/" itemprop="url" rel="index"><span itemprop="name">http</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/http/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/" itemprop="url" rel="index"><span itemprop="name">登陆和授权</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="登陆和授权"><a href="#登陆和授权" class="headerlink" title="登陆和授权"></a>登陆和授权</h1><h2 id="登录和授权的区别："><a href="#登录和授权的区别：" class="headerlink" title="登录和授权的区别："></a>登录和授权的区别：</h2><ul>
+<li>登录:身份认证，即确认「你是你」的过程</li>
+<li>授权:由身份或持有的令牌确认享有某些权限(例如获取用户信息)。</li>
+</ul>
+<p>登录过程实质上的目的也是为了确认权限。因此，在实际的应用中，多数场景下的「登录」和「授权」界限是模糊的。</p>
+<h2 id="HTTP-中确认授权-或登录-的两种方式"><a href="#HTTP-中确认授权-或登录-的两种方式" class="headerlink" title="HTTP 中确认授权(或登录)的两种方式"></a>HTTP 中确认授权(或登录)的两种方式</h2><ol>
+<li>通过Cookie</li>
+<li>通过Authorization Header</li>
+</ol>
+<h3 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h3><p>起源:「购物⻋」功能的需求，由 Netscape 浏览器开发团队打造。 工作机制:</p>
+<ol>
+<li><p>服务器需要客户端保存的内容，放在 Set-Cookie headers 里返回，客户端会自动保存。</p>
+</li>
+<li><p>客户端保存的 Cookies，会在之后的所有请求里都携带进 Cookie header 里发回给服务器。</p>
+</li>
+<li><p>客户端保存Cookie是按照服务器域名来分类的，例如shop.com发回的 Cookie 保存下来以后，在之后向 games.com 的请求中并不会携带。</p>
+</li>
+<li><p>客户端保存的Cookie在超时后会被删除、没有设置超时时间的Cookie (称作 Session Cookie)在浏览器关闭后就会自动删除;另外，服务器也可以主动删除还未过期的客户端 Cookies。</p>
+</li>
+</ol>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702125123536.png" alt="image-20210702125123536">                          </p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702125143369.png" alt="image-20210702125143369">                                           <img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702125945817.png" alt="image-20210702125945817">                                                                                                                     </p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702130012721.png" alt="image-20210702130012721"></p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702130035733.png" alt="image-20210702130035733"></p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702130044015.png" alt="image-20210702130044015"></p>
+<h4 id="Cookie-的作用"><a href="#Cookie-的作用" class="headerlink" title="Cookie 的作用"></a>Cookie 的作用</h4><blockquote>
+<p>会话（Session）也是用户状态机制。Cookie是存本地的，Session是存服务器的。</p>
+<p>由于HTTP是无状态的请求无法确定用户状态，服务器通过存储SessionId并配合Cookie验证用户是否登陆。</p>
+</blockquote>
+<ul>
+<li> 会话管理:登录状态、购物⻋</li>
+</ul>
+<ol>
+<li><p>登陆后服务器会记录此次会话（Session）并声称SessionId<br><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702130814894.png" alt="image-20210702130814894"></p>
+</li>
+<li><p>服务端返回SessionId给客户端<br><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702130838821.png" alt="image-20210702130838821"></p>
+</li>
+<li><p>客户端本地存储SessionId</p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702130849455.png" alt="image-20210702130849455"></p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702130859160.png" alt="image-20210702130859160"></p>
+</li>
+</ol>
+<ul>
+<li><p>个性化:用户偏好、主题 </p>
+<p>服务器记录clientId来存储风格，和Session类似</p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702130955005.png" alt="image-20210702130955005"><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702131004645.png" alt="image-20210702131004645"></p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702131028541.png" alt="image-20210702131028541"></p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702131010998.png" alt="image-20210702131010998"></p>
+</li>
+<li><p>Tracking:分析用户行为</p>
+<p><img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702131252119.png" alt="image-20210702131252119"></p>
+</li>
+</ul>
+<h4 id="XSS-Cross-site-scripting-了解即可-跨站脚本攻击。"><a href="#XSS-Cross-site-scripting-了解即可-跨站脚本攻击。" class="headerlink" title="XSS (Cross-site scripting)(了解即可):跨站脚本攻击。"></a>XSS (Cross-site scripting)(了解即可):跨站脚本攻击。</h4><p>即使用 JavaScript 拿 到浏览器的 Cookie 之后，发送到自己的网站，以这种方式来盗取用户 Cookie。应对方式:Server 在发送 Cookie 时，敏感的 Cookie 加上 HttpOnly。</p>
+<p>应对方式:HttpOnly——这个 Cookie 只能用于 HTTP 请求，不能被 JavaScript 调用。它可以防止本地代码滥用 Cookie。</p>
+<h4 id="XSRF-Cross-site-request-forgery-了解即可-跨站请求伪造。"><a href="#XSRF-Cross-site-request-forgery-了解即可-跨站请求伪造。" class="headerlink" title="XSRF (Cross-site request forgery)(了解即可):跨站请求伪造。"></a>XSRF (Cross-site request forgery)(了解即可):跨站请求伪造。</h4><p>即在用户不知情的情况下访问已经保存了 Cookie 的网站，以此来越权操作用户账户(例如 盗取用户资金)。应对方式主要是从服务器安全⻆度考虑，就不多说了。</p>
+<p>应对方式:Referer 校验。是浏览器自动加的header，如果是从其他网站跳转的，referer中会存储跳转来源，我们可以强制网站不接受从其他网站跳转而来的请求，也可以根据referer 判断来源网站是否在白名单中。</p>
+<h3 id="Authorization-（现在常用）"><a href="#Authorization-（现在常用）" class="headerlink" title="Authorization （现在常用）"></a>Authorization （现在常用）</h3><p>两种主流方式: Basic 和 Bearer</p>
+<h4 id="Basic"><a href="#Basic" class="headerlink" title="Basic:"></a>Basic:</h4><ul>
+<li>格式:Authorization: Basic <a href="username:password(Base64ed)">username:password(Base64ed)</a></li>
+<li>风险:header可以被解码（base64）,在http请求中会被截获，可以使用https解决。本地存储的token可能被盗，可以通过加密本地存储。</li>
+</ul>
+<h4 id="Bearer"><a href="#Bearer" class="headerlink" title="Bearer:"></a>Bearer:</h4><ul>
+<li><p>格式:Authorization: Bearer <bearer token></bearer></p>
+</li>
+<li><p>bearer token 的获取方式:通过 OAuth2 的授权流程</p>
+<p>OAuth2 的流程:</p>
+<ol>
+<li><p>第三方网站向授权方网站申请第三方授权合作，拿到clientid和client secret</p>
+</li>
+<li><p>用户在使用第三方网站时，点击「通过XX(如GitHub)授权」按钮，第三方 网站将⻚面跳转到授权方网站，并传入 client id 作为自己的身份标识</p>
+</li>
+<li><p>授权方网站根据clientid，将第三方网站的信息和第三方网站需要的用户权 限展示给用户，并询问用户是否同意授权</p>
+</li>
+<li><p>用户点击「同意授权」按钮后，授权方网站将⻚面跳转回第三方网站，并传 入 Authorization code 作为用户认可的凭证。</p>
+</li>
+<li><p>第三方网站将Authorization code发送回自己的服务器</p>
+</li>
+<li><p>服务器将Authorization code和自己的client secret一并发送给授权方的服务器(必须https)，授权方服务器在验证通过后，返回 access token。OAuth 流程结束。</p>
+</li>
+<li><p>在上面的过程结束之后，第三方网站的服务器(或者有时客户端也会)就可以使用 access token 作为用户授权的令牌，向授权方网站发送请求来获取 用户信息或操作用户账户。但这已经在 OAuth 流程之外。</p>
+</li>
+</ol>
+</li>
+<li><p>为什么 OAuth 要引入 Authorization code，并需要申请授权的第三方将 Authorization code 发送回自己的服务器，再从服务器来获取 access token， 而不是直接返回 access token ?这样复杂的流程意义何在?</p>
+<p> 为了安全。OAuth 不强制授权流程必须使用 HTTPS，因此需要保证当通信路径中存在窃听者时， 依然具有足够高的安全性。</p>
+</li>
+<li><p>第三方 App 通过微信登录的流程，也是一个 OAuth2 流程:</p>
+<ol>
+<li><p>第三方App向腾讯申请第三方授权合作，拿到clientid和clientsecret</p>
+</li>
+<li><p>用户在使用第三方App时，点击「通过微信登录」，第三方App将使用微信 SDK 跳转到微信，并传入自己的 client id 作为自己的身份标识</p>
+</li>
+<li><p>微信通过和服务器交互，拿到第三方App的信息，并显示在界面中，然后询问用户是否同意授权该 App 使用微信来登录</p>
+</li>
+<li><p>用户点击「使用微信登录」后，微信和服务器交互将授权信息提交，然后跳转回第三方 App，并传入 Authorization code 作为用户认可的凭证</p>
+</li>
+<li><p>第三方App调用自己服务器的「微信登录」Api，并传入Authorization code，然后等待服务器的响应</p>
+</li>
+<li><p>服务器在收到登录请求后，拿收到的Authorizationcode去向微信的第三方授权接口发送请求，将 Authorization code 和自己的 client secret 一起作为参数发送，微信在验证通过后，返回 access token</p>
+</li>
+<li><p>服务器在收到accesstoken后，立即拿着access token去向微信的用户信息接口发送请求，微信验证通过后，返回用户信息</p>
+</li>
+<li><p>服务器在收到用户信息后，在自己的数据库中为用户创建一个账户，并使用从微信服务器拿来的用户信息填入自己的数据库，以及将用户的 ID 和用户的微信 ID 做关联</p>
+</li>
+<li><p>用户创建完成后，服务器向客户端的请求发送响应，传送回刚创建好的用户信息</p>
+</li>
+<li><p>客户端收到服务器响应，用户登录成功</p>
+</li>
+</ol>
+</li>
+<li><p>在自家 App 中使用 Bearer token</p>
+<p>有的 App 会在 Api 的设计中，将登录和授权设计成类似 OAuth2 的过程，但简 化掉 Authorization code 概念。即:登录接口请求成功时，会返回 access token，然后客户端在之后的请求中，就可以使用这个 access token 来当做 bearer token 进行用户操作了。</p>
+</li>
+<li><p>Refresh token</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;token_type&quot;: &quot;Bearer&quot;,</span><br><span class="line">    &quot;access_token&quot;: &quot;xxxxx&quot;,</span><br><span class="line">    &quot;refresh_token&quot;: &quot;xxxxx&quot;,</span><br><span class="line">    &quot;expires_time&quot;: &quot;xxxxx&quot;</span><br></pre></td></tr></table></figure>
+<p>}</p>
+<p>用法:access token 有失效时间，在它失效后，调用 refresh token 接口，传入 refresh_token 来获取新的 access token。</p>
+<img src="/2021/07/02/%E7%99%BB%E9%99%86%E5%92%8C%E6%8E%88%E6%9D%83/image-20210702162801669.png" alt="image-20210702162801669" style="zoom:50%;">
+
+<p><strong>目的:</strong></p>
+<p>安全。当 access token 失窃，由于它有失效时间，因此坏人只有较短的时间来「做坏事」;同时，由于(在标准的 OAuth2 流程中)refresh token 永 远只存在与第三方服务的服务器中，因此 refresh token 几乎没有失窃的⻛险。</p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/01/Android%E9%9D%A2%E7%BB%8F%EF%BC%9A%E4%BC%98%E5%8C%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1099,351 +1471,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/01/Kotlin%E5%9F%BA%E7%A1%80/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/01/Kotlin%E5%9F%BA%E7%A1%80/" class="post-title-link" itemprop="url">Kotlin基础</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-01 15:39:15" itemprop="dateCreated datePublished" datetime="2021-04-01T15:39:15+08:00">2021-04-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-04-30 08:35:31" itemprop="dateModified" datetime="2021-04-30T08:35:31+08:00">2021-04-30</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Kotlin/" itemprop="url" rel="index"><span itemprop="name">Kotlin</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Kotlin-基础"><a href="#Kotlin-基础" class="headerlink" title="Kotlin 基础"></a>Kotlin 基础</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>​    Kotlin是一种在Java虚拟机上运行的静态类型编程语言。它主要是JetBrains开发团队所开发出来的编程语言。<br>虽然Kotlin与Java语法并不兼容，但Kotlin被设计成可以和Java代码相互运作，并可以重复使用如Java集合框架等现有Java引用的方法库。它很容易在Android项目中替代Java或者同Java一起使用。</p>
-<h3 id="Kotlin的特点："><a href="#Kotlin的特点：" class="headerlink" title="Kotlin的特点："></a>Kotlin的特点：</h3><ul>
-<li>简洁易用: Kotlin中提供了大量的扩展，使得我们的代码更加简洁，开发出来的框架更加易用</li>
-<li>安全: 避免空指针异常等整个类的错误</li>
-<li>互操作性: 充分利用 JVM、Android 和浏览器的现有库</li>
-<li>工具友好: 可用任何 Java IDE 或者使用命令行构建</li>
-</ul>
-<h3 id="Kotlin-构建流程："><a href="#Kotlin-构建流程：" class="headerlink" title="Kotlin 构建流程："></a>Kotlin 构建流程：</h3><p><img src="/2021/04/01/Kotlin%E5%9F%BA%E7%A1%80/image-20210401154811917.png" alt="image-20210401154811917"></p>
-<ul>
-<li>*kt 会被Kotlin编译器变成编译为.class 的字节码文件，然后被归档成.jar ，最后由各平台打包工具输出最终的程序</li>
-<li>我们用Java写的程序所有的实现都会有标准的Java类库来做支撑，比如：<code>java.lang.*</code>,<code>java.util.*</code>但是Kot lin中的类库是不在标准的Java类库中的，所以，Kotlin应用程序需要在最后一步借助Kotlin运行时来支撑这些Java标准库没有的实现。</li>
-</ul>
-<h2 id="Kotlin和Java的异同"><a href="#Kotlin和Java的异同" class="headerlink" title="Kotlin和Java的异同"></a>Kotlin和Java的异同</h2><h3 id="打印日志"><a href="#打印日志" class="headerlink" title="打印日志"></a>打印日志</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">System.out.print(<span class="string">&quot;hello world&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;hello world&quot;</span>);</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(<span class="string">&quot;hello world&quot;</span>)</span><br><span class="line">println(<span class="string">&quot;hello world&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h3 id="定义变量与常量"><a href="#定义变量与常量" class="headerlink" title="定义变量与常量"></a>定义变量与常量</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String name = <span class="string">&quot;hello world&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> String name = <span class="string">&quot;hello world&quot;</span>;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> name = <span class="string">&quot;hello world&quot;</span></span><br><span class="line"><span class="keyword">val</span> name = <span class="string">&quot;hello world&quot;</span></span><br></pre></td></tr></table></figure>
-<h3 id="null声明"><a href="#null声明" class="headerlink" title="null声明"></a>null声明</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String otherName;</span><br><span class="line">otherName = <span class="keyword">null</span>;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> otherName : String?</span><br><span class="line">otherName = <span class="literal">null</span></span><br></pre></td></tr></table></figure>
-<h3 id="空判断"><a href="#空判断" class="headerlink" title="空判断"></a>空判断</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (text != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">int</span> length = text.length();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">text?.let &#123;<span class="comment">//表示text不为null的条件下，才会去执行let函数体</span></span><br><span class="line">    <span class="keyword">val</span> length = text.length</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// or simply</span></span><br><span class="line"><span class="keyword">val</span> length = text?.length</span><br></pre></td></tr></table></figure>
-<h3 id="字符串拼接"><a href="#字符串拼接" class="headerlink" title="字符串拼接"></a>字符串拼接</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String firstName = <span class="string">&quot;Android&quot;</span>;</span><br><span class="line">String lastName = <span class="string">&quot;Architect&quot;</span>;</span><br><span class="line">String message = <span class="string">&quot;My name is: &quot;</span> + firstName + <span class="string">&quot; &quot;</span> + lastName;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> firstName = <span class="string">&quot;Android&quot;</span></span><br><span class="line"><span class="keyword">val</span> lastName = <span class="string">&quot;Architect&quot;</span></span><br><span class="line"><span class="keyword">val</span> message = <span class="string">&quot;My name is: <span class="variable">$firstName</span> <span class="variable">$lastName</span>&quot;</span></span><br></pre></td></tr></table></figure>
-<h3 id="换行"><a href="#换行" class="headerlink" title="换行"></a>换行</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String text = <span class="string">&quot;First Line\n&quot;</span> +</span><br><span class="line">              <span class="string">&quot;Second Line\n&quot;</span> +</span><br><span class="line">              <span class="string">&quot;Third Line&quot;</span>;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> text = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        |First Line</span></span><br><span class="line"><span class="string">        |Second Line</span></span><br><span class="line"><span class="string">        |Third Line</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span>.trimMargin()</span><br></pre></td></tr></table></figure>
-<h3 id="三元表达式"><a href="#三元表达式" class="headerlink" title="三元表达式"></a>三元表达式</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String text = x &gt; <span class="number">5</span> ? <span class="string">&quot;x &gt; 5&quot;</span> : <span class="string">&quot;x &lt;= 5&quot;</span>;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> text = <span class="keyword">if</span> (x &gt; <span class="number">5</span>)</span><br><span class="line">              <span class="string">&quot;x &gt; 5&quot;</span></span><br><span class="line">           <span class="keyword">else</span> <span class="string">&quot;x &lt;= 5&quot;</span></span><br></pre></td></tr></table></figure>
-<h3 id="操作符"><a href="#操作符" class="headerlink" title="操作符"></a>操作符</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> andResult  = a &amp; b;</span><br><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> orResult   = a | b;</span><br><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> xorResult  = a ^ b;</span><br><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> rightShift = a &gt;&gt; <span class="number">2</span>;</span><br><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> leftShift  = a &lt;&lt; <span class="number">2</span>;</span><br><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> unsignedRightShift = a &gt;&gt;&gt; <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> andResult  = a and b</span><br><span class="line"><span class="keyword">val</span> orResult   = a or b</span><br><span class="line"><span class="keyword">val</span> xorResult  = a xor b</span><br><span class="line"><span class="keyword">val</span> rightShift = a shr <span class="number">2</span></span><br><span class="line"><span class="keyword">val</span> leftShift  = a shl <span class="number">2</span></span><br><span class="line"><span class="keyword">val</span> unsignedRightShift = a ushr <span class="number">2</span></span><br></pre></td></tr></table></figure>
-<h3 id="类型判断和转换（声明式）"><a href="#类型判断和转换（声明式）" class="headerlink" title="类型判断和转换（声明式）"></a>类型判断和转换（声明式）</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (object <span class="keyword">instanceof</span> Car) &#123;</span><br><span class="line">   Car car = (Car) object;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="keyword">object</span> <span class="keyword">is</span> Car) &#123;</span><br><span class="line">   <span class="keyword">var</span> car = <span class="keyword">object</span> <span class="comment">// 自动识别</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="类型判断和转换（隐式）"><a href="#类型判断和转换（隐式）" class="headerlink" title="类型判断和转换（隐式）"></a>类型判断和转换（隐式）</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (object <span class="keyword">instanceof</span> Car) &#123;</span><br><span class="line">   Car car = (Car) object;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="keyword">object</span> <span class="keyword">is</span> Car) &#123;</span><br><span class="line">   <span class="keyword">var</span> car = <span class="keyword">object</span> <span class="comment">// 自动识别</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="多重条件"><a href="#多重条件" class="headerlink" title="多重条件"></a>多重条件</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (score &gt;= <span class="number">0</span> &amp;&amp; score &lt;= <span class="number">300</span>) &#123; &#125;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (score <span class="keyword">in</span> <span class="number">0.</span><span class="number">.300</span>) &#123; &#125;</span><br></pre></td></tr></table></figure>
-<h3 id="更灵活的case语句"><a href="#更灵活的case语句" class="headerlink" title="更灵活的case语句"></a>更灵活的case语句</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> score = <span class="comment">// some score;</span></span><br><span class="line">String grade;</span><br><span class="line"><span class="keyword">switch</span> (score) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">10</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">9</span>:</span><br><span class="line">        grade = <span class="string">&quot;Excellent&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">8</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">7</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">6</span>:</span><br><span class="line">        grade = <span class="string">&quot;Good&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">        grade = <span class="string">&quot;OK&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">        grade = <span class="string">&quot;Fail&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        grade = <span class="string">&quot;Fail&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> score = <span class="comment">// some score</span></span><br><span class="line"><span class="keyword">var</span> grade = <span class="keyword">when</span> (score) &#123;</span><br><span class="line">    <span class="number">9</span>, <span class="number">10</span> -&gt; <span class="string">&quot;Excellent&quot;</span></span><br><span class="line">    <span class="keyword">in</span> <span class="number">6.</span><span class="number">.8</span> -&gt; <span class="string">&quot;Good&quot;</span></span><br><span class="line">    <span class="number">4</span>, <span class="number">5</span> -&gt; <span class="string">&quot;OK&quot;</span></span><br><span class="line">    <span class="keyword">in</span> <span class="number">1.</span><span class="number">.3</span> -&gt; <span class="string">&quot;Fail&quot;</span></span><br><span class="line">    <span class="keyword">else</span> -&gt; <span class="string">&quot;Fail&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="for-循环"><a href="#for-循环" class="headerlink" title="for 循环"></a>for 循环</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">10</span> ; i++) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; <span class="number">10</span> ; i++) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">10</span>; i &gt;= <span class="number">0</span> ; i--) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">10</span> ; i+=<span class="number">2</span>) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">10</span>; i &gt;= <span class="number">0</span> ; i-=<span class="number">2</span>) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (String item : collection) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Map.Entry&lt;String, String&gt; entry: map.entrySet()) &#123; &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span>) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1</span> until <span class="number">10</span>) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">10</span> downTo <span class="number">0</span>) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span> step <span class="number">2</span>) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">10</span> downTo <span class="number">0</span> step <span class="number">2</span>) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (item <span class="keyword">in</span> collection) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> ((key, value) <span class="keyword">in</span> map) &#123; &#125;</span><br></pre></td></tr></table></figure>
-<h3 id="更方便的集合"><a href="#更方便的集合" class="headerlink" title="更方便的集合"></a>更方便的集合</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> List&lt;Integer&gt; listOfNumber = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Map&lt;Integer, String&gt; keyValue = <span class="keyword">new</span> HashMap&lt;Integer, String&gt;();</span><br><span class="line">map.put(<span class="number">1</span>, <span class="string">&quot;Android&quot;</span>);</span><br><span class="line">map.put(<span class="number">2</span>, <span class="string">&quot;Ali&quot;</span>);</span><br><span class="line">map.put(<span class="number">3</span>, <span class="string">&quot;Mindorks&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Java 9</span></span><br><span class="line"><span class="keyword">final</span> List&lt;Integer&gt; listOfNumber = List.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Map&lt;Integer, String&gt; keyValue = Map.of(<span class="number">1</span>, <span class="string">&quot;Android&quot;</span>,</span><br><span class="line">                                             <span class="number">2</span>, <span class="string">&quot;Ali&quot;</span>,</span><br><span class="line">                                             <span class="number">3</span>, <span class="string">&quot;Mindorks&quot;</span>);</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> listOfNumber = listOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line"><span class="keyword">val</span> keyValue = mapOf(<span class="number">1</span> to <span class="string">&quot;Android&quot;</span>,</span><br><span class="line">                     <span class="number">2</span> to <span class="string">&quot;Ali&quot;</span>,</span><br><span class="line">                     <span class="number">3</span> to <span class="string">&quot;Mindorks&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h3 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Java 7 and below</span></span><br><span class="line"><span class="keyword">for</span> (Car car : cars) &#123;</span><br><span class="line">  System.out.println(car.speed);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Java 8+</span></span><br><span class="line">cars.forEach(car -&gt; System.out.println(car.speed));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Java 7 and below</span></span><br><span class="line"><span class="keyword">for</span> (Car car : cars) &#123;</span><br><span class="line">  <span class="keyword">if</span> (car.speed &gt; <span class="number">100</span>) &#123;</span><br><span class="line">    System.out.println(car.speed);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Java 8+</span></span><br><span class="line">cars.stream().filter(car -&gt; car.speed &gt; <span class="number">100</span>).forEach(car -&gt; System.out.println(car.speed));</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cars.forEach &#123;</span><br><span class="line">    println(it.speed)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">cars.filter &#123; it.speed &gt; <span class="number">100</span> &#125;</span><br><span class="line">      .forEach &#123; println(it.speed)&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="方法定义"><a href="#方法定义" class="headerlink" title="方法定义"></a>方法定义</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="comment">// logic here</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">doSomething</span><span class="params">(<span class="keyword">int</span>... numbers)</span> </span>&#123;</span><br><span class="line">   <span class="comment">// logic here</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doSomething</span><span class="params">()</span></span> &#123;</span><br><span class="line">   <span class="comment">// logic here</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doSomething</span><span class="params">(<span class="keyword">vararg</span> numbers: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">   <span class="comment">// logic here</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>###带返回值的方法</p>
-<p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getScore</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="comment">// logic here</span></span><br><span class="line">   <span class="keyword">return</span> score;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getScore</span><span class="params">()</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">   <span class="comment">// logic here</span></span><br><span class="line">   <span class="keyword">return</span> score</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// as a single-expression function</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getScore</span><span class="params">()</span></span>: <span class="built_in">Int</span> = score</span><br></pre></td></tr></table></figure>
-<p>###无结束符号</p>
-<p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getScore</span><span class="params">(<span class="keyword">int</span> value)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// logic here</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span> * value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getScore</span><span class="params">(value: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">   <span class="comment">// logic here</span></span><br><span class="line">   <span class="keyword">return</span> <span class="number">2</span> * value</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// as a single-expression function</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getScore</span><span class="params">(value: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> = <span class="number">2</span> * value</span><br></pre></td></tr></table></figure>
-<h3 id="Constructor-构造器"><a href="#Constructor-构造器" class="headerlink" title="Constructor 构造器"></a>Constructor 构造器</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Utils</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Utils</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="comment">// This utility class is not publicly instantiable</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getScore</span><span class="params">(<span class="keyword">int</span> value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span> * value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Utils</span> <span class="keyword">private</span> <span class="keyword">constructor</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">fun</span> <span class="title">getScore</span><span class="params">(value: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">2</span> * value</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// another way</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">object</span> Utils &#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getScore</span><span class="params">(value: <span class="type">Int</span>)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span> * value</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="GetSet-构造器"><a href="#GetSet-构造器" class="headerlink" title="GetSet 构造器"></a>GetSet 构造器</h3><p>Java：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Developer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Developer</span><span class="params">(String name, <span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Kotlin:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Developer</span></span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> age: <span class="built_in">Int</span>)</span><br></pre></td></tr></table></figure>
-<h2 id="必备基础"><a href="#必备基础" class="headerlink" title="必备基础"></a>必备基础</h2><p>学习新语言，第一步就是学习它有怎样的数据类型，以及它的数组集合和方法是怎样子，因为这些事我们入手一门新语言时的第一步，也是基础汇总的基础。</p>
-<h3 id="Kotlin基本类型"><a href="#Kotlin基本类型" class="headerlink" title="Kotlin基本类型"></a>Kotlin基本类型</h3><h4 id="数字"><a href="#数字" class="headerlink" title="数字"></a>数字</h4><p>Kotlin 提供了一组表示数字的内置类型。 对于整数，有四种不同大小的类型，因此值的范围也不同。</p>
-<table>
-<thead>
-<tr>
-<th align="left">类型</th>
-<th align="left">大小（比特数）</th>
-<th align="left">最小值</th>
-<th align="left">最大值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">Byte</td>
-<td align="left">8</td>
-<td align="left">-128</td>
-<td align="left">127</td>
-</tr>
-<tr>
-<td align="left">Short</td>
-<td align="left">16</td>
-<td align="left">-32768</td>
-<td align="left">32767</td>
-</tr>
-<tr>
-<td align="left">Int</td>
-<td align="left">32</td>
-<td align="left">-2,147,483,648 (-231)</td>
-<td align="left">2,147,483,647 (231 - 1)</td>
-</tr>
-<tr>
-<td align="left">Long</td>
-<td align="left">64</td>
-<td align="left">-9,223,372,036,854,775,808 (-263)</td>
-<td align="left">9,223,372,036,854,775,807 (263 - 1)</td>
-</tr>
-</tbody></table>
-<p>对于浮点数，Kotlin 提供了 <code>Float</code> 与 <code>Double</code> 类型。 根据 <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/IEEE_754">IEEE 754 标准</a>， 两种浮点类型的<em>十进制位数</em>（即可以存储多少位十进制数）不同。 <code>Float</code> 反映了 IEEE 754 <em>单精度</em>，而 <code>Double</code> 提供了<em>双精度</em>。</p>
-<table>
-<thead>
-<tr>
-<th align="left">类型</th>
-<th align="left">大小（比特数）</th>
-<th align="left">有效数字比特数</th>
-<th align="left">指数比特数</th>
-<th align="left">十进制位数</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">Float</td>
-<td align="left">32</td>
-<td align="left">24</td>
-<td align="left">8</td>
-<td align="left">6-7</td>
-</tr>
-<tr>
-<td align="left">Double</td>
-<td align="left">64</td>
-<td align="left">53</td>
-<td align="left">11</td>
-<td align="left">15-16</td>
-</tr>
-</tbody></table>
-<h3 id="Kotlin的数组"><a href="#Kotlin的数组" class="headerlink" title="Kotlin的数组"></a>Kotlin的数组</h3><p>数组在 Kotlin 中使用 <code>Array</code> 类来表示，它定义了 <code>get</code> 与 <code>set</code> 函数（按照运算符重载约定这会转变为 <code>[]</code>）以及 <code>size</code> 属性，以及一些其他有用的成员函数：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">class Array&lt;T&gt; private constructor() &#123;</span><br><span class="line">    val size: Int</span><br><span class="line">    operator fun get(index: Int): T</span><br><span class="line">    operator fun set(index: Int, value: T): Unit</span><br><span class="line"></span><br><span class="line">    operator fun iterator(): Iterator&lt;T&gt;</span><br><span class="line">    &#x2F;&#x2F; ……</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="数组的创建技巧"><a href="#数组的创建技巧" class="headerlink" title="数组的创建技巧"></a>数组的创建技巧</h4><p>我们可以使用库函数 <code>arrayOf()</code> 来创建一个数组并传递元素值给它，这样 <code>arrayOf(1, 2, 3)</code> 创建了 array <code>[1, 2, 3]</code>。 或者，库函数 <code>arrayOfNulls()</code> 可以用于创建一个指定大小的、所有元素都为空的数组。</p>
-<p>另一个选项是用接受数组大小以及一个函数参数的 <code>Array</code> 构造函数，用作参数的函数能够返回给定索引的每个元素初始值：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 创建一个 Array&lt;String&gt; 初始化为 [&quot;0&quot;, &quot;1&quot;, &quot;4&quot;, &quot;9&quot;, &quot;16&quot;]</span><br><span class="line">val asc &#x3D; Array(5) &#123; i -&gt; (i * i).toString() &#125;</span><br><span class="line">asc.forEach &#123; println(it) &#125;</span><br></pre></td></tr></table></figure>
-<p>如上所述，<code>[]</code> 运算符代表调用成员函数 <code>get()</code> 与 <code>set()</code>。</p>
-<p>Kotlin 中数组是<em>不型变的（invariant）</em>。这意味着 Kotlin 不让我们把 <code>Array&lt;String&gt;</code> 赋值给 <code>Array&lt;Any&gt;</code>，以防止可能的运行时失败。</p>
-<h4 id="原生类型数组"><a href="#原生类型数组" class="headerlink" title="原生类型数组"></a>原生类型数组</h4><p>Kotlin 也有无装箱开箱的专门的类来表示原生类型数组: <code>ByteArray</code>、 <code>ShortArray</code>、<code>IntArray</code> 等等。这些类与 <code>Array</code> 并没有继承关系，但是它们有同样的方法属性集。它们也都有相应的工厂方法:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> x: IntArray = intArrayOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">x[<span class="number">0</span>] = x[<span class="number">1</span>] + x[<span class="number">2</span>]</span><br><span class="line"><span class="comment">// 大小为 5、值为 [0, 0, 0, 0, 0] 的整型数组</span></span><br><span class="line"><span class="keyword">val</span> arr = IntArray(<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 例如：用常量初始化数组中的值</span></span><br><span class="line"><span class="comment">// 大小为 5、值为 [42, 42, 42, 42, 42] 的整型数组</span></span><br><span class="line"><span class="keyword">val</span> arr = IntArray(<span class="number">5</span>) &#123; <span class="number">42</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 例如：使用 lambda 表达式初始化数组中的值</span></span><br><span class="line"><span class="comment">// 大小为 5、值为 [0, 1, 2, 3, 4] 的整型数组（值初始化为其索引值）</span></span><br><span class="line"><span class="keyword">var</span> arr = IntArray(<span class="number">5</span>) &#123; it * <span class="number">1</span> &#125;</span><br></pre></td></tr></table></figure>
-<h4 id="Kotlin数组的遍历"><a href="#Kotlin数组的遍历" class="headerlink" title="Kotlin数组的遍历"></a>Kotlin数组的遍历</h4><h5 id="数组遍历"><a href="#数组遍历" class="headerlink" title="数组遍历"></a>数组遍历</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (item <span class="keyword">in</span> array) &#123;</span><br><span class="line">    println(item)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="带索引遍历数组"><a href="#带索引遍历数组" class="headerlink" title="带索引遍历数组"></a>带索引遍历数组</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> array.indices) &#123;</span><br><span class="line">    println(i.toString() + <span class="string">&quot;-&gt;&quot;</span> + array[i])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="遍历元素（带索引）"><a href="#遍历元素（带索引）" class="headerlink" title="遍历元素（带索引）"></a>遍历元素（带索引）</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> ((index, item) <span class="keyword">in</span> array.withIndex()) &#123;</span><br><span class="line">    println(<span class="string">&quot;<span class="variable">$index</span>-&gt;<span class="variable">$item</span>&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="forEach遍历数组"><a href="#forEach遍历数组" class="headerlink" title="forEach遍历数组"></a>forEach遍历数组</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">array.forEach &#123; println(it) &#125;</span><br></pre></td></tr></table></figure>
-<h5 id="forEach增强版"><a href="#forEach增强版" class="headerlink" title="forEach增强版"></a>forEach增强版</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">array.forEachIndexed &#123;</span><br><span class="line">	println(<span class="string">&quot;<span class="variable">$index</span>: <span class="variable">$item</span>&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="Kotlin集合"><a href="#Kotlin集合" class="headerlink" title="Kotlin集合"></a>Kotlin集合</h3><p>Kotlin 标准库提供了一整套用于管理<em>集合</em>的工具，集合是可变数量（可能为零）的一组条目，各种集合对于解决问题都具有重要意义，并且经常用到。</p>
-<ul>
-<li><em>List</em> 是一个有序集合，可通过索引（反映元素位置的整数）访问元素。元素可以在 list 中出现多次。列表的一个示例是一句话：有一组字、这些字的顺序很重要并且字可以重复。</li>
-<li><em>Set</em> 是唯一元素的集合。它反映了集合（set）的数学抽象：一组无重复的对象。一般来说 set 中元素的顺序并不重要。例如，字母表是字母的集合（set）。</li>
-<li><em>Map</em>（或者<em>字典</em>）是一组键值对。键是唯一的，每个键都刚好映射到一个值。值可以重复。map 对于存储对象之间的逻辑连接非常有用，例如，员工的 ID 与员工的位置。</li>
-</ul>
-<h4 id="集合的可变性与不可变性"><a href="#集合的可变性与不可变性" class="headerlink" title="集合的可变性与不可变性"></a>集合的可变性与不可变性</h4><p>Kotlin中存在两种意义上的集合，一种是可以修改的，一种是不可以修改的。</p>
-<h5 id="不可变集合"><a href="#不可变集合" class="headerlink" title="不可变集合"></a>不可变集合</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> stringList = listOf(<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>, <span class="string">&quot;one&quot;</span>)</span><br><span class="line">println(stringList)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> stringSet = setOf(<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>, <span class="string">&quot;three&quot;</span>)</span><br><span class="line">println(stringSet)</span><br></pre></td></tr></table></figure>
-<h5 id="可变集合（list-前面加mutable）"><a href="#可变集合（list-前面加mutable）" class="headerlink" title="可变集合（list 前面加mutable）"></a>可变集合（list 前面加mutable）</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> numbers = mutableListOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line">numbers.add(<span class="number">5</span>)</span><br><span class="line">numbers.removeAt(<span class="number">1</span>)</span><br><span class="line">numbers[<span class="number">0</span>] = <span class="number">0</span></span><br><span class="line">println(numbers)</span><br></pre></td></tr></table></figure>
-<p>不难发现，每个不可变集合都有对应的可变集合，也就是以mutable为前缀的集合。</p>
-<h5 id="集合排序"><a href="#集合排序" class="headerlink" title="集合排序"></a>集合排序</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> numbers = mutableListOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line"><span class="comment">//随机排列元素</span></span><br><span class="line">numbers.shuffle()</span><br><span class="line">println(numbers)</span><br><span class="line">numbers.sort()<span class="comment">//排序，从小打到</span></span><br><span class="line">numbers.sortDescending()<span class="comment">//从大到小</span></span><br><span class="line">println(numbers)</span><br><span class="line"></span><br><span class="line"><span class="comment">//定义一个Person类，有name 和 age 两属性</span></span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Language</span></span>(<span class="keyword">var</span> name: String, <span class="keyword">var</span> score: <span class="built_in">Int</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> languageList: MutableList&lt;Language&gt; = mutableListOf()</span><br><span class="line">languageList.add(Language(<span class="string">&quot;Java&quot;</span>, <span class="number">80</span>))</span><br><span class="line">languageList.add(Language(<span class="string">&quot;Kotlin&quot;</span>, <span class="number">90</span>))</span><br><span class="line">languageList.add(Language(<span class="string">&quot;Dart&quot;</span>, <span class="number">99</span>))</span><br><span class="line">languageList.add(Language(<span class="string">&quot;C&quot;</span>, <span class="number">80</span>))</span><br><span class="line"><span class="comment">//使用sortBy进行排序，适合单条件排序</span></span><br><span class="line">languageList.sortBy &#123; it.score &#125;</span><br><span class="line">println(languageList)</span><br><span class="line"><span class="comment">//使用sortWith进行排序，适合多条件排序</span></span><br><span class="line">languageList.sortWith(compareBy(</span><br><span class="line">        <span class="comment">//it变量是lambda中的隐式参数</span></span><br><span class="line">        &#123; it.score &#125;, &#123; it.name &#125;)</span><br><span class="line">)</span><br><span class="line">println(languageList)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="Set和Map"><a href="#Set和Map" class="headerlink" title="Set和Map"></a>Set和Map</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**set**/</span></span><br><span class="line"><span class="keyword">val</span> hello = mutableSetOf(<span class="string">&quot;H&quot;</span>, <span class="string">&quot;e&quot;</span>, <span class="string">&quot;l&quot;</span>, <span class="string">&quot;l&quot;</span>, <span class="string">&quot;o&quot;</span>)<span class="comment">//自动过滤重复元素</span></span><br><span class="line">hello.remove(<span class="string">&quot;o&quot;</span>)</span><br><span class="line"><span class="comment">//集合的加减操作，前面的集合必须是可变集合</span></span><br><span class="line">hello += setOf(<span class="string">&quot;w&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;r&quot;</span>, <span class="string">&quot;l&quot;</span>, <span class="string">&quot;d&quot;</span>)</span><br><span class="line">println(hello)</span><br><span class="line"></span><br><span class="line"><span class="comment">/**Map&lt;K, V&gt; 不是 Collection 接口的继承者；但是它也是 Kotlin 的一种集合类型**/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> numbersMap = mapOf(<span class="string">&quot;key1&quot;</span> to <span class="number">1</span>, <span class="string">&quot;key2&quot;</span> to <span class="number">2</span>, <span class="string">&quot;key3&quot;</span> to <span class="number">3</span>, <span class="string">&quot;key4&quot;</span> to <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">println(<span class="string">&quot;All keys: <span class="subst">$&#123;numbersMap.keys&#125;</span>&quot;</span>)</span><br><span class="line">println(<span class="string">&quot;All values: <span class="subst">$&#123;numbersMap.values&#125;</span>&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> (<span class="string">&quot;key2&quot;</span> <span class="keyword">in</span> numbersMap) println(<span class="string">&quot;Value by key \&quot;key2\&quot;: <span class="subst">$&#123;numbersMap[<span class="string">&quot;key2&quot;</span>]&#125;</span>&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> (<span class="number">1</span> <span class="keyword">in</span> numbersMap.values) println(<span class="string">&quot;1 is in the map&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> (numbersMap.containsValue(<span class="number">1</span>)) println(<span class="string">&quot; 1 is in the map&quot;</span>)</span><br><span class="line">		<span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Q1 : 两个具有相同键值对，但顺序不同对Map相等么？为什么？</span></span><br><span class="line"><span class="comment">     * 无论顺序如何，包含相同键值对对两个Map是相等的</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">val</span> anotherMap = mapOf(<span class="string">&quot;key2&quot;</span> to <span class="number">2</span> ,<span class="string">&quot;key1&quot;</span> to <span class="number">1</span>,<span class="string">&quot;key3&quot;</span> to <span class="number">3</span>,<span class="string">&quot;key4&quot;</span> to <span class="number">4</span>)</span><br><span class="line">    println(<span class="string">&quot;anotherMap == numberMap:<span class="subst">$&#123;anotherMap == numberMap&#125;</span>&quot;</span>)</span><br><span class="line">		<span class="comment">// == 会调用 Any 的equals方法</span></span><br><span class="line">    anotherMap.equals(numberMap)</span><br></pre></td></tr></table></figure>
-<h4 id="Q1-两个具有相同键值对，但顺序不同对Map相等么？为什么？"><a href="#Q1-两个具有相同键值对，但顺序不同对Map相等么？为什么？" class="headerlink" title="Q1: 两个具有相同键值对，但顺序不同对Map相等么？为什么？"></a>Q1: 两个具有相同键值对，但顺序不同对Map相等么？为什么？</h4><p><strong>A:</strong> 无论顺序如何，包含相同键值对对两个Map是相等的</p>
-<p>Debug 进入源码：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> boolean equals(Object o) &#123;</span><br><span class="line">  		<span class="comment">// 如果内存地址一致，返回true</span></span><br><span class="line">     <span class="keyword">if</span> (o == <span class="keyword">this</span>)</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">	<span class="comment">//如果比较的对象不是Map ，返回 false</span></span><br><span class="line">     <span class="keyword">if</span> (!(o instanceof Map))</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">     Map&lt;?,?&gt; m = (Map&lt;?,?&gt;) o;</span><br><span class="line">  		<span class="comment">// Map的size不相等，返回false</span></span><br><span class="line">     <span class="keyword">if</span> (m.size() != size())</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">	<span class="comment">//遍历两个Map的Key和Value，如果有不相等的，则返回false，否则将会返回true</span></span><br><span class="line">     <span class="keyword">try</span> &#123;</span><br><span class="line">         Iterator&lt;Entry&lt;K,V&gt;&gt; i = entrySet().iterator();</span><br><span class="line">         <span class="keyword">while</span> (i.hasNext()) &#123;</span><br><span class="line">             Entry&lt;K,V&gt; e = i.next();</span><br><span class="line">             K key = e.getKey();</span><br><span class="line">             V value = e.getValue();</span><br><span class="line">             <span class="keyword">if</span> (value == <span class="literal">null</span>) &#123;</span><br><span class="line">                 <span class="keyword">if</span> (!(m.<span class="keyword">get</span>(key)==<span class="literal">null</span> &amp;&amp; m.containsKey(key)))</span><br><span class="line">                     <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">             &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                 <span class="keyword">if</span> (!value.equals(m.<span class="keyword">get</span>(key)))</span><br><span class="line">                     <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125; <span class="keyword">catch</span> (ClassCastException unused) &#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">     &#125; <span class="keyword">catch</span> (NullPointerException unused) &#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<h4 id="Q2-两个具有相同元素，但顺序不同的list相等吗？"><a href="#Q2-两个具有相同元素，但顺序不同的list相等吗？" class="headerlink" title="Q2: 两个具有相同元素，但顺序不同的list相等吗？"></a>Q2: 两个具有相同元素，但顺序不同的list相等吗？</h4><p>不相等，debug进入源码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line"><span class="comment">// 如果内存地址一致，返回true</span></span><br><span class="line">    <span class="keyword">if</span> (o == <span class="keyword">this</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line"><span class="comment">//如果比较的对象不是List，返回 false</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> List))</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"><span class="comment">//初始化迭代器</span></span><br><span class="line">    ListIterator&lt;E&gt; e1 = listIterator();</span><br><span class="line">    ListIterator&lt;?&gt; e2 = ((List&lt;?&gt;) o).listIterator();</span><br><span class="line">  </span><br><span class="line">   <span class="comment">// 比昂里两个list，如果不同返回false</span></span><br><span class="line">    <span class="keyword">while</span> (e1.hasNext() &amp;&amp; e2.hasNext()) &#123;</span><br><span class="line">        E o1 = e1.next();</span><br><span class="line">        Object o2 = e2.next();</span><br><span class="line">        <span class="keyword">if</span> (!(o1==<span class="keyword">null</span> ? o2==<span class="keyword">null</span> : o1.equals(o2)))</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">//两个list的迭代器hasNext都返回false时候（已经遍历结束），方法返回true，否则返回false（说明list长度不同）</span></span><br><span class="line">    <span class="keyword">return</span> !(e1.hasNext() || e2.hasNext());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/30/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8A%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/30/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8A%EF%BC%89/" class="post-title-link" itemprop="url">排序（上）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-03-30 16:52:10" itemprop="dateCreated datePublished" datetime="2021-03-30T16:52:10+08:00">2021-03-30</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-25 17:27:32" itemprop="dateModified" datetime="2021-06-25T17:27:32+08:00">2021-06-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F/" itemprop="url" rel="index"><span itemprop="name">排序</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Geek时间：排序（上）原地排序-笔记"><a href="#Geek时间：排序（上）原地排序-笔记" class="headerlink" title="Geek时间：排序（上）原地排序 笔记"></a>Geek时间：排序（上）原地排序 笔记</h1>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/30/%E6%8E%92%E5%BA%8F%EF%BC%88%E4%B8%8A%EF%BC%89/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1515,20 +1542,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-count">54</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-count">44</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-count">44</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
