@@ -168,6 +168,156 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/19/Android%E6%B3%A8%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="oldnineping">
+      <meta itemprop="description" content="技术日记和杂七杂八的dx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="地球上的小东西">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/01/19/Android%E6%B3%A8%E8%A7%A3/" class="post-title-link" itemprop="url">Android注解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-19 11:08:55" itemprop="dateCreated datePublished" datetime="2022-01-19T11:08:55+08:00">2022-01-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-20 17:21:08" itemprop="dateModified" datetime="2022-01-20T17:21:08+08:00">2022-01-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/%E6%B3%A8%E8%A7%A3/" itemprop="url" rel="index"><span itemprop="name">注解</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="注解"><a href="#注解" class="headerlink" title="注解"></a>注解</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>注解，也被称为元数据，为我们在代码中添加信息提供了一种形式化的方法，使我们可以在稍后某个时刻非常方便地使用这些数据。（Java编程思想）<br>很多文章都是讲述java注解的，而且很多例子虽然有和Android互通的部分，但是Android开发中也扩展了很多单纯Java中没有的注解应用。所以这里主要介绍Android开发中的注解，当然包括Java注解。<br>目前很多框架开发或者Android开发中都用到了注解，SDK开发中也有很多可以对接口添加限制以规范用户使用的规则，这些都是值得我们去学习的。</p>
+<h2 id="Java注解"><a href="#Java注解" class="headerlink" title="Java注解"></a>Java注解</h2><p>Java 注解（Annotation）又称 Java 标注，是 JDK5.0 引入的一种注释机制。 Java 语言中的类、方法、变量、参数和包等都可以被标注。和 Javadoc 不同，Java 标注可以通过反射获取标注内容。在编译器生成类文件时，标注可以被嵌入到字节码中。Java 虚拟机可以保留标注内容，在运行时可以获取到标注内容 。 当然它也支持自定义 Java 标注。</p>
+<h3 id="内置标准注解"><a href="#内置标准注解" class="headerlink" title="内置标准注解"></a>内置标准注解</h3><p><strong>Java内置了三种标准注解，其定义在java.lang中</strong>：</p>
+<ol>
+<li><p>@Override，表示当前的方法定义将覆盖超类中的方法。</p>
+</li>
+<li><p>@Deprecated，被此注解标记的元素表示被废弃，如果程序员使用了注解为它的元素，那么编译器会发出警告。</p>
+</li>
+<li><p>@SuppressWarnings，关闭不当的编译器警告信息。</p>
+<p>这几种注解我们平时开发中肯定经常用到，但是你可能很少看到注解原来的样子。如下为注解的类，可以看到，除了@符号的使用以外，它基本与Java固有语法一致。只是注解上又增加了其他注解。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(ElementType.METHOD)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.SOURCE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Override &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Target(value=&#123;CONSTRUCTOR, FIELD, LOCAL_VARIABLE, METHOD, PACKAGE, PARAMETER, TYPE&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Deprecated &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Target(&#123;TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.SOURCE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> SuppressWarnings &#123;</span><br><span class="line">    String[] value();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>注解的注解就是，元注解，专职负责注解其他的注解。</p>
+<h3 id="元注解"><a href="#元注解" class="headerlink" title="元注解"></a>元注解</h3><table>
+<thead>
+<tr>
+<th>元注解</th>
+<th>说明</th>
+<th>取值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@Target</td>
+<td>表示该注解可以用在什么地方</td>
+<td>ElementType.ANNOTATION_TYPE 可以应用于注释类型。<br>ElementType.CONSTRUCTOR 可以应用于构造函数。<br>ElementType.FIELD 可以应用于字段或属性。ElementType.LOCAL_VARIABLE 可以应用于局部变量。<br>ElementType.METHOD 可以应用于方法级注释。<br>ElementType.PACKAGE 可以应用于包声明。<br>ElementType.PARAMETER 可以应用于方法的参数。ElementType.TYPE 可以应用于类的任何元素。</td>
+</tr>
+<tr>
+<td>@Retention</td>
+<td>表示需要在什么级别保存该注解信息</td>
+<td>1.SOURCE:在源文件中有效（即源文件保留）<br>2.CLASS:在class文件中有效（即class保留）<br>3.RUNTIME:在运行时有效（即运行时保留）</td>
+</tr>
+<tr>
+<td>@Documented</td>
+<td>表示将此注解包含在Javadoc中</td>
+<td>无</td>
+</tr>
+<tr>
+<td>@Inherited</td>
+<td>表示允许子类继承父类中的注解</td>
+<td>无</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>经过对元注解的表格进行理解，可以回头看我们平常使用的标准注解Override 、Deprecated 和SuppressWarnings 。可以看到他们分别都由元注解进行了注释，并且我们能够明白，为啥@Override只能用在方法上（@Target），而不能用在类、构造函数、变量上，而@Deprecated就可以用在构造函数、变量、方法、包、参数等，因为其代表的意义就可以表示它能够标注的所有类型都是废弃的元素。</p>
+<h3 id="Java程序或者Android程序的三个阶段"><a href="#Java程序或者Android程序的三个阶段" class="headerlink" title="Java程序或者Android程序的三个阶段"></a>Java程序或者Android程序的三个阶段</h3><p>我们在as或者idea等IDE开发时的Java源码时期，即SOURCE实际。然后经过gradle或其他构件工具编译，变成了.Class文件，在Android apk中的dex文件中都是.class文件，此时即Retention的Class时期。之后便是程序运行阶段，变成Jvm运行的RUNTIME时期，此时应用是执行状态，如果定义注解为RUNTIME，则此时的注解是保留的。</p>
+<p>java的三个标准注解的@Retention，有两个是RetentionPolicy.SOURCE，一个是RetentionPolicy.RUNTIME。从上述表格可以了解，source即源文件保留，即是.java文件中保留。Runtime即运行时有效，即在Android应用在运行时还会存在，当然如果是java程序运行时也保留。可以理解为@Override 注释的方法，只在代码开发时有用即编码时可以覆盖父类方法，编译后和运行中这个注解代表的意义就没有了。<br>大多数时候，程序员主要是用元注解定义自己的注解，并编写自己的处理器来处理它们，文章最后会简单的写个自定义注解并应用以加深理解。</p>
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><p>上边是经典的Java注解介绍，由于我们的Java开发都是基于JDK的，所以上述源码定义都在JDK的源码中。而由于新的JDK对旧版进行了扩充。<br>如@Repeatable 即是@since 1.8。 从JDK1.8引入的，可能使用比较少见，笔者也没见过这个的应用目前。<strong>但是提这个的目的即任何语法都是供加速开发或者其他目的添加的，只不过我们自定义注解是为了我们自己的逻辑、或者做框架的是为了使用框架的人方便， JDK的开发人员是为了所有Java开发和他们自己方便。所以虽然我们不是定义JDK语言的，但是我们任何人开发都可以使用注解这种方式，为我们的代码和框架服务。注解是不断变化并发展的，当然我们Java或Android开发也是。</strong><br>package java.lang.annotation;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The annotation type &#123;<span class="doctag">@code</span> java.lang.annotation.Repeatable&#125; is</span></span><br><span class="line"><span class="comment"> * used to indicate that the annotation type whose declaration it</span></span><br><span class="line"><span class="comment"> * (meta-)annotates is &lt;em&gt;repeatable&lt;/em&gt;. The value of</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@code</span> <span class="doctag">@Repeatable</span>&#125; indicates the &lt;em&gt;containing annotation</span></span><br><span class="line"><span class="comment"> * type&lt;/em&gt; for the repeatable annotation type.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@since</span> 1.8</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@jls</span> 9.6 Annotation Types</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@jls</span> 9.7 Annotations</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Target(ElementType.ANNOTATION_TYPE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Repeatable &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Indicates the &lt;em&gt;containing annotation type&lt;/em&gt; for the</span></span><br><span class="line"><span class="comment">     * repeatable annotation type.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the containing annotation type</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    Class&lt;? extends Annotation&gt; value();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="Android注解"><a href="#Android注解" class="headerlink" title="Android注解"></a>Android注解</h2><p>本来在Android系统源码中/frameworks/base/core/java/android/annotation中是有很多的注解的，但是呢，他们都是系统源码用的注解，不是给我们这种开发人员用的，因为所有的注解的注释上都有@hide注释。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> * &#123;<span class="meta">@hide</span>&#125;</span><br><span class="line"> */</span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention(SOURCE)</span></span><br><span class="line"><span class="meta">@Target(&#123;METHOD, PARAMETER, FIELD&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> AnyRes &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Android系统给我们提供的SDK中，只有两个原生注解。位于android.annotation包中<br>@TargetApi 使高版本API的代码在低版本SDK不报错。<br>@SuppressLint 使用此标注让Lint忽略指定的警告。<br>举例：<br>@SuppressLint(“NewApi”）屏蔽一切新api中才能使用的方法报的android lint错误。 @SuppressLint(“HandlerLeak”) 在主线程用Handler处理消息出现时会有警告，提示你，这块有内存泄露的危险，handler最好声明为static的</p>
+<p>然后系统以另外的形式即Android Support方式提供给我们其他的注解。这些注解不是默认加载的，它们被包装为一个单独的库。Support Library现在是由一些更小的库组成的，包括：v4-support、appcompat、gridlayout、mediarouter等等。当然这里的注解是没有@hide注释的，只是需要开发者去加载对应的dependence。然后Android Studio实在基于这些注解来检查代码中的潜在问题了。如果升级到androidx，也有对应的dependence。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    compile <span class="string">&#x27;com.android.support:support-annotations:XXX&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Nullness Annotations 参数<br>@NonNull 该注释表明使用的参数或者返回值不能为null<br>如果本地变量已知为空，并且我们申明了@NonNull, IDE会使用Warn警告提醒存在潜在的崩溃。<br>@Nullable 注释表明使用的的参数或者返回值可以为null<br>Resource Annotations，资源引用限制类：用于限制参数必须为对应的资源类型。<br>AnimatorRes ：animator资源类型<br>AnimRes：anim资源类型<br>AnyRes：任意资源类型<br>ArrayRes：array资源类型<br>AttrRes：attr资源类型<br>BoolRes：boolean资源类型<br>ColorRes：color资源类型<br>DimenRes：dimen资源类型。<br>DrawableRes：drawable资源类型。<br>FractionRes：fraction资源类型<br>IdRes：id资源类型<br>IntegerRes：integer资源类型<br>InterpolatorRes：interpolator资源类型<br>LayoutRes：layout资源类型<br>MenuRes：menu资源类型<br>PluralsRes：plurals资源类型<br>RawRes：raw资源类型<br>StringRes：string资源类型<br>StyleableRes：styleable资源类型<br>StyleRes：style资源类型<br>TransitionRes：transition资源类型<br>XmlRes：xml资源类型</p>
+<p>作用举例：资源里的R.layout.<em>和R.string.</em>,二者都是int值，在源码阶段，如果在setContentView（值）的值设为R.string.* 理论上是不是也能编译通过？但是实际上不能，如果你这样做了，就会显示红色警告，为什么呢。</p>
+<p>原因就在源码里，我们可以点进去看源码。在setContentView的参数里有**@LayoutRes**的注解，告诉用户这个int值必须是代表layout的。其他的资源类注解同理</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Override</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContentView</span><span class="params">(<span class="meta">@LayoutRes</span> <span class="keyword">int</span> layoutResID)</span> </span>&#123;</span><br><span class="line">    getDelegate().setContentView(layoutResID);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Thread annotations 线程执行限制类：用于限制方法或者类必须在指定的线程执行。如果方法代码运行线程和标注的线程不一致，则会导致警告。<br>@AnyThread<br>@BinderThread<br>@MainThread<br>@UiThread<br>@WorkerThread</p>
+<p>Value Constraint Annotations 类型范围限制类：用于限制标注值的值范围</p>
+<p>@FloatRang<br>@IntRange<br>如下为@FloatRange的注释上的示例， 其代表返回值为从0.0-1.0直接的float值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Denotes that the annotated element should be a float or double in the given range</span></span><br><span class="line"><span class="comment">* &lt;p&gt;</span></span><br><span class="line"><span class="comment">* Example:</span></span><br><span class="line"><span class="comment">* &#123;<span class="doctag">@code</span></span></span><br><span class="line"><span class="comment">* 	<span class="doctag">@FloatRange</span>(from=0.0,to=1.0)</span></span><br><span class="line"><span class="comment">*  public float getAlpha() &#123;</span></span><br><span class="line"><span class="comment">*      ...</span></span><br><span class="line"><span class="comment">*  &#125;</span></span><br></pre></td></tr></table></figure>
+<p>类型定义类：用于限制定义的注解的取值集合</p>
+<p>@IntDef int型除了被作为资源引用传递之外，还经常被作为一种“枚举”类型来使用。在创建一个注解的同时列出所有可用的有效值，然后再使用这个注解。也就是说@IntDef是用来修饰注解的注解（元注解），用它所修饰的注解在使用时就限定了被修饰对象的可取值范围。<br>@StringDef 类似IntDef，列举出所有String的取值范围。</p>
+<p>如下为Intdef的源码，可以看出，其@Target为ANNOTATION_TYPE，和前边java的元注解一致，所以这两个也是元注解。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Retention(CLASS)</span></span><br><span class="line"><span class="meta">@Target(&#123;ANNOTATION_TYPE&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> IntDef &#123;</span><br><span class="line">    <span class="comment">/** Defines the allowed constants for this element */</span></span><br><span class="line">    <span class="keyword">long</span>[] value() <span class="keyword">default</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/** Defines whether the constants can be used as a flag, or just as an enum (the default) */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">flag</span><span class="params">()</span> <span class="keyword">default</span> <span class="keyword">false</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里继续举例说明，自定义了一个Weather注解，而且定义了取值范围，即IntDef中包含的选型。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SUNNY = <span class="number">1</span>;</span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CLOUDY = <span class="number">2</span>;</span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> RAIN = <span class="number">3</span>;</span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SNOW = <span class="number">4</span>;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@Target(ElementType.PARAMETER)</span></span><br><span class="line"> <span class="meta">@IntDef(&#123;</span></span><br><span class="line"><span class="meta">     SUNNY,</span></span><br><span class="line"><span class="meta">     CLOUDY,</span></span><br><span class="line"><span class="meta">     RAIN,</span></span><br><span class="line"><span class="meta">     SNOW</span></span><br><span class="line"><span class="meta"> &#125;)</span></span><br><span class="line"> <span class="meta">@Retention(RetentionPolicy.SOURCE)</span></span><br><span class="line"> <span class="keyword">public</span> <span class="meta">@interface</span> Weather &#123;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setWeather</span><span class="params">(<span class="meta">@Weather</span> <span class="keyword">int</span> weather)</span></span>&#123;</span><br><span class="line">     </span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>使用时，如果传入IntDef中定义的值，则显示正常，否则编译器会出发红色警告。虽然，2值是包含在IntDef取值范围的int值，但是仍不允许，必须写对应常量。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/05/Gradle%E8%AF%A6%E8%A7%A3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1142,223 +1292,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/06/%E8%87%AA%E5%AE%9A%E4%B9%89view%E5%B8%83%E5%B1%8001:%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="oldnineping">
-      <meta itemprop="description" content="技术日记和杂七杂八的dx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="地球上的小东西">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/09/06/%E8%87%AA%E5%AE%9A%E4%B9%89view%E5%B8%83%E5%B1%8001:%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">自定义view布局01:布局流程完全解析</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-09-06 17:53:02" itemprop="dateCreated datePublished" datetime="2021-09-06T17:53:02+08:00">2021-09-06</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-09-07 17:50:59" itemprop="dateModified" datetime="2021-09-07T17:50:59+08:00">2021-09-07</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/%E8%87%AA%E5%AE%9A%E4%B9%89view/" itemprop="url" rel="index"><span itemprop="name">自定义view</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="布局流程完全解析"><a href="#布局流程完全解析" class="headerlink" title="布局流程完全解析"></a>布局流程完全解析</h1><h2 id="布局过程"><a href="#布局过程" class="headerlink" title="布局过程"></a>布局过程</h2><p>确定每个 View 的位置和尺寸 </p>
-<p>作用: 为<strong>绘制</strong>和<strong>触摸范围</strong>做支持</p>
-<ul>
-<li><strong>绘制</strong>: 知道往哪里绘制</li>
-<li><strong>触摸反馈</strong>: 知道用户点的是哪里</li>
-</ul>
-<h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><h3 id="从整体看"><a href="#从整体看" class="headerlink" title="从整体看"></a>从整体看</h3><ul>
-<li>测量流程:从根 View 递归调用每一级子 View 的 measure() 方法，对它们进行测量</li>
-<li>布局流程:从根 View 递归调用每一级子 View 的 layout() 方法，把测量过程得 出的子 View 的位置和尺寸传给子 View，子 View 保存</li>
-</ul>
-<p>View onLayout是空方法</p>
-<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210907111935951.png" alt="image-20210907111935951" style="zoom: 67%;">
-
-<p>View Group需要处理子View的布局</p>
-<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210907112056602.png" alt="image-20210907112056602"></p>
-<h4 id="为什么要分两个流程"><a href="#为什么要分两个流程" class="headerlink" title="为什么要分两个流程?"></a>为什么要分两个流程?</h4><p>因为可能会重复测量</p>
-<p>测量是一个动态的过程我们要测量多个子View ，有些子View可能要测量多次</p>
-<p>比如下面的例子第一个子View是 match_parent ，第一次测量是没有结果的，需要两次测量，把测量/布局分成两个流程，可以让布局只使用最后保存的生效的数值，提高效率</p>
-<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210906175625735.png" alt="image-20210906175625735"></p>
-<h3 id="从个体看对于每个View"><a href="#从个体看对于每个View" class="headerlink" title="从个体看对于每个View"></a>从个体看对于每个View</h3><ol>
-<li><p>运行前，开发者在 xml 文件里写入对 View 的布局要求 layout_xxx</p>
-</li>
-<li><p>父 View 在自己的 onMeasure() 中，根据开发者在 xml 中写的对子 View 的要 求，和自己的可用空间，得出对子 View 的具体尺寸要求（结合上一步开发者写入的 layout_xxx和父View的可用空间计算）</p>
-<p> <img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210907110500303.png" alt="image-20210907110500303"></p>
-</li>
-<li><p>子 View 在自己的 onMeasure() 中，根据父 View 的要求和自己的特性算出自己 的期望尺寸</p>
-<ul>
-<li>如果是 ViewGroup，还会在这里调用每个子 View 的 measure() 进行测量</li>
-</ul>
-</li>
-<li><p>父 View 在子 View 计算出期望尺寸后，得出子 View 的实际尺寸和位置</p>
-</li>
-<li><p>子 View 在自己的 layout() 方法中，将父 View 传进来的自己的实际尺寸和位置 保存</p>
-<ul>
-<li>如果是 ViewGroup，还会在 onLayout() 里调用每个子 View 的 layout() 把 它们的尺寸位置传给它们</li>
-</ul>
-</li>
-</ol>
-<h2 id="自定义布局"><a href="#自定义布局" class="headerlink" title="自定义布局"></a>自定义布局</h2><p>具体实现方式：</p>
-<ul>
-<li>继承已有View，简单修改它们的尺寸：重写 onMeasure()<ul>
-<li>SquareImageView 方形view</li>
-</ul>
-</li>
-<li>对自定义View完全进行自定义运算：重写onMeasure()<ul>
-<li>CircleView 圆形view，外部根据内部图形设定宽高</li>
-</ul>
-</li>
-<li>自定义Layout：重写omMeasure()和onLayout()<ul>
-<li>TagLayout 标签布局（Android的flex-box 类似）</li>
-</ul>
-</li>
-</ul>
-<h3 id="自定义View"><a href="#自定义View" class="headerlink" title="自定义View"></a>自定义View</h3><h4 id="自定义View方式一：简单改写已有View的尺寸"><a href="#自定义View方式一：简单改写已有View的尺寸" class="headerlink" title="自定义View方式一：简单改写已有View的尺寸"></a>自定义View方式一：简单改写已有View的尺寸</h4><ol>
-<li><p>重写onMeasure()</p>
-</li>
-<li><p>用getMeasuredWidth()和getMeasuredHeight()获取到测量出的尺寸</p>
-</li>
-<li><p>计算出最终要的尺寸</p>
-</li>
-<li><p>用setOnMeasuredDimension(width, height)把结果保存</p>
-</li>
-</ol>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SquareImageView</span></span>(context: Context?, attrs: AttributeSet?) : AppCompatImageView(context, attrs) &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec)</span><br><span class="line">		<span class="comment">// 使用系统计算过的宽&amp;高，计算比较小的那个</span></span><br><span class="line">    <span class="keyword">val</span> size = min(measuredWidth, measuredHeight)</span><br><span class="line">    <span class="comment">// 存储宽高，并非作为返回值给父类，而是使用时自己或父类去拿</span></span><br><span class="line">    setMeasuredDimension(size, size)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="重写layout也能改写尺寸，为什么要重写onMeaSure"><a href="#重写layout也能改写尺寸，为什么要重写onMeaSure" class="headerlink" title="重写layout也能改写尺寸，为什么要重写onMeaSure"></a>重写layout也能改写尺寸，为什么要重写onMeaSure</h4><p>若直接重写layout的确能改写尺寸，但是父View是不知道你的改动的，会造成位置错误</p>
-<p>Eg</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    &lt;com.hencoder.layoutsize.view.SquareImageView</span><br><span class="line">        android:layout_width=&quot;300dp&quot;</span><br><span class="line">        android:layout_height=&quot;200dp&quot;</span><br><span class="line">        android:src=&quot;@drawable/avatar_rengwuxian&quot;</span><br><span class="line">         /&gt;</span><br><span class="line">    &lt;View</span><br><span class="line">        android:layout_width=&quot;200dp&quot;</span><br><span class="line">        android:layout_height=&quot;200dp&quot;</span><br><span class="line">        android:background=&quot;@color/purple_200&quot;/&gt;</span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>对于Android系统你的布局应该是这样的</p>
-<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210907085754293.png" alt="image-20210907085754293"></p>
-<p>若在layout中修改了尺寸，但系统不知道你的修改，结果就是：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SquareImageView</span></span>(context: Context?, attrs: AttributeSet?) : AppCompatImageView(context, attrs) &#123;</span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">layout</span><span class="params">(l: <span class="type">Int</span>, t: <span class="type">Int</span>, r: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> width = r - l</span><br><span class="line">    <span class="keyword">val</span> height = b - t</span><br><span class="line">    <span class="keyword">val</span> size = min(width,height)</span><br><span class="line">    <span class="keyword">super</span>.layout(l, t, l+size, t+size)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
-<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210907085940819.png" alt="image-20210907085940819"></p>
-<h4 id="测量尺寸的方法"><a href="#测量尺寸的方法" class="headerlink" title="测量尺寸的方法"></a>测量尺寸的方法</h4><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">getMeasuredHeight() <span class="comment">// 测量期望尺寸 高</span></span><br><span class="line">getMeasuredWidth()  <span class="comment">// 测量期望尺寸 宽</span></span><br><span class="line">getHeight() <span class="comment">// 测量实际尺寸 高</span></span><br><span class="line">getWidth() <span class="comment">// 测量实际尺寸 宽</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">//  View.class 中  getWidth() ，getHeight() 能获得View实际应用的值</span></span><br><span class="line"> </span><br><span class="line">  <span class="meta">@ViewDebug</span>.ExportedProperty(category = <span class="string">&quot;layout&quot;</span>)</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> int getWidth() &#123;</span><br><span class="line">        <span class="keyword">return</span> mRight - mLeft;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">   </span><br><span class="line">    <span class="meta">@ViewDebug</span>.ExportedProperty(category = <span class="string">&quot;layout&quot;</span>)</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> int getHeight() &#123;</span><br><span class="line">        <span class="keyword">return</span> mBottom - mTop;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>getMeasuredHeight/Width方法获得的是期望的值，可能会被父类修改未必准确，测量过程中能拿到</li>
-<li>getHeight/Width方法获得的是布局实际应用的宽高，但是在测量过程中拿不到</li>
-</ul>
-<blockquote>
-<p>有时用getHeight/Width 获得了宽高值，此时View却进行了刷新导致宽高变化，获得的值还是上一轮的</p>
-<p>而每次刷新getMeasuredHeight/Width会重新计算，虽然不一定是最后应用的但更实时</p>
-<p><strong>所以测量过程中我们有时只能使用getMeasuredHeight/Width ()，其他时候使用getHeight/Width</strong></p>
-</blockquote>
-<h4 id="自定义View方式二：完全自定义View的尺寸"><a href="#自定义View方式二：完全自定义View的尺寸" class="headerlink" title="自定义View方式二：完全自定义View的尺寸"></a>自定义View方式二：完全自定义View的尺寸</h4><ol>
-<li><p>重写onMeasure()</p>
-</li>
-<li><p>计算出自己的尺寸</p>
-</li>
-<li><p>用resolveSize() / resolveSizeAndState() 修正结果</p>
-</li>
-<li><p>使用setMeasuredDimension(width,height) 保存结果</p>
-</li>
-</ol>
-<p>不重写onMeasure()</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 半径</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> RADIUS = <span class="number">100.</span>dp</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> PADDING = <span class="number">100.</span>dp</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CircleView</span></span>(context: Context?, attrs: AttributeSet?) : View(context, attrs) &#123;</span><br><span class="line">  <span class="meta">@RequiresApi(Build.VERSION_CODES.M)</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">val</span> paint = Paint(Paint.ANTI_ALIAS_FLAG).apply &#123;</span><br><span class="line">    color = getContext().getColor(R.color.purple_200)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@RequiresApi(Build.VERSION_CODES.M)</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onDraw</span><span class="params">(canvas: <span class="type">Canvas</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">super</span>.onDraw(canvas)</span><br><span class="line"></span><br><span class="line">    canvas.drawCircle(PADDING + RADIUS, PADDING + RADIUS, RADIUS, paint)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Xml:</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    &lt;com.hencoder.layoutsize.view.CircleView</span><br><span class="line">        android:layout_width=&quot;wrap_content&quot;</span><br><span class="line">        android:layout_height=&quot;wrap_content&quot;</span><br><span class="line">        android:src=&quot;@drawable/avatar_rengwuxian&quot;</span><br><span class="line">        android:background=&quot;@color/teal_200&quot;</span><br><span class="line">         /&gt;</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>View 默认会填充整个屏幕</p>
-<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210907101823266.png" alt="image-20210907101823266"></p>
-<p>重写onMeasure方法指定定View的尺寸</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 重写View的宽高</span></span><br><span class="line">  <span class="keyword">val</span> size = ((PADDING + RADIUS) * <span class="number">2</span>).toInt()</span><br><span class="line">  <span class="comment">// 考虑父View的宽高建议 ： widthMeasureSpec: Int, heightMeasureSpec: Int</span></span><br><span class="line">  <span class="keyword">val</span> width = resolveSize(size, widthMeasureSpec)</span><br><span class="line">  <span class="keyword">val</span> height = resolveSize(size, heightMeasureSpec)</span><br><span class="line">  setMeasuredDimension(width, height)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Xml ：View不会再填充整个屏幕：</p>
-<p><img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210907102042312.png" alt="image-20210907102042312"></p>
-<h4 id="父View的宽高建议"><a href="#父View的宽高建议" class="headerlink" title="父View的宽高建议"></a>父View的宽高建议</h4><p> onMeasure方法的两个参数 widthMeasureSpec，heightMeasureSpec是父View的宽高建议</p>
-<p>有三种模式：</p>
-<ol>
-<li>不超过指定宽高 MeasureSpec.AT_MOST</li>
-<li>精确指定宽高 MeasureSpec.EXACTLY</li>
-<li>不限制 MeasureSpec.UNSPECIFIED</li>
-</ol>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">  <span class="keyword">val</span> size = ((PADDING + RADIUS) * <span class="number">2</span>).toInt()</span><br><span class="line">  <span class="comment">// 获得限制宽/高的模式 ：MeasureSpec.getMode</span></span><br><span class="line">  <span class="keyword">val</span> specWidthMode = MeasureSpec.getMode(widthMeasureSpec)</span><br><span class="line">  <span class="comment">// 若模式是不限制，就可以无视了，若有限制，需要获得精确的值/限制的值，通过getSize拿到</span></span><br><span class="line">  <span class="keyword">val</span> specWidthSize = MeasureSpec.getSize(widthMeasureSpec)</span><br><span class="line">  <span class="keyword">var</span> width = <span class="number">0</span></span><br><span class="line">  <span class="keyword">if</span> (MeasureSpec.EXACTLY == specWidthMode)&#123;</span><br><span class="line">    <span class="comment">// 精确模式</span></span><br><span class="line">    width = specWidthSize</span><br><span class="line">  &#125;<span class="keyword">else</span> <span class="keyword">if</span> (MeasureSpec.AT_MOST == specWidthMode)&#123;</span><br><span class="line">    <span class="comment">// 最大值限制</span></span><br><span class="line">    width = <span class="keyword">if</span> (size &gt; widthMeasureSpec) widthMeasureSpec <span class="keyword">else</span> size</span><br><span class="line"></span><br><span class="line">  &#125;<span class="keyword">else</span> <span class="keyword">if</span> (MeasureSpec.UNSPECIFIED == specWidthMode) &#123;</span><br><span class="line">    <span class="comment">//无限制</span></span><br><span class="line">    width = size</span><br><span class="line">  &#125;</span><br><span class="line">  setMeasuredDimension(width, size)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="resolveSize和resolveSizeAndState和"><a href="#resolveSize和resolveSizeAndState和" class="headerlink" title="resolveSize和resolveSizeAndState和"></a>resolveSize和resolveSizeAndState和</h4><p>父View的宽高限制/建议都是固定逻辑，系统已经有方法处理这套逻辑了</p>
-<p>resolveSize：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> width = resolveSize(size, widthMeasureSpec)</span><br><span class="line"><span class="keyword">val</span> height = resolveSize(size, heightMeasureSpec)</span><br></pre></td></tr></table></figure>
-<p>resolveSizeAndState和resolveSize的区别在于，当测量模式是AT_MOST进行最大值限制的时候，若测量的值超出了最大值限制，会上报给父view一个MEASURED_STATE_TOO_SMALL的值表达空间不足，然而在实际应用中一般不会去读这个值，所以一遍都用resovleSize()方法处理</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> static int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) &#123;</span><br><span class="line">    <span class="keyword">final</span> int specMode = MeasureSpec.getMode(measureSpec);</span><br><span class="line">    <span class="keyword">final</span> int specSize = MeasureSpec.getSize(measureSpec);</span><br><span class="line">    <span class="keyword">final</span> int result;</span><br><span class="line">    switch (specMode) &#123;</span><br><span class="line">        case MeasureSpec.AT_MOST:</span><br><span class="line">            <span class="keyword">if</span> (specSize &lt; size) &#123;</span><br><span class="line">                result = specSize | MEASURED_STATE_TOO_SMALL;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                result = size;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        case MeasureSpec.EXACTLY:</span><br><span class="line">            result = specSize;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        case MeasureSpec.UNSPECIFIED:</span><br><span class="line">        default:</span><br><span class="line">            result = size;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result | (childMeasuredState &amp; MEASURED_STATE_MASK);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="自定义Layout-ViewGroup"><a href="#自定义Layout-ViewGroup" class="headerlink" title="自定义Layout(ViewGroup)"></a>自定义Layout(ViewGroup)</h3><ul>
-<li>重写 onMeasure()<ul>
-<li>遍历每个子 View，测量子 View<ul>
-<li>测量完成后，得出子 View 的实际位置和尺寸，并暂时保存</li>
-<li>有些子 View 可能需要重新测量</li>
-</ul>
-</li>
-<li> 测量出所有子 View 的位置和尺寸后，计算出自己的尺寸，并用 setMeasuredDimension(width, height) 保存</li>
-</ul>
-</li>
-<li>重写 onLayout()<ul>
-<li>遍历每个子 View，调用它们的 layout() 方法来将位置和尺寸传给它们</li>
-</ul>
-</li>
-</ul>
-<p>Eg：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TagLayout</span></span>(context: Context?, attrs: AttributeSet?) : ViewGroup(context, attrs) &#123;</span><br><span class="line">  <span class="comment">// 存储每个子View的尺寸位置</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">val</span> childrenBounds = mutableListOf&lt;Rect&gt;()</span><br><span class="line">  <span class="comment">// 重写 onMeasure()</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onMeasure</span><span class="params">(widthMeasureSpec: <span class="type">Int</span>, heightMeasureSpec: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 记录已用的宽度</span></span><br><span class="line">    <span class="keyword">var</span> widthUsed = <span class="number">0</span></span><br><span class="line">    <span class="comment">// 记录已用高度</span></span><br><span class="line">    <span class="keyword">var</span> heightUsed = <span class="number">0</span></span><br><span class="line">    <span class="comment">// 单行 已用 宽度</span></span><br><span class="line">    <span class="keyword">var</span> lineWidthUsed = <span class="number">0</span></span><br><span class="line">    <span class="comment">// 单行最大高度</span></span><br><span class="line">    <span class="keyword">var</span> lineMaxHeight = <span class="number">0</span></span><br><span class="line">    <span class="comment">// 获得父类限制的宽度</span></span><br><span class="line">    <span class="keyword">val</span> specWidthSize = MeasureSpec.getSize(widthMeasureSpec)</span><br><span class="line">    <span class="comment">// 获得父类的尺寸限制模式 ，有三种 UNSPECIFIED无限制 ，EXACTLY精确，AT_MOST不能超过限制的最大值</span></span><br><span class="line">    <span class="keyword">val</span> specWidthMode = MeasureSpec.getMode(widthMeasureSpec)</span><br><span class="line">    <span class="comment">//1. 遍历每个子 View，测量子 View</span></span><br><span class="line">    <span class="keyword">for</span> ((index, child) <span class="keyword">in</span> children.withIndex()) &#123;</span><br><span class="line">      <span class="comment">// 调用 子View的 mseasure方法测量View的尺寸和位置</span></span><br><span class="line">      <span class="comment">// 需要传递宽高限制 widthMeasureSpec，heightMeasureSpec，已经用的宽度/高度</span></span><br><span class="line">      <span class="comment">// 这个通用方法，原则上只要不超过父类的宽高可以随意设置</span></span><br><span class="line">      measureChildWithMargins(child, widthMeasureSpec, <span class="number">0</span>, heightMeasureSpec, heightUsed)</span><br><span class="line">      <span class="comment">// 换行：父View的尺寸限制模式 不是无限制 且 已用宽度加上这个子View的测量宽度 超过父类限制的最大值</span></span><br><span class="line">      <span class="keyword">if</span> (specWidthMode != MeasureSpec.UNSPECIFIED &amp;&amp;</span><br><span class="line">        lineWidthUsed + child.measuredWidth &gt; specWidthSize) &#123;</span><br><span class="line">        <span class="comment">// 换行 行的最大高度/行的已有宽度都要归零</span></span><br><span class="line">        lineWidthUsed = <span class="number">0</span></span><br><span class="line">        <span class="comment">// 存储当前的行最大高度，得到已用高度</span></span><br><span class="line">        heightUsed += lineMaxHeight</span><br><span class="line">        lineMaxHeight = <span class="number">0</span></span><br><span class="line">        <span class="comment">// 给子View测量位置/尺寸</span></span><br><span class="line">        measureChildWithMargins(child, widthMeasureSpec, <span class="number">0</span>, heightMeasureSpec, heightUsed)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 2. 测量量完成后，得出子 View 的实际位置和尺寸，并暂时保存</span></span><br><span class="line">      <span class="keyword">if</span> (index &gt;= childrenBounds.size) &#123;</span><br><span class="line">        childrenBounds.add(Rect())</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 拿到用于存储的Rect 对象</span></span><br><span class="line">      <span class="keyword">val</span> childBounds = childrenBounds[index]</span><br><span class="line">      <span class="comment">// 对Rect 对象修改，暂时存储具体的位置，尺寸</span></span><br><span class="line">      childBounds.<span class="keyword">set</span>(lineWidthUsed, heightUsed, lineWidthUsed + child.measuredWidth, heightUsed + child.measuredHeight)</span><br><span class="line">      <span class="comment">// 记录子view已用宽度</span></span><br><span class="line">      lineWidthUsed += child.measuredWidth</span><br><span class="line">      <span class="comment">// 计算 当前行宽度是否超过已用宽度</span></span><br><span class="line">      widthUsed = max(widthUsed, lineWidthUsed)</span><br><span class="line">      <span class="comment">// 计算当前子View的高度是否超过 之前其他行的最大高度</span></span><br><span class="line">      lineMaxHeight = max(lineMaxHeight, child.measuredHeight)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 算出自己的尺寸 宽度，高度</span></span><br><span class="line">    <span class="comment">// 宽度就是已用宽度度</span></span><br><span class="line">    <span class="keyword">val</span> selfWidth = widthUsed</span><br><span class="line">    <span class="comment">// 高度使用已用高度+本行最大行高（只有换行时存储上一行的行高到 heightUsed，所以这里要+本行行高）</span></span><br><span class="line">    <span class="keyword">val</span> selfHeight = heightUsed + lineMaxHeight</span><br><span class="line">    <span class="comment">// 应用计算出来的自身尺寸</span></span><br><span class="line">    setMeasuredDimension(selfWidth, selfHeight)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 重写 onLayout()</span></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onLayout</span><span class="params">(changed: <span class="type">Boolean</span>, l: <span class="type">Int</span>, t: <span class="type">Int</span>, r: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span> &#123;</span><br><span class="line">    <span class="comment">//3. 遍历每个子 View，调用它们的 layout() 方法来将位置和尺寸传给它们</span></span><br><span class="line">    <span class="keyword">for</span> ((index, child) <span class="keyword">in</span> children.withIndex()) &#123;</span><br><span class="line">      <span class="comment">// 取出存储的每个子View的尺寸，位置信息</span></span><br><span class="line">      <span class="keyword">val</span> childBounds = childrenBounds[index]</span><br><span class="line">      <span class="comment">// 调用子View的layout ()  传递存储的信息</span></span><br><span class="line">      child.layout(childBounds.left, childBounds.top, childBounds.right, childBounds.bottom)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">generateLayoutParams</span><span class="params">(attrs: <span class="type">AttributeSet</span>?)</span></span>: LayoutParams &#123;</span><br><span class="line">    <span class="keyword">return</span> MarginLayoutParams(context, attrs)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>效果：</p>
-<img src="https://gitee.com/laonaiping/blog-images/raw/master/img/image-20210907163741810.png" alt="image-20210907163741810" style="zoom:67%;">
-
-<h4 id="measureChildWithMargins"><a href="#measureChildWithMargins" class="headerlink" title="measureChildWithMargins"></a>measureChildWithMargins</h4><p>ViewGroup设置子VIew的尺寸/位置</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">measureChildWithMargins</span><span class="params">(View child,</span></span></span><br><span class="line"><span class="function"><span class="params">           <span class="keyword">int</span> parentWidthMeasureSpec, <span class="keyword">int</span> widthUsed,</span></span></span><br><span class="line"><span class="function"><span class="params">           <span class="keyword">int</span> parentHeightMeasureSpec, <span class="keyword">int</span> heightUsed)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//  child： 具体设置的子View对象</span></span><br><span class="line">  <span class="comment">//  parentWidthMeasureSpec ：父View的宽</span></span><br><span class="line">  <span class="comment">//  widthUsed： 已用宽度</span></span><br><span class="line">  <span class="comment">//  parentHeightMeasureSpec： 父View的高</span></span><br><span class="line">  <span class="comment">//  heightUsed： 已用高度</span></span><br><span class="line">       <span class="keyword">final</span> MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> <span class="keyword">int</span> childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,</span><br><span class="line">               mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin</span><br><span class="line">                       + widthUsed, lp.width);</span><br><span class="line">       <span class="keyword">final</span> <span class="keyword">int</span> childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,</span><br><span class="line">               mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin</span><br><span class="line">                       + heightUsed, lp.height);</span><br><span class="line"></span><br><span class="line">       child.measure(childWidthMeasureSpec, childHeightMeasureSpec);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="getChildMeasureSpec"><a href="#getChildMeasureSpec" class="headerlink" title="getChildMeasureSpec"></a>getChildMeasureSpec</h4><p>根据父View的尺寸/限制模式，padding等信息获得子View尺寸</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getChildMeasureSpec</span><span class="params">(<span class="keyword">int</span> spec, <span class="keyword">int</span> padding, <span class="keyword">int</span> childDimension)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> specMode = MeasureSpec.getMode(spec);</span><br><span class="line">    <span class="keyword">int</span> specSize = MeasureSpec.getSize(spec);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> size = Math.max(<span class="number">0</span>, specSize - padding);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> resultSize = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> resultMode = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (specMode) &#123;</span><br><span class="line">    <span class="comment">// Parent has imposed an exact size on us</span></span><br><span class="line">    <span class="keyword">case</span> MeasureSpec.EXACTLY:</span><br><span class="line">        <span class="keyword">if</span> (childDimension &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            resultSize = childDimension;</span><br><span class="line">            resultMode = MeasureSpec.EXACTLY;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.MATCH_PARENT) &#123;</span><br><span class="line">            <span class="comment">// Child wants to be our size. So be it.</span></span><br><span class="line">            resultSize = size;</span><br><span class="line">            resultMode = MeasureSpec.EXACTLY;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.WRAP_CONTENT) &#123;</span><br><span class="line">            <span class="comment">// Child wants to determine its own size. It can&#x27;t be</span></span><br><span class="line">            <span class="comment">// bigger than us.</span></span><br><span class="line">            resultSize = size;</span><br><span class="line">            resultMode = MeasureSpec.AT_MOST;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Parent has imposed a maximum size on us</span></span><br><span class="line">    <span class="keyword">case</span> MeasureSpec.AT_MOST:</span><br><span class="line">        <span class="keyword">if</span> (childDimension &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// Child wants a specific size... so be it</span></span><br><span class="line">            resultSize = childDimension;</span><br><span class="line">            resultMode = MeasureSpec.EXACTLY;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.MATCH_PARENT) &#123;</span><br><span class="line">            <span class="comment">// Child wants to be our size, but our size is not fixed.</span></span><br><span class="line">            <span class="comment">// Constrain child to not be bigger than us.</span></span><br><span class="line">            resultSize = size;</span><br><span class="line">            resultMode = MeasureSpec.AT_MOST;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.WRAP_CONTENT) &#123;</span><br><span class="line">            <span class="comment">// Child wants to determine its own size. It can&#x27;t be</span></span><br><span class="line">            <span class="comment">// bigger than us.</span></span><br><span class="line">            resultSize = size;</span><br><span class="line">            resultMode = MeasureSpec.AT_MOST;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Parent asked to see how big we want to be</span></span><br><span class="line">    <span class="keyword">case</span> MeasureSpec.UNSPECIFIED:</span><br><span class="line">        <span class="keyword">if</span> (childDimension &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// Child wants a specific size... let him have it</span></span><br><span class="line">            resultSize = childDimension;</span><br><span class="line">            resultMode = MeasureSpec.EXACTLY;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.MATCH_PARENT) &#123;</span><br><span class="line">            <span class="comment">// Child wants to be our size... find out how big it should</span></span><br><span class="line">            <span class="comment">// be</span></span><br><span class="line">            resultSize = View.sUseZeroUnspecifiedMeasureSpec ? <span class="number">0</span> : size;</span><br><span class="line">            resultMode = MeasureSpec.UNSPECIFIED;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.WRAP_CONTENT) &#123;</span><br><span class="line">            <span class="comment">// Child wants to determine its own size.... find out how</span></span><br><span class="line">            <span class="comment">// big it should be</span></span><br><span class="line">            resultSize = View.sUseZeroUnspecifiedMeasureSpec ? <span class="number">0</span> : size;</span><br><span class="line">            resultMode = MeasureSpec.UNSPECIFIED;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//noinspection ResourceType</span></span><br><span class="line">    <span class="keyword">return</span> MeasureSpec.makeMeasureSpec(resultSize, resultMode);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1430,20 +1363,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">55</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-count">45</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-count">45</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
